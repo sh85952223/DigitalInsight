@@ -1,10 +1,10 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Nanum+Gothic+Coding:wght@400;700&family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 /* -------------------------------------------------------------------------- */
 /*                                 Fonts                                      */
 /* -------------------------------------------------------------------------- */
 /* Added Korean Fonts: Black Han Sans (Display), Nanum Gothic Coding (Code/Tech), Noto Sans KR (UI) */
-@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Nanum+Gothic+Coding:wght@400;700&family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 /* -------------------------------------------------------------------------- */
 /*                               Variables                                    */

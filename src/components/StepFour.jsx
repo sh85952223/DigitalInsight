@@ -35,7 +35,7 @@ function getZone(x, y, width, height) {
     }
 }
 
-export default function StepFour({ result, onRestart }) {
+export default function StepFour({ result, onRestart, onNext }) {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [isHovering, setIsHovering] = useState(false);
     const [zone, setZone] = useState(null);
@@ -314,7 +314,7 @@ export default function StepFour({ result, onRestart }) {
                 </div>
 
                 <button
-                    onClick={onRestart}
+                    onClick={onNext}
                     style={{
                         padding: '12px 32px',
                         border: '1px solid rgba(0, 243, 255, 0.5)',
@@ -330,13 +330,15 @@ export default function StepFour({ result, onRestart }) {
                     onMouseEnter={(e) => {
                         e.target.style.borderColor = '#00f3ff';
                         e.target.style.color = '#00f3ff';
+                        e.target.style.boxShadow = '0 0 15px rgba(0, 243, 255, 0.3)';
                     }}
                     onMouseLeave={(e) => {
                         e.target.style.borderColor = 'rgba(0, 243, 255, 0.5)';
                         e.target.style.color = 'rgba(0, 243, 255, 0.7)';
+                        e.target.style.boxShadow = 'none';
                     }}
                 >
-                    처음으로 돌아가기
+                    디자인의 본질 탐구하기
                 </button>
             </motion.div>
         </motion.div>
