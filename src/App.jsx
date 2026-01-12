@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import './index.css';
 
 import CyberBackground from './components/CyberBackground';
+import StepZero from './components/StepZero';
 import StepOne from './components/StepOne';
 import StepTwo from './components/StepTwo';
 import StepThree from './components/StepThree';
@@ -43,7 +44,8 @@ function App() {
             onChange={(e) => setCurrentStep(Number(e.target.value))}
             className="bg-black text-cyan-500 border border-cyan-500 text-xs p-1"
           >
-            <option value={1}>Step 1: Intro</option>
+            <option value={0}>Step 0: Evolution (Intro)</option>
+            <option value={1}>Step 1: Agent Briefing</option>
             <option value={2}>Step 2: Dark Patterns</option>
             <option value={3}>Step 3: Experiment</option>
             <option value={4}>Step 4: Result</option>
@@ -53,6 +55,13 @@ function App() {
         </div>
 
         <AnimatePresence mode="wait">
+          {currentStep === 0 && (
+            <StepZero
+              key="step0"
+              onNext={() => setCurrentStep(1)}
+            />
+          )}
+
           {currentStep === 1 && (
             <StepOne
               key="step1"
