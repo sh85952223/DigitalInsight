@@ -236,7 +236,7 @@ export default function StepFour({ result, onRestart }) {
                         color: 'rgba(0, 243, 255, 0.7)',
                         fontFamily: 'monospace'
                     }}>
-                        엄지 도달 범위 시뮬레이션
+                        터치 도달 범위 시뮬레이션
                     </div>
                 </div>
             </motion.div>
@@ -274,8 +274,8 @@ export default function StepFour({ result, onRestart }) {
                         fontFamily: 'var(--font-ui, sans-serif)'
                     }}>
                         <Typewriter
-                            text="직접 체험해보세요. 마우스(엄지)가 닿기 힘든 곳은 'Dead Zone', 가장 편안한 곳은 'Easy Zone'입니다. 중요한 버튼이 왜 항상 오른쪽 아래에 있는지, 이제 이해되시나요?"
-                            speed={20}
+                            text="직접 체험해보세요. 엄지가 닿기 힘든 곳은 'Dead Zone', 가장 편안한 곳은 'Easy Zone'입니다. 중요한 버튼이 왜 항상 오른쪽 아래에 있는지, 이제 이해되시나요?"
+                            speed={10}
                         />
                     </p>
                 </div>
@@ -304,11 +304,11 @@ export default function StepFour({ result, onRestart }) {
                         </li>
                         <li style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', fontSize: '14px', color: '#d1d5db', fontFamily: 'monospace' }}>
                             <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#2dd4bf', flexShrink: 0 }}></span>
-                            <span><strong style={{ color: '#99f6e4' }}>Stretch Zone</strong>: 약간의 노력이 필요 / 보조 기능</span>
+                            <span><strong style={{ color: '#99f6e4' }}>Stretch Zone</strong>: 약간의 노력이 필요 / 주로 보조 기능이 위치함</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#d1d5db', fontFamily: 'monospace' }}>
                             <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#a3e635', flexShrink: 0 }}></span>
-                            <span><strong style={{ color: '#bef264' }}>Easy Zone</strong>: 가장 편한 영역 / 주요 행동(CTA) 버튼</span>
+                            <span><strong style={{ color: '#bef264' }}>Easy Zone</strong>: 가장 편한 영역 / 주요 행동을 유도하는 버튼이 위치</span>
                         </li>
                     </ul>
                 </div>

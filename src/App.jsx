@@ -7,14 +7,10 @@ import StepOne from './components/StepOne';
 import StepTwo from './components/StepTwo';
 import StepThree from './components/StepThree';
 import StepFour from './components/StepFour';
-import HeatmapTest from './components/HeatmapTest';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(1);
   const [experimentResult, setExperimentResult] = useState(null);
-
-  // Check if we're in test mode via URL hash
-  const isTestMode = window.location.hash === '#test';
 
   const handleRecordResult = (result) => {
     setExperimentResult(result);
@@ -25,18 +21,12 @@ function App() {
     setExperimentResult(null);
   };
 
-  // Test Mode: Show isolated heatmap test
-  if (isTestMode) {
-    return <HeatmapTest />;
-  }
-
   return (
     <>
       <CyberBackground />
       <div className="scanlines" />
       <div className="vignette" />
 
-      {/* Main Container */}
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
