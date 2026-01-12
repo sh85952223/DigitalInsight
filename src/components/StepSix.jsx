@@ -55,7 +55,7 @@ export default function StepSix({ onNext }) {
 
     const uxDefinitions = {
         order: {
-            title: "주문 여정 (User Journey)",
+            title: "주문을 하기까지...(User Journey)",
             steps: [
                 "사용자는 '메뉴 보기'를 통해 탐색을 시작합니다.",
                 "매력적인 커피 사진과 설명을 확인합니다.",

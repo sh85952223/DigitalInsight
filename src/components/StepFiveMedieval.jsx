@@ -336,6 +336,13 @@ export default function StepFiveMedieval({ onNext }) {
 // --- SUB-COMPONENT: Acronym Lab ---
 function AcronymLabModule({ onNext }) {
     const [step, setStep] = useState(0); // 0: Intro, 1: U, 2: I, 3: X, 4: Final
+    const [showButton, setShowButton] = useState(false);
+
+    useEffect(() => {
+        // Prevent accidental clicks by delaying button appearance
+        const timer = setTimeout(() => setShowButton(true), 1500);
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center">
@@ -348,9 +355,21 @@ function AcronymLabModule({ onNext }) {
                         여행은 즐거우셨나요?<br />
                         방금 경험한 것들을 <span className="font-bold text-amber-500">용어로 정리</span>해봅시다.
                     </p>
-                    <button onClick={() => setStep(1)} className="px-8 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors">
-                        정리 시작하기
-                    </button>
+
+                    <div className="h-16 flex items-center justify-center">
+                        <AnimatePresence>
+                            {showButton && (
+                                <motion.button
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    onClick={() => setStep(1)}
+                                    className="px-8 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors shadow-lg hover:shadow-cyan-500/30"
+                                >
+                                    정리 시작하기
+                                </motion.button>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </motion.div>
             )}
 
@@ -399,20 +418,20 @@ function AcronymLabModule({ onNext }) {
             <div className="h-32 mt-12 flex items-center justify-center">
                 {step === 1 && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <p className="text-xl text-blue-200 mb-4">"모든 디지털 환경의 중심은 사용자입니다."</p>
-                        <button onClick={() => setStep(2)} className="text-white underline hover:text-blue-300">다음: I (Interface) ▶</button>
+                        <p className="text-xl font-bold text-blue-200 mb-4">"모든 디지털 환경의 중심은 사용자입니다."</p>
+                        <button onClick={() => setStep(2)} className="text-white underline hover:text-blue-300 text-lg">다음: I (Interface) ▶</button>
                     </motion.div>
                 )}
                 {step === 2 && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <p className="text-xl text-cyan-200 mb-4">"UI는 사용자의 눈과 손이 닿는 아름다운 도구입니다."</p>
-                        <button onClick={() => setStep(3)} className="text-white underline hover:text-cyan-300">다음: X (Experience) ▶</button>
+                        <p className="text-xl font-bold text-cyan-200 mb-4">"UI는 사용자의 눈과 손이 닿는 아름다운 도구입니다."</p>
+                        <button onClick={() => setStep(3)} className="text-white underline hover:text-cyan-300 text-lg">다음: X (Experience) ▶</button>
                     </motion.div>
                 )}
                 {step === 3 && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <p className="text-xl text-green-200 mb-4">"UX는 사용자가 느끼는 만족감과 추억입니다."</p>
-                        <button onClick={() => setStep(4)} className="text-white underline hover:text-green-300">결론 보기 ▶</button>
+                        <p className="text-xl font-bold text-green-200 mb-4">"UX는 사용자가 느끼는 만족감과 추억입니다."</p>
+                        <button onClick={() => setStep(4)} className="text-white underline hover:text-green-300 text-lg">결론 보기 ▶</button>
                     </motion.div>
                 )}
                 {step === 4 && (
@@ -423,9 +442,9 @@ function AcronymLabModule({ onNext }) {
                         </p>
                         <button
                             onClick={onNext}
-                            className="px-8 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                            className="px-8 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.4)]"
                         >
-                            교육 완료 (Finish)
+                            UI와 UX 파헤쳐 보기
                         </button>
                     </motion.div>
                 )}
