@@ -57,7 +57,7 @@ export default function StepThree({ onNext, onRecordResult }) {
                                     <div className="w-2 h-2 bg-[var(--primary-cyan)] rounded-full" />
                                 </div>
                                 <div className="text-2xl font-display font-bold text-[var(--primary-cyan)]">정확히 일치</div>
-                                <div className="text-sm font-code text-gray-500 mt-2">PRECISE_HIT</div>
+                                <div className="text-sm font-code text-gray-500 mt-2">CORRECT</div>
                             </div>
 
                             {/* Corner Accents */}
@@ -78,7 +78,7 @@ export default function StepThree({ onNext, onRecordResult }) {
                                     <div className="absolute w-full h-[1px] bg-[var(--accent-red)] -rotate-45" />
                                 </div>
                                 <div className="text-2xl font-display font-bold text-[var(--accent-red)]">위치 빗나감</div>
-                                <div className="text-sm font-code text-gray-500 mt-2">OFFSET_DETECTED</div>
+                                <div className="text-sm font-code text-gray-500 mt-2">FAIL</div>
                             </div>
 
                             {/* Corner Accents */}
@@ -108,7 +108,7 @@ export default function StepThree({ onNext, onRecordResult }) {
                                 />
                             </div>
                             <div className="flex justify-between text-xs font-code text-[var(--primary-cyan)] mt-2">
-                                <span>생체 데이터 분석 중...</span>
+                                <span>실험 데이터 분석 중...</span>
                                 <span><Typewriter text="100%" speed={50} /></span>
                             </div>
                         </div>
@@ -155,7 +155,7 @@ export default function StepThree({ onNext, onRecordResult }) {
                                 onClick={onNext}
                                 className={`px-8 py-3 bg-[var(--panel-bg)] text-white font-bold font-display tracking-wider hover:bg-white hover:text-black transition-colors border ${resultType === 'match' ? 'border-[var(--primary-cyan)]' : 'border-[var(--accent-red)]'}`}
                             >
-                                과학적 분석 보고서 보기
+                                실험 분석 보고서 보기
                             </button>
                         </HudContainer>
                     </motion.div>

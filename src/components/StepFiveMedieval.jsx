@@ -149,13 +149,14 @@ export default function StepFiveMedieval({ onNext }) {
                         {/* Interaction Cue Styles */}
                         <style>
                             {`
-                                @keyframes pulse-soft {
-                                    0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
-                                    70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-                                    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+                                @keyframes pulse-strong {
+                                    0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); transform: scale(1); }
+                                    50% { transform: scale(1.1); }
+                                    70% { box-shadow: 0 0 0 20px rgba(255, 215, 0, 0); }
+                                    100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); transform: scale(1); }
                                 }
                                 .interaction-cue {
-                                    animation: pulse-soft 2s infinite;
+                                    animation: pulse-strong 1.5s infinite;
                                 }
                             `}
                         </style>
@@ -166,9 +167,10 @@ export default function StepFiveMedieval({ onNext }) {
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => handleInspect('chandelier')}
                         >
-                            {/* Subtle particle/glow indicator */}
-                            <div className="w-4 h-4 bg-white/50 rounded-full blur-sm interaction-cue group-hover:bg-yellow-200/80 transition-all duration-500" />
-                            <div className="absolute inset-0 bg-yellow-500/0 group-hover:bg-yellow-500/10 rounded-full blur-2xl transition-colors duration-700" />
+                            {/* Dramatic Glow & Icon */}
+                            <div className="absolute text-4xl animate-bounce drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">✨</div>
+                            <div className="w-8 h-8 bg-yellow-400/50 rounded-full blur-sm interaction-cue group-hover:bg-yellow-200/80 transition-all duration-300" />
+                            <div className="absolute inset-0 bg-yellow-500/10 group-hover:bg-yellow-500/20 rounded-full blur-3xl transition-colors duration-500" />
                         </motion.div>
 
                         {/* Menu Area (Right Table) */}
@@ -177,8 +179,9 @@ export default function StepFiveMedieval({ onNext }) {
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => handleInspect('menu')}
                         >
-                            <div className="w-4 h-4 bg-white/50 rounded-full blur-sm interaction-cue group-hover:bg-cyan-200/80 transition-all duration-500" />
-                            <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/10 rounded-lg blur-xl transition-colors duration-700" />
+                            <div className="absolute text-4xl animate-bounce delay-100 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">✨</div>
+                            <div className="w-8 h-8 bg-cyan-400/50 rounded-full blur-sm interaction-cue group-hover:bg-cyan-200/80 transition-all duration-300" />
+                            <div className="absolute inset-0 bg-cyan-500/10 group-hover:bg-cyan-500/20 rounded-lg blur-2xl transition-colors duration-500" />
                         </motion.div>
 
                         {/* Rug Area */}
@@ -187,8 +190,9 @@ export default function StepFiveMedieval({ onNext }) {
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => handleInspect('rug')}
                         >
-                            <div className="w-4 h-4 bg-white/50 rounded-full blur-sm interaction-cue group-hover:bg-orange-200/80 transition-all duration-500" />
-                            <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/10 rounded-full blur-xl transition-colors duration-700" />
+                            <div className="absolute text-4xl animate-bounce delay-200 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">✨</div>
+                            <div className="w-8 h-8 bg-orange-400/50 rounded-full blur-sm interaction-cue group-hover:bg-orange-200/80 transition-all duration-300" />
+                            <div className="absolute inset-0 bg-orange-500/10 group-hover:bg-orange-500/20 rounded-full blur-2xl transition-colors duration-500" />
                         </motion.div>
                     </>
                 )}
@@ -275,7 +279,7 @@ export default function StepFiveMedieval({ onNext }) {
                         className="max-w-3xl"
                     >
                         <p className="text-gray-400 text-lg mb-6 leading-relaxed font-ui">
-                            방금 우리는 기업이 만든 <span className="text-cyan-400 font-bold">'설계(UI)'</span>를 경험했습니다.
+                            방금 우리는 기업이 만든 <span className="text-cyan-400 font-bold">'디지털 환경 설계'</span>를 경험했습니다.
                         </p>
                         <p className="text-gray-200 text-2xl font-bold mb-12 leading-relaxed font-display">
                             그렇다면 도대체 <span className="text-cyan-400">UI</span>가 뭐고, <span className="text-green-400">UX</span>는 무엇일까요?<br />
@@ -296,10 +300,10 @@ export default function StepFiveMedieval({ onNext }) {
             {phase === 'transition_in' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
                     <div className="glitch-effect text-cyan-500 font-code text-xl mb-4">
-                        SYSTEM: Analyzing Design Origins...
+                        SYSTEM: Analyzing Digital Environment Origins...
                     </div>
                     <Typewriter
-                        text="Time Travel Sequence Initiated..."
+                        text="Beyond time and space…"
                         speed={50}
                         className="text-white font-display text-2xl tracking-widest"
                     />
@@ -342,7 +346,7 @@ function AcronymLabModule({ onNext }) {
                     </h2>
                     <p className="text-gray-300 text-xl mb-8 leading-relaxed">
                         여행은 즐거우셨나요?<br />
-                        방금 경험한 것들을 우리가 배우던 용어로 정리해봅시다.
+                        방금 경험한 것들을 <span className="font-bold text-amber-500">용어로 정리</span>해봅시다.
                     </p>
                     <button onClick={() => setStep(1)} className="px-8 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors">
                         정리 시작하기

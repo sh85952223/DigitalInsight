@@ -8,6 +8,7 @@ import StepTwo from './components/StepTwo';
 import StepThree from './components/StepThree';
 import StepFour from './components/StepFour';
 import StepFiveMedieval from './components/StepFiveMedieval';
+import StepSix from './components/StepSix';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -31,7 +32,21 @@ function App() {
       <div className="vignette" />
 
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
-        {/* Simple Dev Menu for quick navigation during testing - REMOVED */}
+        {/* Simple Dev Menu - PERSISTENT */}
+        <div className="absolute top-4 right-4 z-50 opacity-20 hover:opacity-100 transition-opacity">
+          <select
+            value={currentStep}
+            onChange={(e) => setCurrentStep(Number(e.target.value))}
+            className="bg-black text-cyan-500 border border-cyan-500 text-xs p-1"
+          >
+            <option value={1}>Step 1: Intro</option>
+            <option value={2}>Step 2: Dark Patterns</option>
+            <option value={3}>Step 3: Experiment</option>
+            <option value={4}>Step 4: Result</option>
+            <option value={5}>Step 5: Medieval Cafe</option>
+            <option value={6}>Step 6: UI/UX Anatomy</option>
+          </select>
+        </div>
 
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
@@ -68,7 +83,14 @@ function App() {
           {currentStep === 5 && (
             <StepFiveMedieval
               key="step5"
-              onNext={() => alert('모든 튜토리얼을 완료했습니다! 수고하셨습니다.')}
+              onNext={() => setCurrentStep(6)}
+            />
+          )}
+
+          {currentStep === 6 && (
+            <StepSix
+              key="step6"
+              onNext={() => alert("모든 과정 완료!")}
             />
           )}
         </AnimatePresence>

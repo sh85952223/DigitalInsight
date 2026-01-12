@@ -249,7 +249,7 @@ export default function StepFour({ result, onRestart, onNext }) {
                 transition={{ delay: 0.5 }}
             >
                 <div style={{ marginBottom: '8px', fontSize: '14px', color: '#00f3ff', fontFamily: 'monospace' }}>
-                    [!] UI 디자인 패턴 분석
+                    [!] 왜 주문하기 버튼은 오른쪽 아래 있을까?
                 </div>
                 <h2 style={{
                     fontSize: '48px',
@@ -338,7 +338,7 @@ export default function StepFour({ result, onRestart, onNext }) {
                         e.target.style.boxShadow = 'none';
                     }}
                 >
-                    디자인의 본질 탐구하기
+                    디지털 환경의 본질 탐구하기
                 </button>
             </motion.div>
         </motion.div>
