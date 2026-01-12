@@ -27,9 +27,13 @@ function App() {
 
   return (
     <>
-      <CyberBackground />
-      <div className="scanlines" />
-      <div className="vignette" />
+      {currentStep !== 6 && (
+        <>
+          <CyberBackground />
+          <div className="scanlines" />
+          <div className="vignette" />
+        </>
+      )}
 
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         {/* Simple Dev Menu - PERSISTENT */}
