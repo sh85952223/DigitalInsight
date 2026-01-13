@@ -126,6 +126,41 @@ body {
   z-index: 9999;
 }
 
+/* Vignette */
+.vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.8) 90%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               3D Utilities                                 */
+/* -------------------------------------------------------------------------- */
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-visible {
+  backface-visibility: visible;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
 /* Glitch Keyframes */
 @keyframes glitch-skew {
   0% {
