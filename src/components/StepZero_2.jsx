@@ -17,7 +17,7 @@ export default function StepZero_2({ onComplete }) {
     return (
         <motion.div
             key="friction_loss"
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-black"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#050505]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             style={{ perspective: '1000px' }}

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export default function CyberBackground() {
     return (
-        <div className="fixed inset-0 w-full h-full overflow-hidden -z-10 bg-[var(--bg-color)]">
+        <div id="cyber-bg" className="fixed inset-0 w-full h-full overflow-hidden -z-10 bg-[var(--bg-color)]">
             {/* 1. Base Grid Layer */}
             <div className="absolute inset-0 bg-grid-pattern opacity-40" />
 

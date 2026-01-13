@@ -10,7 +10,7 @@ export default function StepZero({ onNext }) {
 
     return (
         <motion.div
-            className="w-full h-full min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-4 bg-black"
+            className="w-full h-full min-h-screen flex flex-col items-center justify-center relative overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
         >

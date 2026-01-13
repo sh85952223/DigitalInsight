@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import HudContainer from './HudContainer';
 
 // Import Modern Images
 import modernBed from '../assets/modern_bed.png';
 import modernDoor from '../assets/modern_door.png';
 
-// Import Market Images
+// Import Full Market Sequence
 import m1 from '../assets/시장1.png';
 import m2 from '../assets/시장2.png';
 import m3 from '../assets/시장3.png';
@@ -20,9 +19,8 @@ import m10 from '../assets/시장10.png';
 
 const MARKET_SEQUENCE = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10];
 
-// Updated captions to be more generic actions
 const ACTION_STEPS = [
-    "시장에 도착하고 둘러보기",
+    "과거엔...시장에 도착하고 둘러보기",
     "사고 싶은 물건 직접 살펴보기",
     "결정하면 지갑을 꺼내기",
     "현금(또는 카드) 지불하기",
@@ -36,9 +34,9 @@ const ACTION_STEPS = [
 
 export default function StepZero_1({ onComplete }) {
     // Internal Phase: 'cover' -> 'comparison'
-    const [phase, setPhase] = useState('cover');
+    const [showCover, setShowCover] = useState(true);
 
-    // Past Era State
+    // Shared State for interactions (Comparison Phase)
     const [pastStep, setPastStep] = useState(0);
     const [pastCompleted, setPastCompleted] = useState(false);
 
@@ -46,10 +44,24 @@ export default function StepZero_1({ onComplete }) {
     const [presentUnlocked, setPresentUnlocked] = useState(false);
     const [presentPhase, setPresentPhase] = useState('idle'); // idle, ordering, delivered
 
-    const handlePastStep = () => {
-        if (pastStep < MARKET_SEQUENCE.length - 1) {
-            setPastStep(prev => prev + 1);
-        } else {
+    // HIDE GLOBAL BACKGROUND & ANIMATIONS (User Request)
+    useEffect(() => {
+        const cyberBg = document.getElementById('cyber-bg');
+        const scanlines = document.querySelector('.scanlines');
+
+        if (cyberBg) cyberBg.style.display = 'none';
+        if (scanlines) scanlines.style.display = 'none';
+
+        return () => {
+            if (cyberBg) cyberBg.style.display = '';
+            if (scanlines) scanlines.style.display = '';
+        };
+    }, []);
+
+    // Handlers
+    const handlePastChange = (val) => {
+        setPastStep(val);
+        if (val === MARKET_SEQUENCE.length - 1) {
             setPastCompleted(true);
             setPresentUnlocked(true);
         }
@@ -59,227 +71,299 @@ export default function StepZero_1({ onComplete }) {
         setPresentPhase('ordering');
         setTimeout(() => {
             setPresentPhase('delivered');
-        }, 1000); // 1s delivery time
+        }, 1000);
     };
 
     return (
-        <>
+        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
             <AnimatePresence mode="wait">
-                {/* 1. COVER SCREEN */}
-                {phase === 'cover' && (
+                {showCover ? (
+                    /* ==================== COVER SCREEN ==================== */
                     <motion.div
                         key="cover"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, y: -50, filter: 'blur(10px)' }}
-                        className="flex flex-col items-center text-center z-10"
-                    >
-                        <div className="mb-8 p-8 border-2 border-cyan-500/30 bg-black/50 backdrop-blur-sm rounded-lg shadow-[0_0_50px_rgba(0,243,255,0.1)]">
-                            <h1 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-cyan-500 mb-4">
-                                DIGITAL<br />CONSUMER
-                            </h1>
-                            <p className="text-xl md:text-2xl font-ui text-gray-400 tracking-widest uppercase">
-                                현명한 소비 생활의 시작
-                            </p>
-                        </div>
-
-                        <motion.button
-                            onClick={() => setPhase('comparison')}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-10 py-4 bg-cyan-500 text-black font-bold text-xl rounded shadow-[0_0_20px_rgba(0,243,255,0.4)] hover:bg-cyan-400 transition-colors"
-                        >
-                            시작해보기
-                        </motion.button>
-                    </motion.div>
-                )}
-
-                {/* 2. COMPARISON SCREEN (Past vs Present) */}
-                {phase === 'comparison' && (
-                    <motion.div
-                        key="comparison"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center"
+                        exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+                        transition={{ duration: 0.8 }}
+                        className="relative z-20 flex flex-col items-center justify-center text-center p-8"
                     >
-                        {/* LEFT: PAST (Slider Interaction) */}
-                        <div className="flex flex-col gap-4">
-                            <div className="text-center mb-2">
-                                <h3 className="text-2xl font-bold text-gray-400">PAST</h3>
-                                <p className="text-sm text-gray-500">직접 발로 뛰던 시절</p>
-                            </div>
+                        <motion.h1
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2, duration: 0.8 }}
+                            className="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter"
+                        >
+                            Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Insight</span>
+                        </motion.h1>
 
-                            <HudContainer className="relative aspect-[4/3] w-full flex flex-col p-0 overflow-hidden border-gray-600">
-                                {/* Image */}
-                                <img
-                                    src={MARKET_SEQUENCE[pastStep]}
-                                    alt="Past Shopping"
-                                    className="w-full h-full object-cover transition-opacity duration-300"
-                                />
+                        <motion.p
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.5, duration: 0.8 }}
+                            className="text-xl md:text-2xl text-gray-400 font-light mb-12"
+                        >
+                            편리함 뒤에 숨겨진 진실을 마주하다
+                        </motion.p>
 
-                                {/* Step Overlay */}
-                                <div className="absolute top-4 left-4 bg-black/80 px-3 py-1 text-cyan-500 border border-cyan-500/50 font-code text-sm rounded">
-                                    STEP {pastStep + 1} / {MARKET_SEQUENCE.length}
-                                </div>
+                        <motion.button
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{ delay: 0.8 }}
+                            onClick={() => setShowCover(false)}
+                            className="px-10 py-4 bg-white text-black text-lg font-bold rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.5)] transition-all"
+                        >
+                            Start Journey
+                        </motion.button>
+                    </motion.div>
+                ) : (
+                    /* ==================== COMPARISON SCREEN ==================== */
+                    <motion.div
+                        key="comparison"
+                        className="relative z-10 w-full h-full flex items-center justify-center p-8"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1 }}
+                    >
+                        <div className="flex gap-8 md:gap-16 items-center scale-90 md:scale-100 transition-transform">
 
-                                {/* Caption Overlay */}
-                                <div className="absolute bottom-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent p-6 pt-12">
-                                    <p className="text-xl text-white font-ui font-medium min-h-[3.5rem]">
-                                        {ACTION_STEPS[pastStep]}
-                                    </p>
-                                </div>
-                            </HudContainer>
+                            {/* LEFT: PHYSICAL (Paper/Grit/Analog) */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.8 }}
+                                className="relative group"
+                            >
+                                {/* Shadow Decoration */}
+                                <div className="absolute inset-0 bg-black/40 blur-xl transform rotate-[-2deg] translate-y-4" />
 
-                            {/* Custom Interactive Slider */}
-                            <div className="w-full bg-black/40 p-6 rounded-xl border border-gray-800 backdrop-blur-sm relative select-none min-h-[180px] flex flex-col justify-center">
-                                {/* Track */}
-                                <div className="relative w-full h-12 flex items-center justify-center cursor-pointer"
-                                    ref={(el) => {
-                                        if (!el) return;
-                                        window.sliderTrack = el;
-                                    }}
-                                >
-                                    {/* Base Line */}
-                                    <div className="absolute w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-                                        {/* Progress Fill */}
-                                        <motion.div
-                                            className="h-full bg-gradient-to-r from-cyan-900 via-cyan-500 to-white"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${(pastStep / (MARKET_SEQUENCE.length - 1)) * 100}%` }}
-                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                        />
+                                <div className="w-[400px] h-[600px] bg-[#f0f0f0] rounded-sm rotate-[-2deg] flex flex-col p-3 border border-gray-300 relative shadow-2xl transition-transform duration-500 hover:rotate-0 hover:scale-[1.02]">
+                                    {/* Sticky Note Badge */}
+                                    <div className="absolute -top-4 -left-4 w-36 h-10 bg-[#ffd700] shadow-md flex items-center justify-center transform -rotate-3 z-20 border border-yellow-400/50">
+                                        <span className="font-hand text-black font-black tracking-tighter text-lg">PAST MEMORY</span>
+                                        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-white/30 to-transparent pointer-events-none" />
                                     </div>
 
-                                    {/* Ticks */}
-                                    <div className="absolute w-full flex justify-between px-1 pointer-events-none">
-                                        {MARKET_SEQUENCE.map((_, idx) => (
-                                            <div key={idx} className={`w-1 h-3 rounded-full transition-colors ${idx <= pastStep ? 'bg-cyan-300 shadow-[0_0_8px_rgba(0,243,255,0.8)]' : 'bg-gray-700'}`} />
-                                        ))}
+                                    {/* Polaroid-style Image Area */}
+                                    <div className="flex-1 bg-white border border-gray-200 p-3 shadow-inner mb-3 relative overflow-hidden">
+                                        <div className="w-full h-full bg-gray-100 relative overflow-hidden grayscale sepia-[0.2] contrast-125">
+                                            <AnimatePresence mode="wait">
+                                                <motion.img
+                                                    key={pastStep}
+                                                    src={MARKET_SEQUENCE[pastStep]}
+                                                    alt="Past"
+                                                    initial={{ opacity: 0.8, scale: 1.05 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    exit={{ opacity: 0.8 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </AnimatePresence>
+
+                                            {/* Scanlines overlay for slight texture */}
+                                            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,18,0.05)_50%,transparent_50%)] bg-[length:100%_4px] pointer-events-none" />
+                                        </div>
+
+                                        {/* Step Stamp */}
+                                        <div className="absolute top-4 right-4 border-2 border-black/20 text-black/40 font-black px-2 py-1 rotate-12 text-xs">
+                                            STEP {pastStep + 1}-{MARKET_SEQUENCE.length}
+                                        </div>
                                     </div>
 
-                                    {/* Draggable Handle */}
-                                    <div className="absolute inset-0 mx-[-12px]"> {/* Negative margin to align handle center to start/end */}
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max={MARKET_SEQUENCE.length - 1}
-                                            step="1"
-                                            value={pastStep}
-                                            onChange={(e) => {
-                                                const val = Number(e.target.value);
-                                                setPastStep(val);
-                                                if (val === MARKET_SEQUENCE.length - 1) {
-                                                    setPastCompleted(true);
-                                                    setPresentUnlocked(true);
-                                                }
-                                            }}
-                                            className="w-full h-full opacity-0 cursor-ew-resize z-20 absolute top-0 left-0"
-                                        />
+                                    {/* Text & Control Area (Cardboard Texture) */}
+                                    <div className="h-[180px] bg-[#e6e6e6] rounded border border-gray-300 p-5 flex flex-col justify-between shadow-inner relative">
+                                        {/* Paper Texture Overlay */}
+                                        <div className="absolute inset-0 opacity-50 bg-[url('https://www.transparenttextures.com/patterns/cardboard.png')] pointer-events-none mix-blend-multiply" />
 
-                                        {/* Visual Handle (Follows State) */}
-                                        <motion.div
-                                            className="absolute top-1/2 w-8 h-8 -mt-4 bg-black border-2 border-cyan-400 rounded-full shadow-[0_0_15px_rgba(0,243,255,0.5)] flex items-center justify-center z-10 pointer-events-none"
-                                            initial={{ left: '0%' }}
-                                            animate={{ left: `${(pastStep / (MARKET_SEQUENCE.length - 1)) * 100}%` }}
-                                            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                                        >
-                                            <div className="w-2 h-2 bg-white rounded-full" />
-                                        </motion.div>
-                                    </div>
-                                </div>
+                                        <div className="relative z-10">
+                                            <p className="font-serif text-gray-800 text-center font-bold text-lg leading-tight mb-4 min-h-[3rem]">
+                                                "{ACTION_STEPS[pastStep]}"
+                                            </p>
 
-                                {/* Labels */}
-                                <div className="flex justify-between text-[10px] font-code text-cyan-500/50 mt-2 uppercase tracking-widest">
-                                    <span>Start</span>
-                                    <span>Market</span>
-                                    <span>Finish</span>
-                                </div>
+                                            {/* Physical Slider */}
+                                            <div className="relative w-full h-12 flex items-center justify-center mt-2">
+                                                {/* Track */}
+                                                <div className="absolute w-full h-3 bg-gray-400 rounded-full shadow-inner border border-gray-500 overflow-hidden">
+                                                    <div className="w-full h-full bg-gray-300" />
+                                                </div>
+                                                {/* Progress */}
+                                                <motion.div
+                                                    className="absolute left-0 h-3 bg-gray-600 rounded-l-full pointer-events-none"
+                                                    animate={{ width: `${(pastStep / (MARKET_SEQUENCE.length - 1)) * 100}%` }}
+                                                />
 
-                                <p className="text-center text-sm text-cyan-400 mt-2 font-bold animate-pulse">
-                                    {pastCompleted ? "체험 완료!" : "DRAG TO EXPERIENCE >"}
-                                </p>
-                            </div>
-                        </div>
+                                                {/* Handle / Knob */}
+                                                <motion.div
+                                                    className="absolute top-1/2 w-8 h-8 -mt-4 bg-zinc-200 rounded-full shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_-2px_4px_rgba(0,0,0,0.2)] border border-gray-400 flex items-center justify-center pointer-events-none"
+                                                    animate={{ left: `calc(${(pastStep / (MARKET_SEQUENCE.length - 1)) * 100}% - 16px)` }}
+                                                >
+                                                    <div className="w-2 h-2 bg-gray-400 rounded-full shadow-inner" />
+                                                </motion.div>
 
-                        {/* RIGHT: PRESENT (Modern Visuals) */}
-                        <div className={`flex flex-col gap-4 transition-all duration-1000 ${presentUnlocked ? 'opacity-100' : 'opacity-30 blur-sm grayscale'}`}>
-                            <div className="text-center mb-2">
-                                <h3 className="text-2xl font-bold text-white">PRESENT</h3>
-                                <p className="text-sm text-gray-400">터치 한 번으로 끝나는 마법</p>
-                            </div>
-
-                            <HudContainer className="relative aspect-[4/3] w-full flex flex-col p-0 overflow-hidden bg-white border-white/20">
-                                {/* Image Switcher */}
-                                <AnimatePresence mode="wait">
-                                    {presentPhase === 'delivered' ? (
-                                        <motion.div
-                                            key="door"
-                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                            className="w-full h-full relative"
-                                        >
-                                            <img src={modernDoor} alt="Delivery Arrived" className="w-full h-full object-cover invert" />
-                                            <div className="absolute top-4 right-4 bg-red-600 text-white font-bold px-4 py-2 rounded-full animate-bounce shadow-lg">
-                                                문 앞 배송 완료!
+                                                {/* Input - on top */}
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max={MARKET_SEQUENCE.length - 1}
+                                                    step={1}
+                                                    value={pastStep}
+                                                    onChange={(e) => handlePastChange(Number(e.target.value))}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-grab active:cursor-grabbing"
+                                                    style={{ zIndex: 50 }}
+                                                />
                                             </div>
-                                        </motion.div>
-                                    ) : (
-                                        <motion.div
-                                            key="bed"
-                                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                            className="w-full h-full relative"
-                                        >
-                                            <img src={modernBed} alt="Ordering in Bed" className="w-full h-full object-cover invert" />
-                                            {presentPhase === 'ordering' && (
-                                                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                                    <div className="text-4xl animate-spin">⏳</div>
+
+                                            <div className="text-center text-[10px] font-mono text-gray-500 mt-2 tracking-widest uppercase">
+                                                {pastCompleted ? "Memory Archived" : "Drag to Experience"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+
+
+                            {/* VS BADGE */}
+                            <div className="relative z-10 flex flex-col items-center">
+                                <div className="h-20 w-[1px] bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+                                <span className="font-black italic text-4xl text-white/20 my-4 transform -skew-x-12">VS</span>
+                                <div className="h-20 w-[1px] bg-gradient-to-t from-transparent via-white/20 to-transparent" />
+                            </div>
+
+
+                            {/* RIGHT: MODERN WEB BROWSER (Clean/Digital) */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
+                                className={`relative group transition-all duration-500 rotate-2 hover:rotate-0 hover:scale-[1.02] ${presentUnlocked ? 'opacity-100 filter-none' : 'opacity-30 blur-sm grayscale'}`}
+                            >
+                                {/* Shadow Decoration */}
+                                <div className="absolute inset-0 bg-black/40 blur-xl transform rotate-[2deg] translate-y-4 transition-transform group-hover:rotate-0" />
+
+                                {/* Glow Behind */}
+                                <div className="absolute inset-0 bg-purple-500/10 blur-3xl rounded-[10px]" />
+
+                                {/* Browser Window Frame */}
+                                <div className="w-[800px] md:w-[600px] max-w-[90vw] h-[600px] bg-[#1a1a1a] rounded-xl shadow-2xl flex flex-col overflow-hidden relative border border-gray-800 transition-all">
+
+                                    {/* Browser Header (Traffic Lights & URL Bar) */}
+                                    <div className="h-10 bg-[#2a2a2a] border-b border-[#333] flex items-center px-4 gap-4 select-none">
+                                        <div className="flex gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                                            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                                            <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                                        </div>
+                                        {/* Fake URL Bar */}
+                                        <div className="flex-1 bg-[#1a1a1a] rounded flex items-center px-3 py-1 text-xs text-gray-500 font-mono">
+                                            <span className="text-green-500 mr-2">🔒</span> https://instant.shop/checkout
+                                        </div>
+                                    </div>
+
+                                    {/* Main Browser Content Area */}
+                                    <div className="flex-1 relative bg-black flex flex-col">
+
+                                        {/* Image Content */}
+                                        <div className="flex-1 relative overflow-hidden bg-black group-hover:brightness-110 transition-all">
+                                            <AnimatePresence mode="wait">
+                                                {presentPhase === 'delivered' ? (
+                                                    <motion.div key="door" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full relative">
+                                                        <img src={modernDoor} alt="Arrived" className="w-full h-full object-cover invert opacity-80" />
+
+                                                        {/* Delivery Notification Card (Modern Web Style) - FLOAT ANIMATION */}
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: 30 }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                                y: [0, -10, 0] // Floating bobbing effect
+                                                            }}
+                                                            transition={{
+                                                                y: {
+                                                                    duration: 4,
+                                                                    repeat: Infinity,
+                                                                    ease: "easeInOut"
+                                                                },
+                                                                opacity: { duration: 0.5 }
+                                                            }}
+                                                            className="absolute top-8 right-8 bg-[#1a1a1a]/90 backdrop-blur-md text-white p-4 rounded-xl border border-gray-700 shadow-2xl max-w-[200px]"
+                                                        >
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]" />
+                                                                <span className="text-xs font-bold uppercase tracking-wider text-green-500">Arrived</span>
+                                                            </div>
+                                                            <div className="text-lg font-bold">문 앞 배송 완료!</div>
+                                                            <div className="text-xs text-gray-400 mt-1">방금 전 도착했습니다.</div>
+                                                        </motion.div>
+                                                    </motion.div>
+                                                ) : (
+                                                    <motion.div key="bed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full relative">
+                                                        <img src={modernBed} alt="Bed" className="w-full h-full object-cover invert opacity-80" />
+
+                                                        {presentPhase === 'ordering' && (
+                                                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                                                                <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4" />
+                                                                <div className="text-purple-400 font-mono tracking-widest animate-pulse">PROCESSING ORDER...</div>
+                                                            </div>
+                                                        )}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+
+                                            {/* Caption Overlay */}
+                                            <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black to-transparent">
+                                                <h2 className="text-3xl font-black text-white mb-1">
+                                                    {presentPhase === 'idle' && "침대에 누워, 터치 한 번."}
+                                                    {presentPhase === 'ordering' && "결제 진행 중..."}
+                                                    {presentPhase === 'delivered' && "오늘 도착 완료."}
+                                                </h2>
+                                                <p className="text-gray-400 text-sm">
+                                                    {presentPhase === 'idle' && "더 이상 발품 팔 필요가 없는 세상."}
+                                                    {presentPhase === 'ordering' && "복잡한 과정은 생략되었습니다."}
+                                                    {presentPhase === 'delivered' && "더욱 편리해진 생활"}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Web Interaction Footer (Clean Toolbar) */}
+                                        <div className="h-20 bg-[#111] border-t border-[#333] flex items-center justify-between px-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-xs text-gray-500 font-mono">TOTAL</div>
+                                                <div className="text-xl font-bold text-white">$ 29.99</div>
+                                            </div>
+
+                                            {/* Action Button */}
+                                            {presentUnlocked ? (
+                                                presentPhase === 'delivered' ? (
+                                                    <button
+                                                        onClick={onComplete}
+                                                        className="bg-zinc-800 text-white px-8 py-3 rounded-lg text-sm font-bold tracking-wide transition-all border border-gray-600 flex items-center gap-2 group/btn hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 hover:border-transparent hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                                                    >
+                                                        하지만 놓치고 있는건? <span className="text-gray-400 group-hover/btn:translate-x-1 transition-transform group-hover/btn:text-white">→</span>
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={handlePresentOrder}
+                                                        disabled={presentPhase === 'ordering'}
+                                                        className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-lg text-sm font-bold tracking-wide shadow-lg shadow-purple-900/20 active:scale-95 transition-all flex items-center gap-2"
+                                                    >
+                                                        <span className="text-lg">⚡</span> 즉시 결제하기
+                                                    </button>
+                                                )
+                                            ) : (
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <span>🔒</span>
+                                                    <span className="text-xs uppercase tracking-wider">Locked</span>
                                                 </div>
                                             )}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-
-                                {/* Caption Overlay */}
-                                <div className="absolute bottom-0 w-full bg-white/90 p-6 border-t border-gray-200">
-                                    <p className="text-xl text-black font-ui font-bold">
-                                        {presentPhase === 'idle' && "침대에 누워 스마트폰 켜기"}
-                                        {presentPhase === 'ordering' && "결제 처리 중..."}
-                                        {presentPhase === 'delivered' && "물건이 현관문 앞에 도착했습니다!"}
-                                    </p>
-                                </div>
-                            </HudContainer>
-
-                            {/* Present Action Control Panel */}
-                            <div className="w-full bg-black/40 p-6 rounded-xl border border-gray-800 backdrop-blur-sm relative select-none min-h-[180px] flex flex-col justify-center items-center">
-                                {presentUnlocked ? (
-                                    presentPhase === 'delivered' ? (
-                                        <button
-                                            onClick={onComplete}
-                                            className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-xl rounded shadow-[0_0_20px_rgba(0,243,255,0.4)] hover:scale-105 transition-transform"
-                                        >
-                                            달라진 소비 생활, 하지만 &rarr;
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={handlePresentOrder}
-                                            disabled={presentPhase === 'ordering'}
-                                            className="w-full py-4 bg-black border-2 border-black text-white font-bold text-xl rounded hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            {presentPhase === 'ordering' ? '주문 처리 중...' : '👆 지금 즉시 결제하기 (Click)'}
-                                        </button>
-                                    )
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 gap-2">
-                                        <span className="text-3xl">🔒</span>
-                                        <span className="text-sm font-code tracking-widest">LOCKED</span>
-                                        <p className="text-xs text-center text-gray-600">PAST 미션 완료 시 잠금 해제</p>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            </motion.div>
+
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </>
+        </div>
     );
 }
