@@ -161,7 +161,7 @@ export default function StepZero_3({ onNext }) {
                         {/* LAYER 2: Wireframe/Intent Version (Masked Reveal) */}
                         {/* This layer is fixed overlay for perfect alignment */}
                         <div
-                            className="fixed inset-0 z-40  pointer-events-none flex items-center justify-center pt-14"
+                            className="fixed inset-0 z-40  pointer-events-none flex items-center justify-center pt-9"
                             style={{
                                 maskImage: 'radial-gradient(circle 150px at var(--cursor-x) var(--cursor-y), black 30%, transparent 100%)',
                                 WebkitMaskImage: 'radial-gradient(circle 150px at var(--cursor-x) var(--cursor-y), black 30%, transparent 100%)',
@@ -169,15 +169,15 @@ export default function StepZero_3({ onNext }) {
                         >
                             <div className="w-[400px] bg-black rounded-3xl overflow-hidden border-2 border-red-500 relative">
                                 {/* Wireframe Header */}
-                                <div className="h-48 bg-gray-900 relative border-b border-red-900/50">
+                                <div className="h-50.5 bg-gray-900 relative border-b border-red-900/50">
 
                                     {/* Hidden Intent 1 */}
-                                    <div className="absolute top-4 left-4 border border-red-500 text-red-500 px-3 py-1 rounded-full text-sm font-mono bg-red-900/20">
+                                    <div className="absolute top-2 left-4 border border-red-500 text-red-500 px-3 py-1 rounded-full text-sm font-mono font-bold bg-red-900/20">
                                         ⚠️ [가짜 희소성]
                                     </div>
 
                                     {/* Hidden Intent 2 */}
-                                    <div className="absolute bottom-4 right-4 border border-red-500 text-red-500 px-2 py-1 rounded text-xs flex items-center gap-1 font-mono bg-red-900/20">
+                                    <div className="absolute bottom-6.5 right-4 border border-red-500 text-red-500 px-2 py-1 rounded text-xs flex items-center gap-1 font-mono font-bold bg-red-900/20">
                                         ⚠️ [소셜 프루프 압박]
                                     </div>
 
@@ -193,39 +193,39 @@ export default function StepZero_3({ onNext }) {
                                 <div className="p-6 relative">
                                     <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,0,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
 
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="text-gray-500 font-mono text-sm">[상품명 텍스트]</div>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="text-gray-500 font-mono font-bold text-sm">[상품명 텍스트]</div>
                                         <div className="flex flex-col items-end">
-                                            <span className="text-red-500 font-mono text-sm">⚠️ [앵커링 가격]</span>
+                                            <span className="text-red-500 font-mono font-bold text-sm">⚠️ [앵커링 가격]</span>
                                         </div>
                                     </div>
 
                                     <div className="flex gap-2 mb-6">
-                                        <span className="border border-dashed border-red-500/50 text-red-400 text-xs font-mono px-2 py-1 rounded">
+                                        <span className="border border-dashed border-red-500/50 text-red-400 text-xs font-mono font-bold px-2 py-1 rounded">
                                             [과장된 할인율]
                                         </span>
                                     </div>
 
                                     {/* Hidden Intent 3: Timer */}
-                                    <div className="border border-red-500 bg-red-900/20 rounded-lg p-3 mb-4 flex justify-between items-center relative overflow-hidden">
-                                        <span className="text-red-400 text-sm font-mono">⚠️ 불안감 조성 타이머</span>
-                                        <span className="text-red-500 font-mono text-lg">LOOP:INFINITE</span>
+                                    <div className="border border-red-500 bg-red-900/20 rounded-lg p-2 mb-6 flex justify-between items-center relative overflow-hidden">
+                                        <span className="text-red-400 text-sm font-mono font-bold">⚠️ 불안감 조성 타이머</span>
+                                        <span className="text-red-500 font-mono font-black text-lg">LOOP:INFINITE</span>
                                     </div>
 
                                     {/* Hidden Intent 4: Checkbox */}
                                     <div className="flex items-center gap-3 mb-6 p-3 border border-red-500/50 rounded-lg bg-red-900/10">
-                                        <div className="w-5 h-5 border border-red-500 flex items-center justify-center text-red-500 text-xs">V</div>
-                                        <div className="text-sm text-red-400 font-mono">
+                                        <div className="w-5 h-5 border border-red-500 flex items-center justify-center text-red-500 text-xs font-bold">V</div>
+                                        <div className="text-sm text-red-400 font-mono font-bold">
                                             ⚠️ [다크 패턴: 프리 셀렉션]
-                                            <br /><span className="text-xs text-gray-500">부주의한 결제 유도</span>
+                                            <br /><span className="text-xs text-gray-500 font-bold">부주의한 결제 유도</span>
                                         </div>
                                     </div>
 
                                     {/* Hidden Intent 5: Button */}
-                                    <div className="w-full border-2 border-red-500 text-red-500 font-mono py-4 rounded-xl text-center bg-red-900/20 relative shadow-[0_0_20px_rgba(255,0,0,0.2)]">
+                                    <div className="w-full border-2 border-red-500 text-red-500 font-mono font-bold py-4 rounded-xl text-center bg-red-900/20 relative shadow-[0_0_20px_rgba(255,0,0,0.2)]">
                                         ⚠️ [충동적 행동 유도 장치]
                                     </div>
-                                    <div className="text-center mt-3 text-red-900/50 text-xs font-mono">
+                                    <div className="text-center mt-3 text-red-900/50 text-xs font-mono font-bold">
                                         [손실 회피 심리 자극 문구]
                                     </div>
                                 </div>

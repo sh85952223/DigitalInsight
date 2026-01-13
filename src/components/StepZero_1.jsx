@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Crosshair from './common/Crosshair';
 
 // Import Modern Images
 import modernBed from '../assets/modern_bed.png';
@@ -74,6 +75,37 @@ export default function StepZero_1({ onComplete }) {
         }, 1000);
     };
 
+    // Glitch Button Logic
+    const [btnText, setBtnText] = useState("접근을 요청합니다");
+    const intervalRef = useRef(null);
+    const CHARS = "!@#$%^&*()_+-=[]{}|;:,.<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    const handleBtnEnter = () => {
+        let iteration = 0;
+        clearInterval(intervalRef.current);
+        const target = "접근 허가";
+
+        intervalRef.current = setInterval(() => {
+            setBtnText((prev) =>
+                target
+                    .split("")
+                    .map((letter, index) => {
+                        if (index < iteration) return target[index];
+                        return CHARS[Math.floor(Math.random() * CHARS.length)];
+                    })
+                    .join("")
+            );
+
+            if (iteration >= target.length) clearInterval(intervalRef.current);
+            iteration += 1 / 2;
+        }, 30);
+    };
+
+    const handleBtnLeave = () => {
+        clearInterval(intervalRef.current);
+        setBtnText("접근을 요청합니다");
+    };
+
     return (
         <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
             <AnimatePresence mode="wait">
@@ -88,10 +120,11 @@ export default function StepZero_1({ onComplete }) {
                         className="relative z-20 flex flex-col items-center justify-center text-center p-8"
                     >
                         <motion.h1
+                            data-hover="true"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2, duration: 0.8 }}
-                            className="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter"
+                            className="text-6xl md:text-8xl font-black text-white mb-6 tracking-tighter cursor-none"
                         >
                             Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Insight</span>
                         </motion.h1>
@@ -106,16 +139,26 @@ export default function StepZero_1({ onComplete }) {
                         </motion.p>
 
                         <motion.button
+                            data-hover="true"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ scale: 1.1, textShadow: "0 0 8px rgb(255,255,255)" }}
+                            onMouseEnter={handleBtnEnter}
+                            onMouseLeave={handleBtnLeave}
                             whileTap={{ scale: 0.95 }}
                             transition={{ delay: 0.8 }}
                             onClick={() => setShowCover(false)}
-                            className="px-10 py-4 bg-white text-black text-lg font-bold rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.5)] transition-all"
+                            className="px-12 py-5 bg-white text-black text-xl font-bold rounded-none [clip-path:polygon(10%_0,100%_0,100%_80%,90%_100%,0_100%,0_20%)] shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:bg-cyan-400 hover:text-white hover:shadow-[0_0_50px_rgba(6,182,212,0.8)] transition-all tracking-widest cursor-none relative overflow-hidden group"
                         >
-                            Start Journey
+                            {/* Glitch Tech Decos */}
+                            <span className="absolute top-0 left-0 w-2 h-2 bg-black opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            <span className="absolute bottom-0 right-0 w-2 h-2 bg-black opacity-0 group-hover:opacity-100 transition-opacity"></span>
+
+                            {btnText}
                         </motion.button>
+
+                        {/* Only Show Crosshair on Cover */}
+                        <Crosshair color="#22d3ee" />
                     </motion.div>
                 ) : (
                     /* ==================== COMPARISON SCREEN ==================== */
