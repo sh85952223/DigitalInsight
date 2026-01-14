@@ -147,7 +147,14 @@ export default function StepZero_1({ onComplete }) {
                             onMouseLeave={handleBtnLeave}
                             whileTap={{ scale: 0.95 }}
                             transition={{ delay: 0.8 }}
-                            onClick={() => setShowCover(false)}
+                            onClick={() => {
+                                // SFX: Access Granted / Sci-Fi Interface Start
+                                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
+                                audio.volume = 0.5;
+                                audio.play().catch(e => console.error("Audio play failed:", e));
+
+                                setShowCover(false);
+                            }}
                             className="px-12 py-5 bg-white text-black text-xl font-bold rounded-none [clip-path:polygon(10%_0,100%_0,100%_80%,90%_100%,0_100%,0_20%)] shadow-[0_0_30px_rgba(6,182,212,0.5)] hover:bg-cyan-400 hover:text-white hover:shadow-[0_0_50px_rgba(6,182,212,0.8)] transition-all tracking-widest cursor-none relative overflow-hidden group"
                         >
                             {/* Glitch Tech Decos */}

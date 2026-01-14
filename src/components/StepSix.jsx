@@ -420,13 +420,13 @@ export default function StepSix({ onNext }) {
                 </div>
             </div>
 
-            {/* --- RIGHT PANEL:  (Unchanged Structure, Updated Colors) --- */}
-            <div className="w-1/2 h-full bg-[#0a0a09] p-12 flex flex-col relative border-l border-[#333]">
+            {/* --- RIGHT PANEL: (Unchanged Structure, Updated Colors) --- */}
+            <div className="w-1/2 h-full bg-[#0a0a09] p-12 flex flex-col relative border-l border-[#333] overflow-y-auto">
                 <div className="absolute top-6 right-6 text-sm font-bold text-green-500 uppercase tracking-widest bg-green-950/30 px-3 py-1 rounded border border-green-500/30">
                     Zone: 해부학 실험실
                 </div>
 
-                <h1 className="text-4xl font-display font-black mb-12 text-white">
+                <h1 className="text-4xl font-display font-black mb-12 text-white shrink-0">
                     <span className="text-cyan-400">UI</span> 와 <span className="text-green-400">UX</span> 해부학 실험실
                 </h1>
 
@@ -492,7 +492,7 @@ export default function StepSix({ onNext }) {
                 </div>
 
                 {/* CONNECTION */}
-                <div className="mt-auto pt-8 border-t border-[#333]">
+                <div className="mt-auto pt-8 border-t border-[#333] shrink-0">
                     <div className="flex items-center justify-between text-center pb-4">
                         <div className="flex-1">
                             <div className="text-cyan-400 font-black text-2xl mb-1 drop-shadow-md">UI</div>
@@ -512,6 +512,24 @@ export default function StepSix({ onNext }) {
                     </div>
                 </div>
 
+                {/* NEXT BUTTON (Appears when tutorial is done) */}
+                <AnimatePresence>
+                    {(tutorialStep >= 4 || uxFlow === 'order') && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-8 flex justify-end pb-8 shrink-0"
+                        >
+                            <button
+                                onClick={onNext}
+                                className="group flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]"
+                            >
+                                <span>최종 관문으로 이동</span>
+                                <IconArrowForward className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

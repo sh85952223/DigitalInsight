@@ -146,7 +146,8 @@ const QuizStage2 = ({ onComplete }) => {
             }, 300);
         } else {
             triggerFeedback('error');
-            // Card snaps back automatically due to drag behavior, but we add shake
+            // Shake effect is handled by triggerFeedback setting shake state
+            // We DO NOT proceed to next card, giving the user a chance to retry.
         }
     };
 
@@ -178,10 +179,21 @@ const QuizStage2 = ({ onComplete }) => {
                     />
                 )}
                 {feedback === 'error' && (
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-red-600 z-40 pointer-events-none mix-blend-overlay"
-                    />
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-red-600 z-40 pointer-events-none mix-blend-overlay"
+                        />
+                        {/* Error Toast */}
+                        <motion.div
+                            initial={{ opacity: 0, y: -50, x: '-50%' }}
+                            animate={{ opacity: 1, y: 0, x: '-50%' }}
+                            exit={{ opacity: 0, y: -20, x: '-50%' }}
+                            className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-2 rounded-full font-bold shadow-[0_0_20px_rgba(220,38,38,0.6)] flex items-center gap-2 border border-red-400"
+                        >
+                            <span>⚠️ Incorrect Classification! Try Again.</span>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
 

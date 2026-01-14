@@ -235,12 +235,26 @@ export default function StepZero_2({ onComplete }) {
                 transition={{ duration: 10, times: [0, 0.5, 0.7, 0.9, 1] }}
                 onAnimationComplete={() => {
                     setShowReflection(true);
+
+                    // Better Popup Sounds (Arcade/UI beeps)
+                    const popupSounds = [
+                        'https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3',
+                        'https://assets.mixkit.co/sfx/preview/mixkit-software-interface-back-2575.mp3',
+                        'https://assets.mixkit.co/sfx/preview/mixkit-message-pop-alert-2354.mp3'
+                    ];
+
                     // Start showing game popups one by one
                     gamePopups.forEach((popup, index) => {
                         setTimeout(() => {
                             setGamePopups(prev => prev.map(p =>
                                 p.id === popup.id ? { ...p, visible: true } : p
                             ));
+
+                            // Play Random Popup Sound
+                            const sfx = new Audio(popupSounds[Math.floor(Math.random() * popupSounds.length)]);
+                            sfx.volume = 0.3; // slightly lower volume
+                            sfx.play().catch(() => { });
+
                         }, 500 + (index * 400)); // Faster sequence for more popups
                     });
                 }}
@@ -312,154 +326,176 @@ export default function StepZero_2({ onComplete }) {
                                 {Math.round(closedPopups / REQUIRED_CLOSES * 100)}%
                             </motion.span>
                         </div>
-
-                        {/* Glow effect when progress made */}
-                        {closedPopups > 0 && (
-                            <motion.div
-                                className="absolute inset-0 rounded-full"
-                                initial={{ opacity: 0, scale: 1 }}
-                                animate={{ opacity: [0.5, 0], scale: [1, 1.3] }}
-                                transition={{ duration: 0.5 }}
-                                style={{
-                                    background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)'
-                                }}
-                                key={`glow-${closedPopups}`}
-                            />
-                        )}
                     </div>
+
+                    {/* Glow effect when progress made */}
+                    {closedPopups > 0 && (
+                        <motion.div
+                            className="absolute inset-0 rounded-full"
+                            initial={{ opacity: 0, scale: 1 }}
+                            animate={{ opacity: [0.5, 0], scale: [1, 1.3] }}
+                            transition={{ duration: 0.5 }}
+                            style={{
+                                background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)'
+                            }}
+                            key={`glow-${closedPopups}`}
+                        />
+                    )}
 
 
                 </motion.div>
-            )}
+            )
+            }
 
             {/* HINT POPUP - Center, closeable, appears after delay */}
-            {showReflection && closedPopups === 0 && (
-                <motion.div
-                    className="absolute z-50 top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2"
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 2, type: "spring", duration: 0.5 }}
-                >
-                    <div className="bg-gray-800 border border-gray-600 p-6 rounded-xl shadow-2xl text-center">
-                        <div className="flex items-start justify-between gap-4">
-                            <span className="text-white text-lg">💡 팝업이 시야를 가리네요...</span>
-                            <button
-                                onClick={() => setClosedPopups(prev => prev + 1)}
-                                className="w-6 h-6 bg-gray-600 hover:bg-gray-500 rounded-full flex items-center justify-center text-white text-sm transition-colors"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <p className="text-gray-400 text-sm mt-2">버튼을 눌러 팝업을 닫으세요</p>
-                    </div>
-                </motion.div>
-            )}
-
-            {/* POP-UP CLOSING GAME - Interactive popups appear over the message */}
-            {showReflection && closedPopups < REQUIRED_CLOSES && gamePopups.map((popup) => (
-                popup.visible && (
+            {
+                showReflection && closedPopups === 0 && (
                     <motion.div
-                        key={popup.id}
-                        className={`absolute z-50 ${popup.bg} p-6 rounded-xl shadow-2xl cursor-pointer hover:brightness-110`}
-                        style={{ left: popup.x, top: popup.y }}
+                        className="absolute z-50 top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2"
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0 }}
-                        transition={{ type: "spring", duration: 0.4 }}
-                        whileHover={{ scale: 1.05 }}
+                        transition={{ delay: 2, type: "spring", duration: 0.5 }}
                     >
-                        <div className="flex items-start gap-3">
-                            <span className="text-2xl font-black text-white drop-shadow-md">{popup.text}</span>
-                            <button
-                                onClick={() => {
-                                    setGamePopups(prev => prev.map(p =>
-                                        p.id === popup.id ? { ...p, visible: false } : p
-                                    ));
-                                    setClosedPopups(prev => prev + 1);
-                                }}
-                                className="w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white font-bold text-lg transition-colors border border-white/20"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <div className="mt-2 text-sm text-white/90 font-medium">
-                            Click to close!
+                        <div className="bg-gray-800 border border-gray-600 p-6 rounded-xl shadow-2xl text-center">
+                            <div className="flex items-start justify-between gap-4">
+                                <span className="text-white text-lg">💡 팝업이 시야를 가리네요...</span>
+                                <button
+                                    onClick={() => {
+                                        setClosedPopups(prev => prev + 1);
+                                        // Close Hint Sound
+                                        new Audio('https://assets.mixkit.co/sfx/preview/mixkit-simple-game-countdown-921.mp3').play().catch(() => { });
+                                    }}
+                                    className="w-6 h-6 bg-gray-600 hover:bg-gray-500 rounded-full flex items-center justify-center text-white text-sm transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <p className="text-gray-400 text-sm mt-2">버튼을 눌러 팝업을 닫으세요</p>
                         </div>
                     </motion.div>
                 )
-            ))}
+            }
+
+            {/* POP-UP CLOSING GAME - Interactive popups appear over the message */}
+            {
+                showReflection && closedPopups < REQUIRED_CLOSES && gamePopups.map((popup) => (
+                    popup.visible && (
+                        <motion.div
+                            key={popup.id}
+                            className={`absolute z-50 ${popup.bg} p-6 rounded-xl shadow-2xl cursor-pointer hover:brightness-110`}
+                            style={{ left: popup.x, top: popup.y }}
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0 }}
+                            transition={{ type: "spring", duration: 0.4 }}
+                            whileHover={{ scale: 1.05 }}
+                        >
+                            <div className="flex items-start gap-3">
+                                <span className="text-2xl font-black text-white drop-shadow-md">{popup.text}</span>
+                                <button
+                                    onClick={() => {
+                                        setGamePopups(prev => prev.map(p =>
+                                            p.id === popup.id ? { ...p, visible: false } : p
+                                        ));
+                                        setClosedPopups(prev => prev + 1);
+
+                                        // Close Popup Sound (Click)
+                                        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3');
+                                        audio.volume = 0.5;
+                                        audio.play().catch(() => { });
+                                    }}
+                                    className="w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white font-bold text-lg transition-colors border border-white/20"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="mt-2 text-sm text-white/90 font-medium">
+                                Click to close!
+                            </div>
+                        </motion.div>
+                    )
+                ))
+            }
 
             {/* KEY MESSAGE - Appears after closing enough popups */}
-            {closedPopups >= REQUIRED_CLOSES && (
-                <>
-                    {/* EXPLOSION EFFECT */}
-                    <motion.div
-                        className="absolute z-45 pointer-events-none"
-                        initial={{ opacity: 1, scale: 0 }}
-                        animate={{ opacity: [1, 1, 0], scale: [0, 2, 3] }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                    >
-                        <div
-                            className="w-64 h-64 rounded-full"
-                            style={{
-                                background: 'radial-gradient(circle, rgba(6,182,212,0.8) 0%, rgba(6,182,212,0.3) 40%, transparent 70%)'
-                            }}
-                        />
-                    </motion.div>
-
-                    {/* Burst particles */}
-                    {[...Array(8)].map((_, i) => (
+            {
+                closedPopups >= REQUIRED_CLOSES && (
+                    <>
+                        {/* EXPLOSION EFFECT */}
                         <motion.div
-                            key={i}
-                            className="absolute z-45 w-4 h-4 bg-cyan-400 rounded-full pointer-events-none"
-                            initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-                            animate={{
-                                opacity: 0,
-                                scale: 0,
-                                x: Math.cos(i * Math.PI / 4) * 200,
-                                y: Math.sin(i * Math.PI / 4) * 200
+                            className="absolute z-45 pointer-events-none"
+                            initial={{ opacity: 1, scale: 0 }}
+                            animate={{ opacity: [1, 1, 0], scale: [0, 2, 3] }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            onLayoutAnimationStart={() => {
+                                // Impact Sound
+                                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cinematic-deep-impact-swish-1996.mp3');
+                                audio.volume = 0.8;
+                                audio.play().catch(() => { });
                             }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                        />
-                    ))}
-
-                    {/* Screen flash */}
-                    <motion.div
-                        className="absolute inset-0 bg-cyan-500 z-44 pointer-events-none"
-                        initial={{ opacity: 0.8 }}
-                        animate={{ opacity: 0 }}
-                        transition={{ duration: 0.5 }}
-                    />
-
-                    {/* Key Message */}
-                    <motion.div
-                        className="absolute z-50 text-center"
-                        initial={{ opacity: 0, scale: 1.5, filter: 'blur(20px)' }}
-                        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                        transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
-                    >
-                        <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight tracking-tight drop-shadow-2xl">
-                            불편함이 사라진 자리에,<br />
-                            <span className="text-cyan-400">'신중함'</span>도 사라졌다.
-                        </h2>
-                        <p className="text-gray-400 text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed">
-                            우리에게 필요한 건 바로, <span className="text-white border-b-2 border-cyan-500 pb-1 font-bold">생각할 시간</span>
-                        </p>
-
-                        <motion.button
-                            onClick={onComplete}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 1.5, duration: 0.5 }}
-                            whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(0,243,255,0.5)' }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-12 py-5 bg-white text-black font-black text-2xl rounded-sm shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:bg-cyan-50 transition-all uppercase tracking-widest"
                         >
-                            CONTINUE &rarr;
-                        </motion.button>
-                    </motion.div>
-                </>
-            )}
-        </motion.div>
+                            <div
+                                className="w-64 h-64 rounded-full"
+                                style={{
+                                    background: 'radial-gradient(circle, rgba(6,182,212,0.8) 0%, rgba(6,182,212,0.3) 40%, transparent 70%)'
+                                }}
+                            />
+                        </motion.div>
+
+                        {/* Burst particles */}
+                        {[...Array(8)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                className="absolute z-45 w-4 h-4 bg-cyan-400 rounded-full pointer-events-none"
+                                initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                                animate={{
+                                    opacity: 0,
+                                    scale: 0,
+                                    x: Math.cos(i * Math.PI / 4) * 200,
+                                    y: Math.sin(i * Math.PI / 4) * 200
+                                }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                            />
+                        ))}
+
+                        {/* Screen flash */}
+                        <motion.div
+                            className="absolute inset-0 bg-cyan-500 z-44 pointer-events-none"
+                            initial={{ opacity: 0.8 }}
+                            animate={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                        />
+
+                        {/* Key Message */}
+                        <motion.div
+                            className="absolute z-50 text-center"
+                            initial={{ opacity: 0, scale: 1.5, filter: 'blur(20px)' }}
+                            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                            transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                        >
+                            <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight tracking-tight drop-shadow-2xl">
+                                불편함이 사라진 자리에,<br />
+                                <span className="text-cyan-400">'신중함'</span>도 사라졌다.
+                            </h2>
+                            <p className="text-gray-400 text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed">
+                                우리에게 필요한 건 바로, <span className="text-white border-b-2 border-cyan-500 pb-1 font-bold">생각할 시간</span>
+                            </p>
+
+                            <motion.button
+                                onClick={onComplete}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1.5, duration: 0.5 }}
+                                whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(0,243,255,0.5)' }}
+                                whileTap={{ scale: 0.95 }}
+                                className="px-12 py-5 bg-white text-black font-black text-2xl rounded-sm shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:bg-cyan-50 transition-all uppercase tracking-widest"
+                            >
+                                CONTINUE &rarr;
+                            </motion.button>
+                        </motion.div>
+                    </>
+                )
+            }
+        </motion.div >
     );
 }
