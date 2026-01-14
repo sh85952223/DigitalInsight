@@ -146,14 +146,14 @@ export default function StepTwo({ onNext }) {
                                         {currentDirective.title}
                                     </h3>
 
-                                    <p className="text-2xl leading-relaxed font-light font-ui text-gray-200">
+                                    <p className="text-2xl leading-relaxed font-regular font-ui text-gray-200">
                                         "{currentDirective.desc}"
                                     </p>
                                 </div>
 
                                 {/* Footer Controls */}
                                 <div className="flex justify-between items-center pt-8 border-t border-white/10 mt-4">
-                                    <div className="text-xs font-code opacity-50">
+                                    <div className="text-s font-code opacity-50">
                                         실행 확인 대기중...
                                     </div>
                                     <button

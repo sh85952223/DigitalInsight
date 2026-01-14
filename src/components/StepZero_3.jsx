@@ -499,7 +499,7 @@ export default function StepZero_3({ onNext }) {
                     </motion.div>
                     <h2 className="text-5xl md:text-6xl font-black text-white mb-8 leading-tight tracking-tighter">
                         버튼 속 숨겨진 설계들<br />
-                        <span className="text-cyan-400">'디지털 통찰력'</span>을 위한 여정 시작.
+                        <span className="text-cyan-400">'통찰있는 소비 생활'</span>을 위한 여정 시작.
                     </h2>
                     <motion.p
                         className="text-gray-300 text-xl md:text-2xl mb-12 font-medium"
@@ -507,7 +507,7 @@ export default function StepZero_3({ onNext }) {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1 }}
                     >
-                        당신을 디지털 수사 요원으로 임명합니다.
+                        당신에게 디지털 수사 요원이 되기 위한 테스트 자격을 부여합니다.
                     </motion.p>
                     <motion.button
                         onClick={onNext}

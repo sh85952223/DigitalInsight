@@ -24,7 +24,7 @@ export default function HudContainer({ children, className = '', title, type = '
 
             {/* HUD Header / Label - Enhanced for visibility */}
             {title && (
-                <div className={`absolute top-0 left-8 px-4 py-2 -translate-y-1/2 ${titleBgColor} ${titleTextColor} font-bold tracking-widest uppercase flex items-center gap-2 ${largeTitle ? 'text-base' : 'text-xs'}`}>
+                <div className={`absolute top-0 left-8 px-4 py-2 -translate-y-1/2 ${titleBgColor} ${titleTextColor} font-bold tracking-widest uppercase flex items-center gap-2 ${largeTitle ? 'text-base' : 'text-s'}`}>
                     <span className={`w-2 h-2 rounded-full bg-black animate-pulse`} />
                     <span className="font-display">{title}</span>
                 </div>

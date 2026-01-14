@@ -12,7 +12,7 @@ import StepFiveMedieval from './components/StepFiveMedieval';
 import StepSix from './components/StepSix';
 
 function App() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [experimentResult, setExperimentResult] = useState(null);
 
   // URL Hash Routing Listener - REMOVED for Production
