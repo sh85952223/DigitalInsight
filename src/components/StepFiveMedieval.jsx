@@ -98,15 +98,27 @@ export default function StepFiveMedieval({ onNext }) {
                 text: "그럼 이제 주문을 해볼까요? 메뉴판을 다시 자세히 봐주세요.",
                 actionLabel: null
             });
-            await new Promise(r => setTimeout(r, 2500));
+            await new Promise(r => setTimeout(r, 2000));
 
-            setShowOverlay(menuImage);
+            setDialogue(null); // Fade out guide text
+            await new Promise(r => setTimeout(r, 500));
+
+            setShowOverlay(menuImage); // Fade in Menu Image
+            await new Promise(r => setTimeout(r, 800)); // Wait for fade in
+
             setDialogue({
                 speaker: "나",
                 text: "어...? 글씨가 너무 꼬불꼬불해서 뭐라고 쓴 건지 하나도 모르겠네.\n보기엔 예뻤는데 읽기는 너무 불편하다...",
                 actionLabel: "메뉴판 내려놓기",
                 onAction: async () => {
+                    // 1. Close Menu first
                     setShowOverlay(null);
+                    setDialogue(null); // Clear dialogue momentarily to show the scene
+
+                    // 2. Pause to let user seeing the rug/scene
+                    await new Promise(r => setTimeout(r, 2000));
+
+                    // 3. Show Rug Overlay (Optional) or just Dialogue about it
                     setDialogue({
                         speaker: "나",
                         text: "하지만 발에 닿는 양탄자의 감촉은 정말 푹신하고 따뜻해.\n차가웠던 몸이 녹는 기분이야... 계속 머물고 싶어.",
@@ -289,12 +301,18 @@ export default function StepFiveMedieval({ onNext }) {
             speaker: "???",
             text: "놀라셨습니까, 요원?",
             actionLabel: "누...구세요?",
-            onAction: () => {
+            onAction: async () => {
+                setDialogue(null); // 잠시 숨김 (Pause)
+                await new Promise(r => setTimeout(r, 600));
+
                 setDialogue({
                     speaker: "교관",
                     text: "당신의 테스트를 지켜보는 선임 요원입니다. 디지털 환경, 특히 우리가 매일 쓰는 스마트폰에서 UI와 UX를 빼고 이야기 할 순 없습니다.\n요원으로 한 단계 성장을 위해 실제 APP에서도 살펴보죠.",
                     actionLabel: "다음",
-                    onAction: () => {
+                    onAction: async () => {
+                        setDialogue(null); // 잠시 숨김 (Pause)
+                        await new Promise(r => setTimeout(r, 600));
+
                         // 5. Final Line (Before Snap)
                         setDialogue({
                             speaker: "교관",

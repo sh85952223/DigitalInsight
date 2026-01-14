@@ -55,7 +55,7 @@ function App() {
 
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         {/* Simple Dev Menu - PERSISTENT */}
-        <div className="absolute top-4 right-4 z-[10000] opacity-20 hover:opacity-100 transition-opacity">
+        <div className="fixed top-4 right-4 z-[10000] opacity-20 hover:opacity-100 transition-opacity">
           <select
             value={currentSelectValue}
             onChange={handleDevNavChange}

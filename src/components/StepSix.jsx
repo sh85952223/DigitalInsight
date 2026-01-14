@@ -110,7 +110,7 @@ export default function StepSix({ onNext }) {
         const positions = {
             0: { top: '18%', left: '10%', text: "1. 상단 로고를 눌러보세요!" }, // Pointing to Logo
             1: { top: '48%', left: '25%', transform: 'translateX(-50%)', text: "2. 메인 카드를 눌러보세요!" }, // Pointing to Card
-            2: { bottom: '16%', left: '11%', transform: 'translateX(-50%)', text: "3. 메뉴 탭을 눌러보세요!" }, // Pointing to Menu Nav (Coffee Icon)
+            2: { bottom: '16%', left: '14%', transform: 'translateX(-50%)', text: "3. 메뉴 탭을 눌러보세요!" }, // Pointing to Menu Nav (Corrected to 37%)
             3: { top: '61%', right: '12%', text: "4. 주문 버튼을 눌러보세요!" } // New Step 3
         };
 
@@ -279,7 +279,10 @@ export default function StepSix({ onNext }) {
                                 {/* Menu View Card (Navigation) */}
                                 <div
                                     className="relative w-full shrink-0 overflow-hidden rounded-2xl bg-[#231f1a] border border-white/5 group h-40 hover:border-white/10 transition-colors shadow-lg cursor-pointer"
-                                    onClick={() => setAppView('menu')}
+                                    onClick={() => {
+                                        setAppView('menu');
+                                        if (tutorialStep === 1) setTutorialStep(2); // Advance if clicked early
+                                    }}
                                 >
                                     <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=600&auto=format&fit=crop')` }}></div>
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#151210] via-[#151210]/40 to-transparent"></div>
@@ -491,45 +494,52 @@ export default function StepSix({ onNext }) {
                     </AnimatePresence>
                 </div>
 
-                {/* CONNECTION */}
-                <div className="mt-auto pt-8 border-t border-[#333] shrink-0">
-                    <div className="flex items-center justify-between text-center pb-4">
-                        <div className="flex-1">
-                            <div className="text-cyan-400 font-black text-2xl mb-1 drop-shadow-md">UI</div>
-                            <div className="text-sm font-bold text-[#9c9285] uppercase tracking-widest">도구 (Tool)</div>
-                        </div>
-                        <div className="relative flex-1 flex items-center justify-center">
-                            <div className="h-0.5 bg-gradient-to-r from-cyan-900 via-[#555] to-green-900 w-full absolute top-1/2 -translate-y-1/2"></div>
-                            <div className="bg-[#0a0a09] px-4 z-10 relative">
-                                <div className="text-white font-black text-xl mb-1">ACTION</div>
-                                <div className="text-xs font-bold text-[#9c9285]">사용 (Use)</div>
+                {/* FOOTER: CONNECTION & NEXT BUTTON */}
+                <div className="mt-auto pt-8 border-t border-[#333] shrink-0 flex items-center justify-between gap-8 h-32 transition-all duration-500">
+
+                    {/* CONNECTION DIAGRAM (Left) */}
+                    <div className={`transition-all duration-500 ease-in-out
+                        ${(tutorialStep >= 4 || uxFlow === 'order') ? 'flex-1 max-w-[60%] scale-100' : 'w-full scale-125'}
+                    `}>
+                        <div className="flex items-center justify-between text-center">
+                            <div className="flex-1">
+                                <div className="text-cyan-400 font-black text-xl mb-1 drop-shadow-md">UI</div>
+                                <div className="text-[10px] font-bold text-[#9c9285] uppercase tracking-widest">도구</div>
+                            </div>
+                            <div className="relative flex-1 flex items-center justify-center">
+                                <div className="h-0.5 bg-gradient-to-r from-cyan-900 via-[#555] to-green-900 w-full absolute top-1/2 -translate-y-1/2"></div>
+                                <div className="bg-[#0a0a09] px-2 z-10 relative">
+                                    <div className="text-white font-black text-sm mb-0.5">ACTION</div>
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <div className="text-green-400 font-black text-xl mb-1 drop-shadow-md">UX</div>
+                                <div className="text-[10px] font-bold text-[#9c9285] uppercase tracking-widest">결과</div>
                             </div>
                         </div>
-                        <div className="flex-1">
-                            <div className="text-green-400 font-black text-2xl mb-1 drop-shadow-md">UX</div>
-                            <div className="text-sm font-bold text-[#9c9285] uppercase tracking-widest">결과 (Result)</div>
-                        </div>
                     </div>
-                </div>
 
-                {/* NEXT BUTTON (Appears when tutorial is done) */}
-                <AnimatePresence>
-                    {(tutorialStep >= 4 || uxFlow === 'order') && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-8 flex justify-end pb-8 shrink-0"
-                        >
-                            <button
-                                onClick={onNext}
-                                className="group flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]"
+                    {/* NEXT BUTTON (Right) */}
+                    <AnimatePresence>
+                        {(tutorialStep >= 4 || uxFlow === 'order') && (
+                            <motion.div
+                                initial={{ opacity: 0, x: 50, width: 0 }}
+                                animate={{ opacity: 1, x: 0, width: 'auto' }}
+                                exit={{ opacity: 0, x: 50, width: 0 }}
+                                transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
+                                className="flex-shrink-0 whitespace-nowrap overflow-hidden"
                             >
-                                <span>최종 관문으로 이동</span>
-                                <IconArrowForward className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                                <button
+                                    onClick={onNext}
+                                    className="group flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-bold text-base hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]"
+                                >
+                                    <span>최종 관문으로 이동</span>
+                                    <IconArrowForward className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
         </div>
     );

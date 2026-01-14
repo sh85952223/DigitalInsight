@@ -6,17 +6,17 @@ import Crosshair from './common/Crosshair';
 import modernBed from '../assets/modern_bed.png';
 import modernDoor from '../assets/modern_door.png';
 
-// Import Full Market Sequence
-import m1 from '../assets/시장1.png';
-import m2 from '../assets/시장2.png';
-import m3 from '../assets/시장3.png';
-import m4 from '../assets/시장4.png';
-import m5 from '../assets/시장5.png';
-import m6 from '../assets/시장6.png';
-import m7 from '../assets/시장7.png';
-import m8 from '../assets/시장8.png';
-import m9 from '../assets/시장9.png';
-import m10 from '../assets/시장10.png';
+// Import Full Market Sequence (Optimized)
+import m1 from '../assets/optimized/시장1.jpg';
+import m2 from '../assets/optimized/시장2.jpg';
+import m3 from '../assets/optimized/시장3.jpg';
+import m4 from '../assets/optimized/시장4.jpg';
+import m5 from '../assets/optimized/시장5.jpg';
+import m6 from '../assets/optimized/시장6.jpg';
+import m7 from '../assets/optimized/시장7.jpg';
+import m8 from '../assets/optimized/시장8.jpg';
+import m9 from '../assets/optimized/시장9.jpg';
+import m10 from '../assets/optimized/시장10.jpg';
 
 const MARKET_SEQUENCE = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10];
 
@@ -44,6 +44,14 @@ export default function StepZero_1({ onComplete }) {
     // Present Era State
     const [presentUnlocked, setPresentUnlocked] = useState(false);
     const [presentPhase, setPresentPhase] = useState('idle'); // idle, ordering, delivered
+
+    // IMAGE PRELOADING (Optimization)
+    useEffect(() => {
+        MARKET_SEQUENCE.forEach((src) => {
+            const img = new Image();
+            img.src = src;
+        });
+    }, []);
 
     // HIDE GLOBAL BACKGROUND & ANIMATIONS (User Request)
     useEffect(() => {
