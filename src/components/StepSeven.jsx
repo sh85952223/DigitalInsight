@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GlitchText from './GlitchText';
 
 import QuizStage1 from './QuizStage1';
+// import QuizStage2 from './QuizStage2'; // Removed on user request
 import QuizStage2 from './QuizStage2';
-import QuizStage3 from './QuizStage3';
 
 export default function StepSeven({ onNext }) {
     const [step, setStep] = useState(0);
@@ -19,13 +19,13 @@ export default function StepSeven({ onNext }) {
                         onClick={() => setStep(1)}
                         className="w-full h-full flex flex-col items-center justify-center bg-black cursor-pointer text-center"
                     >
-                        <GlitchText text="FINAL EXAM" className="text-7xl font-black text-cyan-400 mb-4" />
+                        <GlitchText text="FINAL EXAM" className="text-9xl font-black text-cyan-400 mb-4" />
                         <motion.div
                             initial={{ width: 0 }} animate={{ width: 200 }}
                             className="h-1 bg-cyan-500 mb-8"
                         />
-                        <p className="text-gray-400 text-xl font-light">
-                            Tap to Begin Certification
+                        <p className="text-gray-400 text-3xl font-semibold">
+                            마지막 관문을 통과하고 정식 요원의 자격을 얻어라.
                         </p>
                     </motion.div>
                 )}
@@ -43,12 +43,6 @@ export default function StepSeven({ onNext }) {
                 )}
 
                 {step === 3 && (
-                    <motion.div key="st3" className="w-full h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <QuizStage3 onComplete={() => setStep(4)} />
-                    </motion.div>
-                )}
-
-                {step === 4 && (
                     <motion.div
                         key="finish"
                         initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}

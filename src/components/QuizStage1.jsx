@@ -86,26 +86,110 @@ const ARTIFACTS = [
     },
 ];
 
+const SoundEngine = {
+    audioCtx: null,
+    init: () => {
+        if (!SoundEngine.audioCtx) {
+            SoundEngine.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    },
+    playTone: (freq, type, duration, vol = 0.1) => {
+        if (!SoundEngine.audioCtx) SoundEngine.init();
+        const osc = SoundEngine.audioCtx.createOscillator();
+        const gain = SoundEngine.audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.type = type;
+        gain.gain.setValueAtTime(vol, SoundEngine.audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, SoundEngine.audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(SoundEngine.audioCtx.destination);
+        osc.start();
+        osc.stop(SoundEngine.audioCtx.currentTime + duration);
+    },
+    playSuccess: () => {
+        SoundEngine.playTone(800, 'sine', 0.1, 0.2);
+        setTimeout(() => SoundEngine.playTone(1200, 'sine', 0.2, 0.2), 100);
+    },
+    playError: () => {
+        SoundEngine.playTone(150, 'sawtooth', 0.3, 0.3);
+        SoundEngine.playTone(100, 'square', 0.3, 0.3);
+    }
+};
+
 const QuizStage1 = ({ onComplete }) => {
     const [digitized, setDigitized] = useState([]);
     const [infoModalItem, setInfoModalItem] = useState(null);
+    const [shakeItem, setShakeItem] = useState(null);
+    const [hoveredSlot, setHoveredSlot] = useState(null);
     const constraintsRef = useRef(null);
 
-    const handleDragEnd = (event, info, item) => {
-        const dropZone = document.getElementById('phone-screen-area');
-        if (dropZone) {
-            const rect = dropZone.getBoundingClientRect();
-            const x = event.clientX || info.point.x;
-            const y = event.clientY || info.point.y;
+    const handleDrag = (event, info, draggedItem) => {
+        const point = {
+            x: event.clientX || info.point.x,
+            y: event.clientY || info.point.y
+        };
+        const padding = 30; // Slightly larger for hover feedback
+        let activeSlot = null;
 
-            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-                if (!digitized.includes(item.id)) {
-                    setDigitized(prev => [...prev, item.id]);
-                    if (navigator.vibrate) navigator.vibrate(50);
-                    setInfoModalItem(item);
+        // Check collision with ALL slots, not just the matching one
+        for (const targetItem of ARTIFACTS) {
+            const targetId = `slot-${targetItem.id}`;
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+                const rect = targetElement.getBoundingClientRect();
+                if (
+                    point.x >= rect.left - padding &&
+                    point.x <= rect.right + padding &&
+                    point.y >= rect.top - padding &&
+                    point.y <= rect.bottom + padding
+                ) {
+                    activeSlot = targetItem.id;
+                    break;
                 }
             }
         }
+        setHoveredSlot(activeSlot);
+    };
+
+    const handleDragEnd = (event, info, item) => {
+        setHoveredSlot(null);
+        const targetId = `slot-${item.id}`;
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+            const rect = targetElement.getBoundingClientRect();
+
+            // Check if the center of the dragged item is within the target slot
+            const point = {
+                x: event.clientX || info.point.x,
+                y: event.clientY || info.point.y
+            };
+
+            // Allow some tolerance (padding) for easier drops
+            const padding = 20;
+
+            if (
+                point.x >= rect.left - padding &&
+                point.x <= rect.right + padding &&
+                point.y >= rect.top - padding &&
+                point.y <= rect.bottom + padding
+            ) {
+                if (!digitized.includes(item.id)) {
+                    setDigitized(prev => [...prev, item.id]);
+                    SoundEngine.playSuccess();
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    setInfoModalItem(item);
+                    return;
+                }
+            }
+        }
+
+        // If we get here, drop failed
+        SoundEngine.playError();
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        setShakeItem(item.id);
+        setTimeout(() => setShakeItem(null), 500);
     };
 
     const handleCloseModal = () => {
@@ -119,7 +203,7 @@ const QuizStage1 = ({ onComplete }) => {
     }, [digitized, infoModalItem, onComplete]);
 
     return (
-        <div className="w-full h-full relative bg-slate-950 flex overflow-hidden font-sans text-cyan-500" ref={constraintsRef}>
+        <div className="w-full h-full relative bg-slate-950 flex overflow-hidden font-sans text-cyan-500" ref={constraintsRef} onClick={() => SoundEngine.init()}>
             {/* AGENT BACKGROUND GRID */}
             <div className="absolute inset-0 z-0 opacity-20 pointer-events-none"
                 style={{
@@ -282,9 +366,15 @@ const QuizStage1 = ({ onComplete }) => {
                                 return (
                                     <div key={item.id} className="flex flex-col items-center gap-2 w-24">
                                         <div className="relative w-24 h-24">
-                                            {/* Placeholder (Empty Slot) */}
-                                            <div className={`absolute inset-0 rounded-[1.5rem] border-2 border-dashed border-white/10 bg-white/5 flex items-center justify-center transition-all duration-300 ${isDigitized ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`}>
-                                                <div className="text-[10px] text-white/20 font-mono text-center leading-tight p-1">
+                                            {/* Placeholder (Empty Slot) - TARGET */}
+                                            <div
+                                                id={`slot-${item.id}`}
+                                                className={`absolute inset-0 rounded-[1.5rem] border-2 border-dashed flex items-center justify-center transition-all duration-300 
+                                                    ${isDigitized ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}
+                                                    ${hoveredSlot === item.id ? 'border-cyan-400 bg-cyan-400/20 scale-110 shadow-[0_0_20px_rgba(34,211,238,0.5)]' : 'border-white/10 bg-white/5'}
+                                                `}
+                                            >
+                                                <div className={`text-[10px] font-mono text-center leading-tight p-1 transition-colors ${hoveredSlot === item.id ? 'text-cyan-200' : 'text-white/20'}`}>
                                                     APP<br />SLOT
                                                 </div>
                                             </div>
@@ -340,6 +430,8 @@ const QuizStage1 = ({ onComplete }) => {
                             drag={!infoModalItem}
                             dragConstraints={constraintsRef}
                             dragElastic={0.1}
+                            dragSnapToOrigin
+                            onDrag={(e, info) => handleDrag(e, info, item)}
                             onDragEnd={(e, info) => handleDragEnd(e, info, item)}
                             whileHover={{ scale: 1.15, cursor: 'grab', zIndex: 100 }}
                             whileDrag={{ scale: 1.25, cursor: 'grabbing', zIndex: 100 }}
