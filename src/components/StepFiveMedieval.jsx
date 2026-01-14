@@ -293,21 +293,23 @@ export default function StepFiveMedieval({ onNext }) {
                 setDialogue({
                     speaker: "교관",
                     text: "디지털 환경, 특히 우리가 매일 쓰는 스마트폰에서 UI와 UX를 빼고 이야기 할 순 없습니다.\n요원으로 한 단계 성장을 위해 실제 APP에서도 살펴보죠.",
-                    actionLabel: "실제 APP에서 느껴보기",
+                    actionLabel: "다음",
                     onAction: () => {
-                        // 5. Snap Action
-                        setDialogue(null);
-                        setIsSnapEffect(true);
+                        // 5. Final Line (Before Snap)
+                        setDialogue({
+                            speaker: "교관",
+                            text: "(손가락을 딱 튕기며)\n이제 그 APP에서 UI와 UX를 직접 해부해 봅시다.",
+                            actionLabel: "Snap! 🫰", // Trigger Snap
+                            onAction: () => {
+                                setDialogue(null);
+                                setIsSnapEffect(true); // Flash
 
-                        setTimeout(() => {
-                            // 6. Final Line & Exit
-                            setDialogue({
-                                speaker: "교관",
-                                text: "(손가락을 딱 튕기며)\n이제 그 APP에서 UI와 UX를 직접 해부해 봅시다.",
-                                actionLabel: "분석실로 이동",
-                                onAction: onNext
-                            });
-                        }, 1000);
+                                // 6. Auto Transition
+                                setTimeout(() => {
+                                    onNext(); // Go to Step 6 automatically
+                                }, 800);
+                            }
+                        });
                     }
                 });
             }
