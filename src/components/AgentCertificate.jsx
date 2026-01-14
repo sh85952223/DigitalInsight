@@ -1,7 +1,6 @@
-import React, { Suspense } from 'react';
+// [REFACTORED] 미사용 React, Suspense, GlitchText import 제거
 import { Loader } from '@react-three/drei';
 import Lanyard from './Lanyard';
-import GlitchText from './GlitchText';
 
 export default function AgentCertificate({ onExit }) {
     return (

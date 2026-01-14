@@ -92,43 +92,41 @@ export default function StepFiveMedieval({ onNext }) {
     const startExperience = () => {
         setPhase('experience');
 
-        const sequence = async () => {
-            setDialogue({
-                speaker: "가이드",
-                text: "그럼 이제 주문을 해볼까요? 메뉴판을 다시 자세히 봐주세요.",
-                actionLabel: null
-            });
-            await new Promise(r => setTimeout(r, 2000));
+        // [REFACTORED] 자동 대기 제거, 사용자 버튼 클릭으로 전환하도록 수정
+        setDialogue({
+            speaker: "가이드",
+            text: "그럼 이제 주문을 해볼까요? 메뉴판을 다시 자세히 봐주세요.",
+            actionLabel: "메뉴판 보기",
+            onAction: async () => {
+                setDialogue(null);
+                await new Promise(r => setTimeout(r, 300));
 
-            setDialogue(null); // Fade out guide text
-            await new Promise(r => setTimeout(r, 500));
+                setShowOverlay(menuImage);
+                await new Promise(r => setTimeout(r, 800));
 
-            setShowOverlay(menuImage); // Fade in Menu Image
-            await new Promise(r => setTimeout(r, 800)); // Wait for fade in
+                setDialogue({
+                    speaker: "나",
+                    text: "어...? 글씨가 너무 꼬불꼬불해서 뭐라고 쓴 건지 하나도 모르겠네.\n보기엔 예뻤는데 읽기는 너무 불편하다...",
+                    actionLabel: "메뉴판 내려놓기",
+                    onAction: async () => {
+                        // 1. Close Menu first
+                        setShowOverlay(null);
+                        setDialogue(null); // Clear dialogue momentarily to show the scene
 
-            setDialogue({
-                speaker: "나",
-                text: "어...? 글씨가 너무 꼬불꼬불해서 뭐라고 쓴 건지 하나도 모르겠네.\n보기엔 예뻤는데 읽기는 너무 불편하다...",
-                actionLabel: "메뉴판 내려놓기",
-                onAction: async () => {
-                    // 1. Close Menu first
-                    setShowOverlay(null);
-                    setDialogue(null); // Clear dialogue momentarily to show the scene
+                        // 2. Pause to let user seeing the rug/scene
+                        await new Promise(r => setTimeout(r, 2000));
 
-                    // 2. Pause to let user seeing the rug/scene
-                    await new Promise(r => setTimeout(r, 2000));
-
-                    // 3. Show Rug Overlay (Optional) or just Dialogue about it
-                    setDialogue({
-                        speaker: "나",
-                        text: "하지만 발에 닿는 양탄자의 감촉은 정말 푹신하고 따뜻해.\n차가웠던 몸이 녹는 기분이야... 계속 머물고 싶어.",
-                        actionLabel: "계속 머무르기...",
-                        onAction: () => startAcronymLab() // Trigger Acronym Lab
-                    });
-                }
-            });
-        };
-        sequence();
+                        // 3. Show Rug Overlay (Optional) or just Dialogue about it
+                        setDialogue({
+                            speaker: "나",
+                            text: "하지만 발에 닿는 양탄자의 감촉은 정말 푹신하고 따뜻해.\n차가웠던 몸이 녹는 기분이야... 계속 머물고 싶어.",
+                            actionLabel: "계속 머무르기...",
+                            onAction: () => startAcronymLab() // Trigger Acronym Lab
+                        });
+                    }
+                });
+            }
+        });
     };
 
     // --- ACRONYM LAB SEQUENCE (Restored) ---

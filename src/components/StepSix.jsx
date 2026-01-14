@@ -95,7 +95,7 @@ export default function StepSix({ onNext }) {
                 )}
 
                 <IconFireplace className="text-[#f49d25] w-7 h-7" />
-                <h1 className="text-xl font-bold tracking-tight text-white font-serif">THE HEARTH</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-white">THE HEARTH</h1>
             </div>
             <button className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/5 transition-colors">
                 <IconNotifications className="text-[#e8e1d5] w-6 h-6" />
@@ -105,13 +105,15 @@ export default function StepSix({ onNext }) {
 
     // --- TUTORIAL TOOLTIP COMPONENT ---
     const TutorialTooltip = () => {
-        if (tutorialStep >= 4) return null; // Updated to 4
+        if (tutorialStep >= 4) return null;
+        // Step 3 (Order Button) should only be visible on 'menu' view
+        if (tutorialStep === 3 && appView !== 'menu') return null;
 
         const positions = {
             0: { top: '18%', left: '10%', text: "1. 상단 로고를 눌러보세요!" }, // Pointing to Logo
             1: { top: '48%', left: '25%', transform: 'translateX(-50%)', text: "2. 메인 카드를 눌러보세요!" }, // Pointing to Card
-            2: { bottom: '16%', left: '14%', transform: 'translateX(-50%)', text: "3. 메뉴 탭을 눌러보세요!" }, // Pointing to Menu Nav (Corrected to 37%)
-            3: { top: '61%', right: '12%', text: "4. 주문 버튼을 눌러보세요!" } // New Step 3
+            2: { bottom: '16%', left: '14%', transform: 'translateX(-50%)', text: "3. 메뉴 탭을 눌러보세요!" }, // Pointing to Menu Nav
+            3: { top: '60%', right: '12%', text: "4. 주문 버튼을 눌러보세요!" } // New Step 3
         };
 
         const currentPos = positions[tutorialStep];
@@ -173,7 +175,7 @@ export default function StepSix({ onNext }) {
                 </motion.div>
             )}
 
-            <div className={`flex flex-col items-center gap-1.5 group ${appView === 'home' ? 'text-white' : 'text-[#9c9285]'}`} onClick={(e) => { e.stopPropagation(); setAppView('home'); setSelectedUI('nav'); if (tutorialStep === 2) setTutorialStep(3); }}>
+            <div className={`flex flex-col items-center gap-1.5 group ${appView === 'home' ? 'text-white' : 'text-[#9c9285]'}`} onClick={(e) => { e.stopPropagation(); setAppView('home'); setSelectedUI('nav'); }}>
                 <IconHome className="w-7 h-7 group-hover:scale-110 transition-transform" />
                 <span className="text-[10px] tracking-wide font-medium">홈</span>
             </div>
@@ -220,14 +222,14 @@ export default function StepSix({ onNext }) {
                             <motion.main
                                 key="home"
                                 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-                                className="relative z-10 flex-1 px-6 pb-32 flex flex-col gap-6 w-full overflow-y-auto"
+                                className="relative z-10 flex-1 px-6 pb-32 flex flex-col gap-2.5 w-full overflow-y-auto"
                                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                             >
                                 {/* Text Section */}
-                                <section className="pt-2 pb-2 shrink-0">
-                                    <h2 className="text-[28px] font-bold text-white leading-snug tracking-tight font-serif">
+                                <section className="pt-1 pb-2 shrink-0">
+                                    <h2 className="text-3xl font-bold text-white leading-snug tracking-tight">
                                         여유가 피어나는 시간,<br />
-                                        <span className="text-[#9c9285] opacity-80 text-base mt-2 block font-normal tracking-tight font-serif">
+                                        <span className="text-[#9c9285] opacity-80 text-lg mt-1 block font-normal tracking-tight">
                                             커피향에 이끌리다.
                                         </span>
                                     </h2>
@@ -258,16 +260,16 @@ export default function StepSix({ onNext }) {
 
                                     <div className="absolute inset-0 bg-cover bg-center opacity-80 group-hover:scale-105 transition-transform duration-1000 ease-out" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=600&auto=format&fit=crop')` }}></div>
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#151210] via-[#151210]/40 to-transparent"></div>
-                                    <div className="relative p-6 flex flex-col h-[20rem] justify-between">
+                                    <div className="relative p-4 flex flex-col h-[20rem] justify-between">
                                         <div className="flex justify-start">
                                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium text-white/90 bg-[#1c1917]/80 backdrop-blur-md border border-white/10 tracking-wide shadow-sm">
                                                 <span className="text-[#f49d25]">ⓘ</span> 오늘의 커피
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-end gap-3">
-                                            <div className="flex flex-col gap-1.5">
-                                                <h3 className="text-2xl text-white tracking-tight leading-tight drop-shadow-md font-bold font-serif">에티오피아<br />예가체프</h3>
-                                                <p className="text-xs leading-relaxed max-w-[90%] break-keep text-[#e8e1d5]/80 drop-shadow-sm font-normal">자스민과 베르가못의 은은한 꽃향기, 깔끔한 여운.</p>
+                                            <div className="flex flex-col gap-2.5">
+                                                <h3 className="text-2xl text-white tracking-tight leading-tight drop-shadow-md font-bold">에티오피아<br />예가체프</h3>
+                                                <p className="text-sm leading-relaxed max-w-[90%] break-keep text-[#e8e1d5]/80 drop-shadow-sm font-normal">자스민과 베르가못의 은은한 꽃향기, 깔끔한 여운.</p>
                                             </div>
                                             <button className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-[#f49d25] text-[#1c1917] hover:bg-white hover:scale-110 transition-all shadow-[0_0_15px_rgba(244,157,37,0.3)]">
                                                 <IconArrowForward className="w-5 h-5" />
@@ -289,8 +291,8 @@ export default function StepSix({ onNext }) {
                                     <div className="relative z-10 p-6 h-full flex flex-col justify-end">
                                         <div className="flex justify-between items-end w-full">
                                             <div>
-                                                <h4 className="text-xl text-white mb-1.5 drop-shadow-md font-bold font-serif">메뉴 보기</h4>
-                                                <p className="text-xs mb-0 leading-relaxed break-keep text-[#e8e1d5]/80 drop-shadow-sm">장인의 손길로 내린<br />커피와 기록들.</p>
+                                                <h4 className="text-xl text-white mb-1.5 drop-shadow-md font-bold">메뉴 보기</h4>
+                                                <p className="text-sm mb-0 leading-relaxed break-keep text-[#e8e1d5]/80 drop-shadow-sm">장인의 손길로 내린<br />커피와 기록들.</p>
                                             </div>
                                             <div className="flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors">
                                                 <IconArrowForward className="w-4 h-4 text-white" />
@@ -313,15 +315,15 @@ export default function StepSix({ onNext }) {
                             >
                                 <div className="flex items-center gap-2 mb-2 shrink-0">
                                     <button onClick={() => setAppView('home')} className="text-[#9c9285] hover:text-white"><IconArrowForward className="w-5 h-5 rotate-180" /></button>
-                                    <h2 className="text-2xl font-bold text-white font-serif">Coffee Menu</h2>
+                                    <h2 className="text-2xl font-bold text-white">Coffee Menu</h2>
                                 </div>
 
                                 {/* Menu List Item 1 */}
                                 <div className="w-full shrink-0 bg-[#231f1a] rounded-xl border border-white/5 overflow-hidden flex gap-4 p-4 items-center group hover:border-[#f49d25]/50 transition-all">
                                     <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?q=80&w=200&auto=format&fit=crop')` }}></div>
                                     <div className="flex-1">
-                                        <h3 className="text-white font-bold text-base font-serif">에스프레소</h3>
-                                        <p className="text-[#9c9285] text-[10px] mt-0.5">깊고 진한 본연의 맛</p>
+                                        <h3 className="text-white font-bold text-lg">에스프레소</h3>
+                                        <p className="text-[#9c9285] text-[13px] mt-0.5">깊고 진한 본연의 맛</p>
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-[#f49d25] font-bold text-sm">3.5</span>
                                             <button className="bg-white/5 hover:bg-[#f49d25] hover:text-[#1c1917] text-[#9c9285] rounded-full p-1.5 transition-colors"><IconNotifications className="w-3.5 h-3.5 rotate-45" /></button>
@@ -347,8 +349,8 @@ export default function StepSix({ onNext }) {
 
                                     <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=200&auto=format&fit=crop')` }}></div>
                                     <div className="flex-1">
-                                        <h3 className="text-white font-bold text-base font-serif">Time Travel Latte</h3>
-                                        <p className="text-[#9c9285] text-[10px] mt-0.5">과거의 향수를 담은 시그니처</p>
+                                        <h3 className="text-white font-bold text-lg">Time Travel Latte</h3>
+                                        <p className="text-[#9c9285] text-[12px] mt-0.5">과거의 향수를 담은 시그니처</p>
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-[#f49d25] font-bold text-sm">5.0</span>
                                             <button
@@ -369,8 +371,8 @@ export default function StepSix({ onNext }) {
                                 <div className="w-full shrink-0 bg-[#231f1a] rounded-xl border border-white/5 overflow-hidden flex gap-4 p-4 items-center opacity-60">
                                     <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0 grayscale" style={{ backgroundImage: `url(${imgColdBrew})` }}></div>
                                     <div className="flex-1">
-                                        <h3 className="text-white font-bold text-base font-serif">콜드브루</h3>
-                                        <p className="text-[#9c9285] text-[10px] mt-0.5">차가운 물로 내린 깔끔함</p>
+                                        <h3 className="text-white font-bold text-lg">콜드브루</h3>
+                                        <p className="text-[#9c9285] text-[12px] mt-0.5">차가운 물로 내린 깔끔함</p>
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-[#f49d25] font-bold text-sm">4.5</span>
                                             <span className="text-[10px] text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded">품절</span>
@@ -382,8 +384,8 @@ export default function StepSix({ onNext }) {
                                 <div className="w-full shrink-0 bg-[#231f1a] rounded-xl border border-white/5 overflow-hidden flex gap-4 p-4 items-center group hover:border-[#f49d25]/50 transition-all">
                                     <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" style={{ backgroundImage: `url(${imgAmericano})` }}></div>
                                     <div className="flex-1">
-                                        <h3 className="text-white font-bold text-base font-serif">아메리카노</h3>
-                                        <p className="text-[#9c9285] text-[10px] mt-0.5">가장 기본적인 커피</p>
+                                        <h3 className="text-white font-bold text-lg">아메리카노</h3>
+                                        <p className="text-[#9c9285] text-[12px] mt-0.5">가장 기본적인 커피</p>
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-[#f49d25] font-bold text-sm">3.0</span>
                                             <button className="bg-white/5 hover:bg-[#f49d25] hover:text-[#1c1917] text-[#9c9285] rounded-full p-1.5 transition-colors"><IconNotifications className="w-3.5 h-3.5 rotate-45" /></button>
@@ -395,8 +397,8 @@ export default function StepSix({ onNext }) {
                                 <div className="w-full shrink-0 bg-[#231f1a] rounded-xl border border-white/5 overflow-hidden flex gap-4 p-4 items-center group hover:border-[#f49d25]/50 transition-all">
                                     <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" style={{ backgroundImage: `url(${imgCafeLatte})` }}></div>
                                     <div className="flex-1">
-                                        <h3 className="text-white font-bold text-base font-serif">카페 라떼</h3>
-                                        <p className="text-[#9c9285] text-[10px] mt-0.5">부드러운 우유와 에스프레소</p>
+                                        <h3 className="text-white font-bold text-lg">카페 라떼</h3>
+                                        <p className="text-[#9c9285] text-[12px] mt-0.5">부드러운 우유와 에스프레소</p>
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-[#f49d25] font-bold text-sm">4.0</span>
                                             <button className="bg-white/5 hover:bg-[#f49d25] hover:text-[#1c1917] text-[#9c9285] rounded-full p-1.5 transition-colors"><IconNotifications className="w-3.5 h-3.5 rotate-45" /></button>
@@ -434,7 +436,7 @@ export default function StepSix({ onNext }) {
                 </h1>
 
                 {/* UI DEFINITION ZONE */}
-                <div className="mb-10 min-h-[180px]">
+                <div className="mb-6 min-h-[160px]">
                     <h3 className="text-cyan-400 font-bold mb-4 flex items-center gap-3 text-xl">
                         <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.8)]"></div>
                         UI (User Interface) : 보이는 것
@@ -448,7 +450,7 @@ export default function StepSix({ onNext }) {
                                 exit={{ opacity: 0, x: 20 }}
                                 className="bg-[#1c1917] border-l-4 border-cyan-500 p-6 rounded-r-lg shadow-lg"
                             >
-                                <h4 className="text-2xl text-white font-bold mb-2 font-serif">{uiDefinitions[selectedUI].title}</h4>
+                                <h4 className="text-2xl text-white font-bold mb-2">{uiDefinitions[selectedUI].title}</h4>
                                 <p className="text-[#e8e1d5] text-lg leading-relaxed">{uiDefinitions[selectedUI].desc}</p>
                             </motion.div>
                         ) : (
@@ -460,7 +462,7 @@ export default function StepSix({ onNext }) {
                 </div>
 
                 {/* UX DEFINITION ZONE */}
-                <div className="mb-8 min-h-[180px]">
+                <div className="mb-4 min-h-[160px]">
                     <h3 className="text-green-400 font-bold mb-4 flex items-center gap-3 text-xl">
                         <div className="w-3 h-3 bg-green-400 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.8)]"></div>
                         UX (User Experience) : 겪는 것
@@ -473,16 +475,16 @@ export default function StepSix({ onNext }) {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-[#1c1917] border-l-4 border-green-500 p-6 rounded-r-lg shadow-lg"
                             >
-                                <h4 className="text-2xl text-white font-bold mb-4 font-serif">{uxDefinitions.order.title}</h4>
-                                <div className="space-y-4">
+                                <h4 className="text-xl text-white font-bold mb-3">{uxDefinitions.order.title}</h4>
+                                <div className="space-y-3">
                                     {uxDefinitions.order.steps.map((step, idx) => (
-                                        <div key={idx} className="flex items-center gap-4 text-[#e8e1d5] text-lg">
+                                        <div key={idx} className="flex items-center gap-3 text-[#e8e1d5] text-base">
                                             <span className="w-8 h-8 rounded-full bg-green-900 border border-green-500/50 text-green-400 flex items-center justify-center text-sm font-bold shadow-lg shrink-0">{idx + 1}</span>
                                             <span className="font-medium">{step}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <p className="mt-6 text-green-400 font-bold text-base border-t border-[#333] pt-4 flex items-center gap-2">
+                                <p className="mt-4 text-green-400 font-bold text-sm border-t border-[#333] pt-3 flex items-center gap-2">
                                     <span>👉</span> {uxDefinitions.order.desc}
                                 </p>
                             </motion.div>
@@ -495,25 +497,25 @@ export default function StepSix({ onNext }) {
                 </div>
 
                 {/* FOOTER: CONNECTION & NEXT BUTTON */}
-                <div className="mt-auto pt-8 border-t border-[#333] shrink-0 flex items-center justify-between gap-8 h-32 transition-all duration-500">
+                <div className="mt-auto pt-8 border-t border-[#333] shrink-0 flex items-center justify-between gap-8 h-32 relative z-10">
 
                     {/* CONNECTION DIAGRAM (Left) */}
-                    <div className={`transition-all duration-500 ease-in-out
-                        ${(tutorialStep >= 4 || uxFlow === 'order') ? 'flex-1 max-w-[60%] scale-100' : 'w-full scale-125'}
+                    <div className={`transition-all duration-700 ease-in-out
+                        ${(tutorialStep >= 4 || uxFlow === 'order') ? 'flex-[0.6] opacity-100' : 'flex-1 opacity-100'}
                     `}>
-                        <div className="flex items-center justify-between text-center">
+                        <div className="flex items-center justify-between text-center whitespace-nowrap">
                             <div className="flex-1">
-                                <div className="text-cyan-400 font-black text-xl mb-1 drop-shadow-md">UI</div>
+                                <div className={`font-black mb-1 drop-shadow-md transition-all duration-700 ${tutorialStep >= 4 || uxFlow === 'order' ? 'text-xl' : 'text-3xl'} text-cyan-400`}>UI</div>
                                 <div className="text-[10px] font-bold text-[#9c9285] uppercase tracking-widest">도구</div>
                             </div>
-                            <div className="relative flex-1 flex items-center justify-center">
+                            <div className="relative flex-[2] flex items-center justify-center mx-4">
                                 <div className="h-0.5 bg-gradient-to-r from-cyan-900 via-[#555] to-green-900 w-full absolute top-1/2 -translate-y-1/2"></div>
-                                <div className="bg-[#0a0a09] px-2 z-10 relative">
-                                    <div className="text-white font-black text-sm mb-0.5">ACTION</div>
+                                <div className="bg-[#0a0a09] px-4 z-10 relative">
+                                    <div className={`font-black mb-0.5 text-white transition-all duration-700 ${tutorialStep >= 4 || uxFlow === 'order' ? 'text-sm' : 'text-xl'}`}>ACTION</div>
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <div className="text-green-400 font-black text-xl mb-1 drop-shadow-md">UX</div>
+                                <div className={`font-black mb-1 drop-shadow-md transition-all duration-700 ${tutorialStep >= 4 || uxFlow === 'order' ? 'text-xl' : 'text-3xl'} text-green-400`}>UX</div>
                                 <div className="text-[10px] font-bold text-[#9c9285] uppercase tracking-widest">결과</div>
                             </div>
                         </div>
@@ -523,15 +525,15 @@ export default function StepSix({ onNext }) {
                     <AnimatePresence>
                         {(tutorialStep >= 4 || uxFlow === 'order') && (
                             <motion.div
-                                initial={{ opacity: 0, x: 50, width: 0 }}
+                                initial={{ opacity: 0, x: 20, width: 0 }}
                                 animate={{ opacity: 1, x: 0, width: 'auto' }}
-                                exit={{ opacity: 0, x: 50, width: 0 }}
-                                transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
-                                className="flex-shrink-0 whitespace-nowrap overflow-hidden"
+                                exit={{ opacity: 0, x: 20, width: 0 }}
+                                transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
+                                className="flex-shrink-0 overflow-visible"
                             >
                                 <button
                                     onClick={onNext}
-                                    className="group flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-bold text-base hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]"
+                                    className="group flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-bold text-base hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] whitespace-nowrap"
                                 >
                                     <span>최종 관문으로 이동</span>
                                     <IconArrowForward className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

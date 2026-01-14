@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// [REFACTORED] 미사용 React import 제거
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Typewriter from './Typewriter';
 

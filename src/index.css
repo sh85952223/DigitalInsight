@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Batang:wght@400;700&family=Nanum+Gothic+Coding:wght@400;700&family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 /* -------------------------------------------------------------------------- */
 /*                                 Fonts                                      */
@@ -25,12 +24,12 @@
   --text-primary: #e0e0e0;
   --text-dim: #707070;
 
-  /* Fonts - Updated for Korean Support */
-  --font-display: 'Black Han Sans', 'Orbitron', sans-serif;
-  /* Impactful Headers */
-  --font-ui: 'Noto Sans KR', 'Rajdhani', sans-serif;
+  /* Fonts - Simplified to Noto Sans KR */
+  --font-display: 'Noto Sans KR', sans-serif;
+  /* Impactful Headers (use font-weight: 900) */
+  --font-ui: 'Noto Sans KR', sans-serif;
   /* General UI */
-  --font-code: 'Nanum Gothic Coding', 'Share Tech Mono', monospace;
+  --font-code: 'Nanum Gothic Coding', monospace;
   /* Tech/Data */
 }
 
@@ -192,14 +191,4 @@ body {
   animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
 }
 
-/* Vignette */
-.vignette {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.8) 90%);
-  pointer-events: none;
-  z-index: 9998;
-}
+/* [REFACTORED] 중복 .vignette 클래스 제거 - 라인 129에서 이미 정의됨 */

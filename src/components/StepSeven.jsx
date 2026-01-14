@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GlitchText from './GlitchText';
 
 import QuizStage1 from './QuizStage1';
-// import QuizStage2 from './QuizStage2'; // Removed on user request
+// [REFACTORED] 중복 QuizStage2 import와 주석 처리된 라인 제거
 import QuizStage2 from './QuizStage2';
 import AgentCertificate from './AgentCertificate';
 

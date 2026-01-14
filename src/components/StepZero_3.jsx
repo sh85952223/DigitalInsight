@@ -495,7 +495,7 @@ export default function StepZero_3({ onNext }) {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.5 }}
                     >
-                        테스트 통과
+                        테스트의 시작
                     </motion.div>
                     <h2 className="text-5xl md:text-6xl font-black text-white mb-8 leading-tight tracking-tighter">
                         버튼 속 숨겨진 설계들<br />
