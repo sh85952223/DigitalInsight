@@ -5,9 +5,15 @@ import GlitchText from './GlitchText';
 import QuizStage1 from './QuizStage1';
 // import QuizStage2 from './QuizStage2'; // Removed on user request
 import QuizStage2 from './QuizStage2';
+import AgentCertificate from './AgentCertificate';
 
-export default function StepSeven({ onNext }) {
-    const [step, setStep] = useState(0);
+export default function StepSeven({ onNext, subStep = 0 }) {
+    const [step, setStep] = useState(subStep);
+
+    // Sync with external subStep prop if provided (for dev menu navigation)
+    React.useEffect(() => {
+        setStep(subStep);
+    }, [subStep]);
 
     return (
         <div className="fixed inset-0 z-[9999] bg-black font-sans select-none">
@@ -45,36 +51,10 @@ export default function StepSeven({ onNext }) {
                 {step === 3 && (
                     <motion.div
                         key="finish"
-                        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                        className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 p-6"
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="w-full h-full"
                     >
-                        <div className="w-full max-w-2xl bg-white text-black p-12 rounded-lg shadow-2xl relative overflow-hidden border-[10px] border-double border-gray-300">
-                            <div className="absolute top-0 right-0 p-8 opacity-20 text-[100px]">🏆</div>
-                            <h1 className="text-5xl font-black mb-2 tracking-tighter">DIGITAL INSIGHT</h1>
-                            <h2 className="text-2xl font-bold text-gray-500 mb-10">CERTIFICATE OF MASTERY</h2>
-
-                            <div className="space-y-4 border-l-4 border-black pl-8 mb-10">
-                                <div>
-                                    <div className="text-xs font-bold text-gray-400 uppercase">Agent Name</div>
-                                    <div className="text-2xl font-serif italic">Master Agent</div>
-                                </div>
-                                <div>
-                                    <div className="text-xs font-bold text-gray-400 uppercase">Authority</div>
-                                    <div className="text-2xl font-serif italic">Anti-Dark Pattern Bureau</div>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-between items-end">
-                                <div className="text-sm font-bold opacity-50">VERIFIED VALID</div>
-                                <div className="w-24 h-24 bg-red-600 text-white rounded-full flex items-center justify-center font-black animate-pulse shadow-xl">
-                                    PASSED
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onClick={onNext} className="mt-8 px-6 py-3 rounded-full border border-white/20 text-white/50 hover:bg-white hover:text-black transition-all">
-                            EXIT
-                        </button>
+                        <AgentCertificate onExit={onNext} />
                     </motion.div>
                 )}
             </AnimatePresence>

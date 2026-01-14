@@ -15,6 +15,7 @@ import StepSeven from './components/StepSeven';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [quizSubStep, setQuizSubStep] = useState(0); // For Step 7 internal navigation
   const [experimentResult, setExperimentResult] = useState(null);
 
   // URL Hash Routing Listener - REMOVED for Production
@@ -28,6 +29,20 @@ function App() {
     setExperimentResult(null);
   };
 
+  const handleDevNavChange = (e) => {
+    const val = e.target.value;
+    if (val.startsWith('7-')) {
+      setCurrentStep(7);
+      setQuizSubStep(Number(val.split('-')[1]));
+    } else {
+      setCurrentStep(Number(val));
+      setQuizSubStep(0); // Reset sub-step when leaving step 7
+    }
+  };
+
+  // Construct current value for select
+  const currentSelectValue = currentStep === 7 ? `7-${quizSubStep}` : currentStep;
+
   return (
     <>
       {currentStep !== 6 && currentStep !== 7 && (
@@ -40,10 +55,10 @@ function App() {
 
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         {/* Simple Dev Menu - PERSISTENT */}
-        <div className="absolute top-4 right-4 z-50 opacity-20 hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 right-4 z-[10000] opacity-20 hover:opacity-100 transition-opacity">
           <select
-            value={currentStep}
-            onChange={(e) => setCurrentStep(Number(e.target.value))}
+            value={currentSelectValue}
+            onChange={handleDevNavChange}
             className="bg-black text-cyan-500 border border-cyan-500 text-xs p-1"
           >
             <option value={0}>Step 0: Evolution (Intro)</option>
@@ -53,7 +68,13 @@ function App() {
             <option value={4}>Step 4: Result</option>
             <option value={5}>Step 5: Medieval Cafe</option>
             <option value={6}>Step 6: UI/UX Anatomy</option>
-            <option value={7}>Step 7: Final Exam</option>
+
+            <optgroup label="Step 7: Final Exam">
+              <option value="7-0">7-0: Intro</option>
+              <option value="7-1">7-1: Digital Trans (Quiz 1)</option>
+              <option value="7-2">7-2: UX Analysis (Quiz 2)</option>
+              <option value="7-3">7-3: Certificate</option>
+            </optgroup>
           </select>
         </div>
 
@@ -113,6 +134,7 @@ function App() {
           {currentStep === 7 && (
             <StepSeven
               key="step7"
+              subStep={quizSubStep}
               onNext={() => alert("All Missions Completed!")}
             />
           )}
