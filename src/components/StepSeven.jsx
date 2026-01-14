@@ -18,12 +18,19 @@ import naviImg from '../assets/네비게이션.png';
 import smartphoneIcon from '../assets/스마트폰.png';
 import musicImg from '../assets/음악앱.png';
 
+// Dock Icons
+import dockPhone from '../assets/icon_phone.png';
+import dockChat from '../assets/icon_chat.png';
+import dockCamera from '../assets/icon_camera.png';
+import dockCalendar from '../assets/icon_calendar.png';
+
+
 const ARTIFACTS = [
     {
         id: 'basket',
         icon: basketImg,
         label: '장바구니',
-        pastDesc: '직접 물건을 담고 집으로 이동',
+        pastDesc: '구매한 물건을 직접 집으로 들고 감',
         appIcon: rocketImg,
         appName: '새벽배송',
         futureDesc: '터치로 주문하고 새벽에 받는 혁신',
@@ -33,7 +40,7 @@ const ARTIFACTS = [
         id: 'wallet',
         icon: walletImg,
         label: '지갑',
-        pastDesc: '현금과 카드로 두툼해진 지갑 소지',
+        pastDesc: '현금과 카드를 두툼하게 소지',
         appIcon: payImg,
         appName: '간편결제',
         futureDesc: '폰 하나로 모든 인증과 결제 완료',
@@ -46,7 +53,7 @@ const ARTIFACTS = [
         pastDesc: '복잡한 수식을 직접 입력',
         appIcon: smartphoneIcon,
         appName: '스마트 계산',
-        futureDesc: '조금 더 복잡하고 빠른 계산을 쉽게',
+        futureDesc: '기존 계산을 보다 빠르고 편하게',
         color: 'bg-gray-500'
     },
     {
@@ -62,8 +69,8 @@ const ARTIFACTS = [
     {
         id: 'map',
         icon: mapImg,
-        label: '종이 지도',
-        pastDesc: '종이로 된 지도로 주기적으로 길을 확인',
+        label: '지도',
+        pastDesc: '종이 지도를 주기적으로 확인하며 길 찾기',
         appIcon: naviImg,
         appName: '네비게이션',
         futureDesc: '실시간 교통정보 기반 최적 경로',
@@ -72,8 +79,8 @@ const ARTIFACTS = [
     {
         id: 'music',
         icon: headphoneImg,
-        label: '헤드폰',
-        pastDesc: 'LP와 CD로 즐기는 저장된 음악',
+        label: 'CD플레이어',
+        pastDesc: 'LP와 CD로 즐기는 정해진(또는 저장된) 음악',
         appIcon: musicImg,
         appName: '스트리밍',
         futureDesc: '전 세계 모든 음악을 실시간 감상',
@@ -154,7 +161,7 @@ const StageOne = ({ onComplete }) => {
                                 MISSION: 아날로그와 디지털 연결
                             </div>
                             <p className="text-base text-gray-300 max-w-xl leading-relaxed border-l-4 border-cyan-500 pl-6 py-2 bg-gradient-to-r from-cyan-900/20 to-transparent">
-                                "과거의 <strong className="text-white">아날로그 방식</strong>을 스마트폰에 있는 <strong className="text-cyan-400">대응하는 앱 아이콘</strong>으로 드래그하여 변환하십시오."
+                                "기존의 <strong className="text-white">아날로그 방식 아이콘</strong>을 변화한 디지털 방식의 <strong className="text-cyan-400">앱 아이콘</strong>으로 드래그 하십시오."
                             </p>
                         </div>
                     </div>
@@ -182,7 +189,7 @@ const StageOne = ({ onComplete }) => {
                             animate={{ x: 0, opacity: 1 }}
                             exit={{ x: -450, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                            className="absolute left-0 top-40 bottom-20 w-[450px] bg-black/90 border-r-2 border-cyan-500 p-10 z-50 text-cyan-50 shadow-[0_0_100px_rgba(6,182,212,0.3)] flex flex-col justify-between"
+                            className="absolute left-0 top-24 bottom-24 w-[450px] bg-black/90 border-r-2 border-cyan-500 p-10 z-50 text-cyan-50 shadow-[0_0_100px_rgba(6,182,212,0.3)] flex flex-col justify-between"
                         >
                             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                                 <div className="flex items-center justify-between mb-6 border-b-2 border-cyan-500/30 pb-4">
@@ -232,7 +239,7 @@ const StageOne = ({ onComplete }) => {
                             {/* CLOSE BUTTON */}
                             <button
                                 onClick={handleCloseModal}
-                                className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg tracking-widest text-sm transition-all shadow-lg hover:shadow-cyan-500/50 border border-cyan-300/30 flex items-center justify-center gap-2 group"
+                                className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg tracking-widest text-sm transition-all shadow-lg hover:shadow-cyan-500/50 border border-cyan-300/30 flex items-center justify-center gap-2 group mt-6"
                             >
                                 <span>CONFIRM & CLOSE</span>
                                 <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -250,25 +257,38 @@ const StageOne = ({ onComplete }) => {
                 <div className="absolute w-[600px] h-[600px] border border-cyan-500/10 rounded-full animate-[spin_20s_linear_infinite] pointer-events-none" />
                 <div className="absolute w-[500px] h-[500px] border border-dashed border-cyan-500/15 rounded-full animate-[spin_30s_linear_infinite_reverse] pointer-events-none" />
 
-                {/* DEVICE CONTAINER (Reduced Size) */}
+                {/* DEVICE CONTAINER (Slightly Wider for Bigger Icons) */}
                 <motion.div
                     id="phone-target"
                     animate={{ scale: digitized.length === ARTIFACTS.length ? 1.05 : 1 }}
-                    className="relative w-[320px] h-[650px] z-20 select-none bg-black rounded-[3rem] border-[6px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10"
+                    className="relative w-[340px] h-[680px] z-20 select-none bg-black rounded-[3.5rem] border-[6px] border-slate-800 shadow-[0_0_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10"
                 >
-                    {/* Device Screen */}
-                    <div id="phone-screen-area" className="w-full h-full bg-slate-900 rounded-[2.5rem] overflow-hidden relative flex flex-col border border-gray-700">
-                        {/* Dynamic Island */}
-                        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-8 bg-black rounded-full z-50 flex items-center justify-center z-50 border-b border-white/5">
-                            <div className="w-20 h-4 bg-[#0a0a0a] rounded-full" />
-                        </div>
+                    <div id="phone-screen-area" className="w-full h-full bg-slate-900 rounded-[3rem] overflow-hidden relative flex flex-col border border-gray-700">
+                        {/* Status Bar Area */}
+                        <div className="absolute top-0 w-full h-14 px-8 pt-5 flex justify-between items-start z-50 text-white font-medium">
+                            {/* Time */}
+                            <span className="text-sm tracking-wide font-semibold">9:41</span>
 
-                        {/* Status Bar */}
-                        <div className="h-14 w-full flex justify-between px-6 items-end pb-3 text-[10px] text-white/60 font-medium z-40 bg-gradient-to-b from-black/80 to-transparent">
-                            <span>AGENT_NET</span>
-                            <div className="flex gap-1.5 align-middle items-center">
-                                <span>100%</span>
-                                <div className="w-4 h-2 border border-white/30 rounded-sm relative"><div className="absolute inset-0.5 bg-white/80 rounded-xs w-[80%]" /></div>
+                            {/* Dynamic Island (Adjusted Width) */}
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-[90px] h-[30px] bg-black rounded-full flex items-center justify-end pr-4 shadow-lg border-b border-white/10">
+                                {/* Camera Lens */}
+                                <div className="w-2.5 h-2.5 rounded-full bg-[#1a1b26] ring-1 ring-white/5 shadow-inner" />
+                            </div>
+
+                            {/* Status Icons */}
+                            <div className="flex gap-2 items-center">
+                                <div className="flex gap-0.5 items-end h-3">
+                                    <div className="w-1 h-1.5 bg-white rounded-[1px]" />
+                                    <div className="w-1 h-2 bg-white rounded-[1px]" />
+                                    <div className="w-1 h-2.5 bg-white rounded-[1px]" />
+                                    <div className="w-1 h-3 bg-white/30 rounded-[1px]" />
+                                </div>
+                                <span className="text-[10px] font-bold">5G</span>
+                                {/* Battery */}
+                                <div className="w-6 h-3 border border-white/40 rounded-[4px] relative p-0.5 flex items-center">
+                                    <div className="h-full w-[60%] bg-white rounded-[1px]" />
+                                    <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-0.5 h-1.5 bg-white/40 rounded-r-sm" />
+                                </div>
                             </div>
                         </div>
 
@@ -277,15 +297,15 @@ const StageOne = ({ onComplete }) => {
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 z-0 mix-blend-overlay" />
 
                         {/* App Grid - Targets */}
-                        <div className="relative z-10 flex-1 p-5 grid grid-cols-2 gap-4 content-start pt-16 place-items-center">
+                        <div className="relative z-10 flex-1 p-6 grid grid-cols-2 gap-y-6 gap-x-4 content-start pt-24 place-items-center">
                             {ARTIFACTS.map(item => {
                                 const isDigitized = digitized.includes(item.id);
                                 return (
-                                    <div key={item.id} className="flex flex-col items-center gap-2 w-20">
-                                        <div className="relative w-16 h-16">
+                                    <div key={item.id} className="flex flex-col items-center gap-2 w-24">
+                                        <div className="relative w-24 h-24">
                                             {/* Placeholder (Empty Slot) */}
-                                            <div className={`absolute inset-0 rounded-[1.2rem] border-2 border-dashed border-white/10 bg-white/5 flex items-center justify-center transition-opacity duration-300 ${isDigitized ? 'opacity-0' : 'opacity-100'}`}>
-                                                <div className="text-[9px] text-white/20 font-mono text-center leading-tight p-1">
+                                            <div className={`absolute inset-0 rounded-[1.5rem] border-2 border-dashed border-white/10 bg-white/5 flex items-center justify-center transition-all duration-300 ${isDigitized ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`}>
+                                                <div className="text-[10px] text-white/20 font-mono text-center leading-tight p-1">
                                                     APP<br />SLOT
                                                 </div>
                                             </div>
@@ -297,14 +317,14 @@ const StageOne = ({ onComplete }) => {
                                                     scale: isDigitized ? 1 : 0.8,
                                                     opacity: isDigitized ? 1 : 0
                                                 }}
-                                                className="w-full h-full rounded-[1.2rem] bg-black/40 backdrop-blur-md shadow-2xl overflow-hidden border border-white/5 absolute inset-0 z-10"
+                                                className="w-full h-full rounded-[1.5rem] bg-black/40 backdrop-blur-md shadow-2xl overflow-hidden border border-white/10 absolute inset-0 z-10"
                                             >
                                                 <img src={item.appIcon} className="w-full h-full object-cover" />
                                             </motion.div>
                                         </div>
 
                                         {/* App Name */}
-                                        <span className={`text-[10px] text-gray-400 font-medium tracking-tight drop-shadow-md transition-colors ${isDigitized ? 'text-white opacity-100' : 'text-gray-600 opacity-50'}`}>
+                                        <span className={`text-sm text-center font-bold tracking-tight drop-shadow-md transition-colors duration-300 ${isDigitized ? 'text-white opacity-100' : 'text-gray-500 opacity-40'}`}>
                                             {item.appName}
                                         </span>
                                     </div>
@@ -312,11 +332,12 @@ const StageOne = ({ onComplete }) => {
                             })}
                         </div>
 
-                        {/* Dock */}
-                        <div className="relative z-10 h-20 mx-4 mb-5 bg-white/5 backdrop-blur-xl rounded-[2rem] flex justify-around items-center px-2 border border-white/5 shadow-lg">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="w-12 h-12 rounded-2xl bg-gray-800/40 border border-white/5" />
-                            ))}
+                        {/* Dock Info */}
+                        <div className="relative z-10 h-24 mx-5 mb-8 bg-white/5 backdrop-blur-xl rounded-[2.5rem] flex justify-around items-center px-4 gap-4 border border-white/5 shadow-lg">
+                            <div className="w-14 h-14 rounded-[1.2rem] overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer"><img src={dockPhone} className="w-full h-full object-cover" /></div>
+                            <div className="w-14 h-14 rounded-[1.2rem] overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer"><img src={dockChat} className="w-full h-full object-cover" /></div>
+                            <div className="w-14 h-14 rounded-[1.2rem] overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer"><img src={dockCamera} className="w-full h-full object-cover" /></div>
+                            <div className="w-14 h-14 rounded-[1.2rem] overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer"><img src={dockCalendar} className="w-full h-full object-cover" /></div>
                         </div>
                     </div>
                 </motion.div>
@@ -327,14 +348,14 @@ const StageOne = ({ onComplete }) => {
 
                     const positions = [
                         // Left Side
-                        { top: '20%', left: '8%', rotate: -15 },  // Top Left
-                        { top: '48%', left: '5%', rotate: 10 },   // Mid Left
-                        { bottom: '15%', left: '8%', rotate: 25 }, // Bottom Left
+                        { top: '30%', left: '15%', rotate: -15 },  // Top Left
+                        { top: '48%', left: '8%', rotate: 10 },   // Mid Left
+                        { bottom: '10%', left: '17%', rotate: 25 }, // Bottom Left
 
                         // Right Side
-                        { top: '20%', right: '8%', rotate: 15 },  // Top Right
-                        { top: '48%', right: '5%', rotate: -10 }, // Mid Right
-                        { bottom: '15%', right: '8%', rotate: -25 } // Bottom Right
+                        { top: '20%', right: '16%', rotate: 15 },  // Top Right
+                        { top: '48%', right: '7%', rotate: -10 }, // Mid Right
+                        { bottom: '15%', right: '18%', rotate: -25 } // Bottom Right
                     ];
                     const pos = positions[i] || { top: '50%', left: '50%' };
 
