@@ -11,6 +11,8 @@ import StepFour from './components/StepFour';
 import StepFiveMedieval from './components/StepFiveMedieval';
 import StepSix from './components/StepSix';
 
+import StepSeven from './components/StepSeven';
+
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [experimentResult, setExperimentResult] = useState(null);
@@ -28,7 +30,7 @@ function App() {
 
   return (
     <>
-      {currentStep !== 6 && (
+      {currentStep !== 6 && currentStep !== 7 && (
         <>
           <CyberBackground />
           <div className="scanlines" />
@@ -51,6 +53,7 @@ function App() {
             <option value={4}>Step 4: Result</option>
             <option value={5}>Step 5: Medieval Cafe</option>
             <option value={6}>Step 6: UI/UX Anatomy</option>
+            <option value={7}>Step 7: Final Exam</option>
           </select>
         </div>
 
@@ -103,7 +106,14 @@ function App() {
           {currentStep === 6 && (
             <StepSix
               key="step6"
-              onNext={() => alert("모든 과정 완료!")}
+              onNext={() => setCurrentStep(7)}
+            />
+          )}
+
+          {currentStep === 7 && (
+            <StepSeven
+              key="step7"
+              onNext={() => alert("All Missions Completed!")}
             />
           )}
         </AnimatePresence>
