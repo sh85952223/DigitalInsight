@@ -86,7 +86,7 @@ export default function StepSix({ onNext }) {
                 {/* Tutorial Sparkle */}
                 {tutorialStep === 0 && (
                     <motion.div
-                        className="absolute -right-6 -top-2 text-2xl filter drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]"
+                        className="absolute -right-6 -top-4 text-2xl filter drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]"
                         animate={{ scale: [1, 1.3, 1], rotate: [0, 15, -15, 0] }}
                         transition={{ repeat: Infinity, duration: 1.5 }}
                     >
@@ -103,6 +103,52 @@ export default function StepSix({ onNext }) {
         </header>
     );
 
+    // --- TUTORIAL TOOLTIP COMPONENT ---
+    const TutorialTooltip = () => {
+        if (tutorialStep >= 4) return null; // Updated to 4
+
+        const positions = {
+            0: { top: '18%', left: '10%', text: "1. 상단 로고를 눌러보세요!" }, // Pointing to Logo
+            1: { top: '48%', left: '25%', transform: 'translateX(-50%)', text: "2. 메인 카드를 눌러보세요!" }, // Pointing to Card
+            2: { bottom: '16%', left: '11%', transform: 'translateX(-50%)', text: "3. 메뉴 탭을 눌러보세요!" }, // Pointing to Menu Nav (Coffee Icon)
+            3: { top: '61%', right: '12%', text: "4. 주문 버튼을 눌러보세요!" } // New Step 3
+        };
+
+        const currentPos = positions[tutorialStep];
+
+        return (
+            <motion.div
+                className="absolute z-50 bg-[#f49d25] text-[#1c1917] px-4 py-2 rounded-xl font-bold shadow-xl border-2 border-white/20 whitespace-nowrap pointer-events-none"
+                style={currentPos}
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{
+                    opacity: 1,
+                    scale: 1,
+                    y: [0, -10, 0] // Bouncing 'Tong-tong' effect
+                }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{
+                    y: {
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    },
+                    default: { duration: 0.3 }
+                }}
+            >
+                {/* Speech Bubble Arrow - Adjusted for Step 3 */}
+                <div
+                    className={`absolute w-0 h-0 border-8 border-transparent 
+                        ${tutorialStep === 2 ? 'border-t-[#f49d25] -bottom-4 left-1/2 -translate-x-1/2' : ''}
+                        ${tutorialStep === 3 ? 'border-b-[#f49d25] -top-4 right-4' : ''}
+                        ${tutorialStep < 2 ? 'border-b-[#f49d25] -top-4 left-1/2 -translate-x-1/2' : ''}
+                    `}
+                />
+                {currentPos.text}
+            </motion.div>
+        );
+    };
+
     // Nav Bar
     const AppNavBar = () => (
         <nav
@@ -113,13 +159,13 @@ export default function StepSix({ onNext }) {
             onClick={() => {
                 setSelectedUI('nav');
                 setUxFlow(null);
-                if (tutorialStep === 2) setTutorialStep(3);
+                if (tutorialStep === 2) setTutorialStep(3); // Go directly to Step 3 (Order Button)
             }}
         >
             {/* Tutorial Sparkle for Nav */}
             {tutorialStep === 2 && (
                 <motion.div
-                    className="absolute left-1/2 -top-6 -translate-x-1/2 text-3xl filter drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]"
+                    className="absolute left-[45%] -top-2 -translate-x-1/2 text-3xl filter drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]"
                     animate={{ scale: [1, 1.3, 1], y: [0, -5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                 >
@@ -131,6 +177,7 @@ export default function StepSix({ onNext }) {
                 <IconHome className="w-7 h-7 group-hover:scale-110 transition-transform" />
                 <span className="text-[10px] tracking-wide font-medium">홈</span>
             </div>
+            {/* Target for Step 2 */}
             <div className={`flex flex-col items-center gap-1.5 group ${appView === 'menu' ? 'text-white' : 'text-[#9c9285]'}`} onClick={(e) => { e.stopPropagation(); setAppView('menu'); setSelectedUI('nav'); if (tutorialStep === 2) setTutorialStep(3); }}>
                 <IconCoffee className="w-7 h-7 group-hover:text-white transition-colors" />
                 <span className="text-[10px] tracking-wide font-medium">메뉴</span>
@@ -162,6 +209,11 @@ export default function StepSix({ onNext }) {
                     <div className="absolute bottom-0 left-0 right-0 h-[70vh] bg-[radial-gradient(circle_at_50%_120%,rgba(244,157,37,0.08)_0%,rgba(34,26,16,0)_70%)] pointer-events-none z-0"></div>
 
                     <AppHeader />
+
+                    {/* Floating Tutorial Tooltip */}
+                    <AnimatePresence>
+                        {tutorialStep < 4 && <TutorialTooltip key="tutorial-tooltip" />}
+                    </AnimatePresence>
 
                     <AnimatePresence mode="wait">
                         {appView === 'home' ? (
@@ -275,7 +327,21 @@ export default function StepSix({ onNext }) {
                                 </div>
 
                                 {/* Menu List Item 2 (Target) */}
-                                <div className={`w-full shrink-0 bg-[#231f1a]/80 rounded-xl border overflow-hidden flex gap-4 p-4 items-center group relative shadow-lg ${selectedUI === 'button' ? 'border-[#f49d25] ring-1 ring-[#f49d25]' : 'border-[#f49d25]/30'}`}>
+                                <div className={`w-full shrink-0 bg-[#231f1a]/80 rounded-xl border overflow-hidden flex gap-4 p-4 items-center group relative shadow-lg transition-all
+                                     ${selectedUI === 'button' ? 'border-[#f49d25] ring-1 ring-[#f49d25]' : 'border-[#f49d25]/30'}
+                                     ${tutorialStep === 3 ? 'ring-2 ring-white ring-offset-2 ring-offset-[#f49d25] animate-pulse z-50' : ''}
+                                `}>
+                                    {/* Tutorial Sparkle for Order Button */}
+                                    {tutorialStep === 3 && (
+                                        <motion.div
+                                            className="absolute right-2 bottom-9 text-3xl z-50 filter drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]"
+                                            animate={{ scale: [1, 1.3, 1], rotate: [0, 10, -10, 0] }}
+                                            transition={{ repeat: Infinity, duration: 1.5 }}
+                                        >
+                                            ✨
+                                        </motion.div>
+                                    )}
+
                                     <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=200&auto=format&fit=crop')` }}></div>
                                     <div className="flex-1">
                                         <h3 className="text-white font-bold text-base font-serif">Time Travel Latte</h3>
@@ -287,6 +353,7 @@ export default function StepSix({ onNext }) {
                                                 onClick={() => {
                                                     setSelectedUI('button');
                                                     setUxFlow('order');
+                                                    if (tutorialStep === 3) setTutorialStep(4);
                                                 }}
                                             >
                                                 주문
@@ -344,16 +411,6 @@ export default function StepSix({ onNext }) {
                 </div>
 
                 <div className="mt-8 flex gap-4 text-[#9c9285] text-sm font-medium bg-[#231f1a] px-6 py-3 rounded-full border border-white/10 shadow-xl items-center relative z-20">
-                    {/* Tutorial Tip */}
-                    {tutorialStep < 3 && (
-                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-max bg-[#f49d25] text-[#1c1917] px-4 py-2 rounded-full font-bold shadow-lg animate-bounce z-50">
-                            {tutorialStep === 0 && "1. 상단 로고를 눌러보세요!"}
-                            {tutorialStep === 1 && "2. 메인 카드를 눌러보세요!"}
-                            {tutorialStep === 2 && "3. 하단 메뉴를 눌러보세요!"}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-[#f49d25]"></div>
-                        </div>
-                    )}
-
                     <span className="flex items-center gap-2"><IconArrowForward className="w-4 h-4 -rotate-90 text-[#f49d25]" /> 위 화면을 조작하여 분석:</span>
                     <span className={`hover:text-[#f49d25] cursor-pointer transition-colors ${appView === 'home' ? 'text-[#f49d25] font-bold' : ''}`} onClick={() => setAppView('home')}>1. 홈</span>
                     <span className="text-[#555]">›</span>
