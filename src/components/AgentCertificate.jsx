@@ -19,9 +19,6 @@ export default function AgentCertificate({ onExit }) {
                 {/* Lanyard component is self-contained with its own Canvas */}
                 <Lanyard />
 
-                <div className="absolute bottom-8 left-0 w-full text-center text-cyan-500/40 text-sm tracking-widest font-mono pointer-events-none">
-                    명찰을 드래그해서 움직여보세요 // INTERACT
-                </div>
             </div>
 
             {/* RIGHT: CERTIFICATE UI */}

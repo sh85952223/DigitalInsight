@@ -1,314 +1,286 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, useSpring, useTransform } from 'framer-motion';
+import React from 'react';
 
 /**
  * Lanyard ID Card Component
- * Enhanced with connected strap and larger card.
+ * Realistic leather strap with metal D-ring and carabiner clip.
+ * Reference: White/gray leather strap with rivets style.
  */
-
 export default function Lanyard() {
-    const containerRef = useRef(null);
-    const canvasRef = useRef(null);
-    const animationRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-
-    // Card position state
-    const [cardCenter, setCardCenter] = useState({ x: 0, y: 0 });
-
-    // Spring physics for card movement
-    const springX = useSpring(0, { stiffness: 100, damping: 25 });
-    const springY = useSpring(0, { stiffness: 100, damping: 25 });
-
-    // Card rotation based on movement
-    const rotateZ = useTransform(springX, [-200, 200], [-8, 8]);
-    const rotateY = useTransform(springX, [-200, 200], [-5, 5]);
-    const rotateX = useTransform(springY, [-150, 150], [3, -3]);
-
-    // Rope points for smooth curve
-    const ropePointsRef = useRef([]);
-
-    useEffect(() => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        setCardCenter({ x: rect.width / 2, y: rect.height / 2 + 50 });
-
-        // Initialize rope points
-        const anchorX = rect.width / 2;
-        const anchorY = 0;
-        const cardTopY = rect.height / 2 - 40; // Card top position
-
-        ropePointsRef.current = [];
-        const segments = 12;
-        for (let i = 0; i <= segments; i++) {
-            const t = i / segments;
-            ropePointsRef.current.push({
-                x: anchorX,
-                y: anchorY + t * (cardTopY - anchorY),
-                vx: 0,
-                vy: 0
-            });
-        }
-    }, []);
-
-    // Canvas animation - draw connected strap
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-
-        const animate = () => {
-            if (!containerRef.current) {
-                animationRef.current = requestAnimationFrame(animate);
-                return;
-            }
-
-            const rect = containerRef.current.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-
-            const anchorX = rect.width / 2;
-            const anchorY = 0;
-
-            // Get current card position from spring
-            const cardX = anchorX + springX.get();
-            const cardTopY = 160 + springY.get(); // Top of card
-
-            // Update rope physics - points follow from anchor to card
-            const points = ropePointsRef.current;
-            if (points.length > 0) {
-                // First point fixed at anchor
-                points[0].x = anchorX;
-                points[0].y = anchorY;
-
-                // Last point follows card top
-                const lastIdx = points.length - 1;
-                const targetX = cardX;
-                const targetY = cardTopY;
-
-                // Smooth follow for last point
-                points[lastIdx].x += (targetX - points[lastIdx].x) * 0.3;
-                points[lastIdx].y += (targetY - points[lastIdx].y) * 0.3;
-
-                // Middle points follow with physics
-                for (let i = 1; i < lastIdx; i++) {
-                    const prev = points[i - 1];
-                    const next = points[i + 1];
-                    const curr = points[i];
-
-                    // Target position (average of neighbors with slight sag)
-                    const targetX = (prev.x + next.x) / 2;
-                    const targetY = (prev.y + next.y) / 2 + 2; // slight gravity sag
-
-                    // Smooth interpolation
-                    curr.vx = (targetX - curr.x) * 0.15;
-                    curr.vy = (targetY - curr.y) * 0.15;
-                    curr.x += curr.vx;
-                    curr.y += curr.vy;
-                }
-            }
-
-            // Clear and draw
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw lanyard strap (thick flat band)
-            if (points.length > 1) {
-                // Draw strap shadow
-                ctx.beginPath();
-                ctx.moveTo(points[0].x + 2, points[0].y + 2);
-                for (let i = 1; i < points.length; i++) {
-                    ctx.lineTo(points[i].x + 2, points[i].y + 2);
-                }
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-                ctx.lineWidth = 14;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.stroke();
-
-                // Draw main strap
-                ctx.beginPath();
-                ctx.moveTo(points[0].x, points[0].y);
-                for (let i = 1; i < points.length; i++) {
-                    ctx.lineTo(points[i].x, points[i].y);
-                }
-
-                // Gradient for strap
-                const gradient = ctx.createLinearGradient(0, 0, 0, cardTopY);
-                gradient.addColorStop(0, '#1e40af');
-                gradient.addColorStop(0.5, '#3b82f6');
-                gradient.addColorStop(1, '#1e40af');
-
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = 12;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.stroke();
-
-                // Draw center stripe pattern on strap
-                ctx.beginPath();
-                ctx.moveTo(points[0].x, points[0].y);
-                for (let i = 1; i < points.length; i++) {
-                    ctx.lineTo(points[i].x, points[i].y);
-                }
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Draw metal clip at end
-                const lastPoint = points[points.length - 1];
-
-                // Clip body
-                ctx.beginPath();
-                ctx.roundRect(lastPoint.x - 12, lastPoint.y - 5, 24, 20, 3);
-                ctx.fillStyle = '#94a3b8';
-                ctx.fill();
-                ctx.strokeStyle = '#64748b';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                // Clip hole
-                ctx.beginPath();
-                ctx.roundRect(lastPoint.x - 6, lastPoint.y + 5, 12, 8, 2);
-                ctx.fillStyle = '#475569';
-                ctx.fill();
-            }
-
-            animationRef.current = requestAnimationFrame(animate);
-        };
-
-        animate();
-
-        return () => {
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-        };
-    }, [springX, springY]);
-
-    const handleMouseMove = useCallback((e) => {
-        if (!isDragging || !containerRef.current) return;
-
-        const rect = containerRef.current.getBoundingClientRect();
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2 + 50;
-
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        // Limit movement range
-        const dx = Math.max(-180, Math.min(180, x - centerX));
-        const dy = Math.max(-100, Math.min(150, y - centerY));
-
-        springX.set(dx);
-        springY.set(dy);
-    }, [isDragging, springX, springY]);
-
-    const handleMouseDown = () => setIsDragging(true);
-
-    const handleMouseUp = useCallback(() => {
-        setIsDragging(false);
-        // Return to center with spring physics
-        springX.set(0);
-        springY.set(0);
-    }, [springX, springY]);
-
-    useEffect(() => {
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [handleMouseMove, handleMouseUp]);
-
     return (
-        <div
-            ref={containerRef}
-            className="w-full h-full relative select-none overflow-hidden"
-            style={{ perspective: '1500px' }}
-        >
-            {/* Canvas for lanyard strap */}
-            <canvas
-                ref={canvasRef}
-                className="absolute inset-0 pointer-events-none z-10"
-            />
+        <div className="w-full h-full flex flex-col items-center pt-0 select-none overflow-hidden">
+            {/* ===== LANYARD STRAP SECTION ===== */}
+            <div className="relative flex flex-col items-center">
 
-            {/* ID Card - LARGER SIZE with better proportions */}
-            <motion.div
-                onMouseDown={handleMouseDown}
-                className="absolute left-1/2 cursor-grab active:cursor-grabbing z-20"
-                style={{
-                    x: springX,
-                    y: springY,
-                    top: '175px',
-                    marginLeft: '-140px', // Half of card width
-                    rotateX,
-                    rotateY,
-                    rotateZ,
-                    transformStyle: 'preserve-3d'
-                }}
-            >
-                {/* Card: 280px x 400px (larger, taller ratio) */}
+                {/* Leather Strap - Going up (lighter gray/white leather) */}
                 <div
-                    className="w-70 rounded-2xl shadow-2xl overflow-hidden border-2 border-cyan-500/40"
+                    className="relative"
                     style={{
-                        width: '280px',
-                        height: '400px',
-                        background: 'linear-gradient(155deg, #050a15 0%, #0f1d32 35%, #0a1628 70%, #050a15 100%)',
-                        boxShadow: '0 40px 80px -20px rgba(0, 180, 255, 0.35), 0 0 60px rgba(0, 200, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.08)'
+                        width: '40px',
+                        height: '140px',
+                        background: 'linear-gradient(90deg, #030712 0%, #0a0f1a 20%, #111827 50%, #0a0f1a 80%, #030712 100%)',
+                        borderRadius: '4px',
+                        boxShadow: 'inset 3px 0 6px rgba(0,0,0,0.3), inset -3px 0 6px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.4)'
                     }}
                 >
-                    {/* Card Header */}
-                    <div className="h-14 bg-gradient-to-r from-cyan-700 via-cyan-500 to-cyan-700 flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.4)_50%,transparent_100%)] animate-pulse opacity-60" />
-                        <span className="text-sm font-black text-black tracking-[0.35em] relative z-10">DIGITAL INSIGHT</span>
-                    </div>
+                    {/* Stitching effect on edges */}
+                    <div className="absolute left-1 top-0 bottom-0 w-[2px] opacity-30"
+                        style={{ background: 'repeating-linear-gradient(180deg, transparent 0px, transparent 4px, #64748b 4px, #64748b 8px)' }}
+                    />
+                    <div className="absolute right-1 top-0 bottom-0 w-[2px] opacity-30"
+                        style={{ background: 'repeating-linear-gradient(180deg, transparent 0px, transparent 4px, #64748b 4px, #64748b 8px)' }}
+                    />
 
-                    {/* Photo Area */}
-                    <div className="flex justify-center mt-8">
-                        <div className="w-28 h-28 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-cyan-500/60 flex items-center justify-center text-6xl shadow-xl">
-                            🕵️
-                        </div>
+                    {/* Metal rivets/holes */}
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2">
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 border border-gray-500 shadow-md" />
                     </div>
-
-                    {/* Info */}
-                    <div className="p-6 text-center space-y-4 mt-2">
-                        <div className="text-xs text-cyan-400 tracking-[0.5em] font-bold">CERTIFIED AGENT</div>
-                        <div className="text-2xl font-black text-white tracking-tight">디지털 수사관</div>
-                        <div className="text-sm text-gray-400 tracking-wider font-mono">ID: DI-2026-0114</div>
-                        <div className="text-xs text-cyan-600/70 tracking-[0.3em] mt-2">LEVEL 7 CLEARANCE</div>
+                    <div className="absolute top-16 left-1/2 -translate-x-1/2">
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 border border-gray-500 shadow-md" />
                     </div>
-
-                    {/* Barcode */}
-                    <div className="absolute bottom-6 left-6 right-6">
-                        <div className="flex justify-center gap-0.5 h-10 opacity-80">
-                            {[...Array(30)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="bg-white/75 rounded-sm"
-                                    style={{ width: Math.random() > 0.5 ? '3px' : '2px' }}
-                                />
-                            ))}
-                        </div>
-                        <div className="text-[9px] text-center text-gray-500 mt-2 font-mono tracking-[0.25em]">★ AUTHORIZED ACCESS ★</div>
+                    <div className="absolute top-[100px] left-1/2 -translate-x-1/2">
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 border border-gray-500 shadow-md" />
                     </div>
+                </div>
 
-                    {/* Holographic Overlay */}
+                {/* Metal D-Ring / Swivel Ring */}
+                <div className="relative -mt-2 z-10">
+                    {/* Ring holder plate */}
                     <div
-                        className="absolute inset-0 pointer-events-none"
+                        className="w-12 h-5 rounded-md flex items-center justify-center"
                         style={{
-                            background: 'linear-gradient(135deg, transparent 25%, rgba(0, 220, 255, 0.06) 50%, transparent 75%)',
-                            backgroundSize: '400% 400%',
-                            animation: 'shimmer 5s infinite ease-in-out'
+                            background: 'linear-gradient(180deg, #d1d5db 0%, #9ca3af 40%, #6b7280 100%)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5)'
+                        }}
+                    >
+                        <div className="w-8 h-2 rounded-sm bg-gradient-to-b from-gray-500 to-gray-600" />
+                    </div>
+
+                    {/* D-Ring */}
+                    <div className="flex justify-center -mt-1">
+                        <div
+                            className="w-8 h-6 rounded-b-full border-[4px] border-gray-500"
+                            style={{
+                                background: 'linear-gradient(180deg, #9ca3af 0%, #6b7280 100%)',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.4), inset 0 -1px 2px rgba(0,0,0,0.3)'
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Carabiner / Lobster Claw Clip */}
+                <div className="relative -mt-2 z-20">
+                    {/* Clip body */}
+                    <div className="flex flex-col items-center">
+                        {/* Top connector ring */}
+                        <div
+                            className="w-4 h-4 rounded-full border-[3px]"
+                            style={{
+                                borderColor: '#6b7280',
+                                background: 'linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%)'
+                            }}
+                        />
+
+                        {/* Clip main body */}
+                        <div
+                            className="w-5 h-10 -mt-1 rounded-b-lg relative"
+                            style={{
+                                background: 'linear-gradient(90deg, #6b7280 0%, #9ca3af 30%, #d1d5db 50%, #9ca3af 70%, #6b7280 100%)',
+                                boxShadow: '0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                            }}
+                        >
+                            {/* Spring lever */}
+                            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-6 bg-gradient-to-b from-gray-400 to-gray-500 rounded-sm" />
+                        </div>
+
+                        {/* Clip hook */}
+                        <div
+                            className="w-6 h-4 -mt-1 relative"
+                            style={{
+                                background: 'linear-gradient(180deg, #9ca3af 0%, #6b7280 100%)',
+                                borderRadius: '0 0 8px 8px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                            }}
+                        >
+                            {/* Hook curve */}
+                            <div
+                                className="absolute -bottom-2 left-0 w-3 h-4 rounded-bl-full border-l-[3px] border-b-[3px] border-gray-500"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Small ring connecting to card */}
+                <div className="mt-1">
+                    <div
+                        className="w-5 h-5 rounded-full border-[3px]"
+                        style={{
+                            borderColor: '#6b7280',
+                            background: 'radial-gradient(circle at 30% 30%, #f1f5f9, #9ca3af)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
                         }}
                     />
                 </div>
-            </motion.div>
+            </div>
 
-            {/* CSS Animation */}
+            {/* ===== ID CARD ===== */}
+            <div
+                className="relative rounded-2xl overflow-hidden mt-1 flex flex-col"
+                style={{
+                    width: '300px',
+                    height: '440px',
+                    background: 'linear-gradient(165deg, #020617 0%, #0c1929 30%, #0f172a 60%, #020617 100%)',
+                    boxShadow: '0 30px 60px -15px rgba(0, 150, 255, 0.3), 0 0 50px rgba(0, 200, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(6, 182, 212, 0.3)'
+                }}
+            >
+                {/* Card hole for clip attachment */}
+                <div className="flex justify-center pt-3 pb-2">
+                    <div
+                        className="w-6 h-4 rounded-full"
+                        style={{
+                            background: 'linear-gradient(180deg, #0a0a0a, #1a1a1a)',
+                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.05)'
+                        }}
+                    />
+                </div>
+
+                {/* Header Band */}
+                <div
+                    className="h-14 flex items-center overflow-hidden relative"
+                    style={{
+                        background: 'linear-gradient(90deg, #0891b2 0%, #06b6d4 30%, #22d3ee 50%, #06b6d4 70%, #0891b2 100%)'
+                    }}
+                >
+                    <div className="animate-marquee whitespace-nowrap flex">
+                        <span className="text-base font-black text-black tracking-[0.4em] mx-8">DIGITAL INSIGHT</span>
+                        <span className="text-base font-black text-black tracking-[0.4em] mx-8">★</span>
+                        <span className="text-base font-black text-black tracking-[0.4em] mx-8">DIGITAL INSIGHT</span>
+                        <span className="text-base font-black text-black tracking-[0.4em] mx-8">★</span>
+                        <span className="text-base font-black text-black tracking-[0.4em] mx-8">DIGITAL INSIGHT</span>
+                        <span className="text-base font-black text-black tracking-[0.4em] mx-8">★</span>
+                    </div>
+                </div>
+
+                {/* Photo Area */}
+                <div className="flex justify-center py-5">
+                    <div
+                        className="w-24 h-24 rounded-xl flex items-center justify-center text-5xl"
+                        style={{
+                            background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+                            border: '2px solid rgba(6, 182, 212, 0.5)',
+                            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5), 0 0 20px rgba(6, 182, 212, 0.2)'
+                        }}
+                    >
+                        🕵️
+                    </div>
+                </div>
+
+                {/* Info Section */}
+                <div className="px-8 text-center">
+                    <div className="text-[11px] text-cyan-400 tracking-[0.5em] font-bold mb-1">CERTIFIED AGENT</div>
+                    <div className="text-2xl font-black text-white tracking-tight">디지털 수사관</div>
+                </div>
+
+                {/* ID and Clearance Row */}
+                <div className="mx-6 mt-5 flex justify-between items-center py-3 border-t border-b border-gray-800">
+                    <div>
+                        <div className="text-[10px] text-gray-500 tracking-wider">ID NUMBER</div>
+                        <div className="text-sm text-gray-300 font-mono">DI-2026-0114</div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-[10px] text-gray-500 tracking-wider">CLEARANCE</div>
+                        <div className="text-sm text-cyan-400 font-bold">LEVEL 1</div>
+                    </div>
+                </div>
+
+                {/* Spacer */}
+                <div className="flex-grow" />
+
+                {/* Barcode Section - pushed to very bottom */}
+                <div className="px-6 pb-8 mt-4">
+                    <div className="flex justify-center gap-[2px] h-9 mb-2">
+                        {[...Array(35)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="bg-white/80 rounded-[1px]"
+                                style={{
+                                    width: [1, 2, 3, 2, 1][i % 5] + 'px',
+                                    height: '100%'
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className="text-[10px] text-center text-gray-500 font-mono tracking-[0.3em]">★ AUTHORIZED ACCESS ★</div>
+                </div>
+
+                {/* Holographic Effect - Rainbow gradient */}
+                <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                        background: `linear-gradient(
+                            130deg,
+                            transparent 0%,
+                            rgba(255, 0, 150, 0.08) 15%,
+                            rgba(0, 255, 255, 0.12) 30%,
+                            transparent 45%,
+                            rgba(120, 0, 255, 0.1) 60%,
+                            rgba(0, 255, 100, 0.1) 75%,
+                            rgba(255, 200, 0, 0.08) 90%,
+                            transparent 100%
+                        )`,
+                        backgroundSize: '300% 300%',
+                        animation: 'hologram 4s ease-in-out infinite'
+                    }}
+                />
+
+                {/* Holographic shine sweep */}
+                <div
+                    className="absolute inset-0 pointer-events-none overflow-hidden"
+                    style={{
+                        background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)',
+                        backgroundSize: '200% 200%',
+                        animation: 'shine 3s ease-in-out infinite'
+                    }}
+                />
+
+                {/* Light flare effect */}
+                <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                        background: 'radial-gradient(circle at 70% 20%, rgba(0, 255, 255, 0.15) 0%, transparent 40%)',
+                        animation: 'flare 5s ease-in-out infinite'
+                    }}
+                />
+
+                {/* Corner accents */}
+                <div className="absolute top-[75px] left-2 w-3 h-3 border-l-2 border-t-2 border-cyan-500/30" />
+                <div className="absolute top-[75px] right-2 w-3 h-3 border-r-2 border-t-2 border-cyan-500/30" />
+                <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-cyan-500/30" />
+                <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-cyan-500/30" />
+            </div>
+
+            {/* CSS Animations */}
             <style>{`
-                @keyframes shimmer {
-                    0%, 100% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
+                @keyframes hologram {
+                    0%, 100% { background-position: 0% 0%; opacity: 0.6; }
+                    25% { background-position: 50% 100%; opacity: 0.9; }
+                    50% { background-position: 100% 50%; opacity: 0.7; }
+                    75% { background-position: 50% 0%; opacity: 0.85; }
+                }
+                @keyframes shine {
+                    0%, 100% { background-position: -100% 0%; }
+                    50% { background-position: 200% 0%; }
+                }
+                @keyframes flare {
+                    0%, 100% { opacity: 0.3; transform: scale(1); }
+                    50% { opacity: 0.8; transform: scale(1.2); }
+                }
+                @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+                .animate-marquee {
+                    animation: marquee 8s linear infinite;
                 }
             `}</style>
         </div>
