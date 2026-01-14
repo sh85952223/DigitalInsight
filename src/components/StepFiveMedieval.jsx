@@ -234,13 +234,13 @@ export default function StepFiveMedieval({ onNext }) {
                                     </div>
                                 </div>
                                 <h2 className="text-3xl font-bold mb-6 text-white font-display">
-                                    "그러나, 보기 좋은 디자인(UI)이<br />반드시 좋은 경험(UX)은 아닙니다."
+                                    "보여지는 디자인 설계(UI)와<br />느끼게 하는 경험(UX)의 설계."
                                 </h2>
                                 <button
                                     onClick={() => startAgentReveal()} // DIRECTLY START AGENT REVEAL HERE
                                     className="mt-8 px-10 py-4 bg-white text-black font-black text-xl hover:scale-105 transition-transform rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)]"
                                 >
-                                    진실 마주하기 ⚡
+                                    조금 더 파헤치기 ⚡
                                 </button>
                             </motion.div>
                         )}
@@ -250,27 +250,41 @@ export default function StepFiveMedieval({ onNext }) {
         );
     };
 
-    // --- AGENT REVEAL SEQUENCE (Updated to be triggered from Acronym Lab) ---
+    // --- AGENT REVEAL SEQUENCE (Refined) ---
     const startAgentReveal = async () => {
-        // 1. Initial Glitch
+        // 1. Initial Glitch & Shopkeeper Vanish
         setPhase('agent_reveal');
         setDialogue(null);
 
-        // Glitch Animation Loop
         let intensity = 0;
+        // Start Glitching
         const glitchInterval = setInterval(() => {
-            intensity = Math.random() * 10;
+            intensity = Math.random() * 20; // Stronger glitch
             setGlitchIntensity(intensity);
         }, 50);
 
-        await new Promise(r => setTimeout(r, 1500)); // Wait for glitch to build up
-
-        // 2. Character Swap & Glitch Stop
-        setCurrentSpeakerImg(agentImage);
+        // Fade out Shopkeeper while glitching
+        await new Promise(r => setTimeout(r, 1000));
+        setCurrentSpeakerImg(null); // Remove Shopkeeper
+        setGlitchIntensity(0);
         clearInterval(glitchInterval);
+
+        // 2. Brief Pause (Empty)
+        await new Promise(r => setTimeout(r, 800));
+
+        // 3. Agent Appear (Glitch In)
+        setCurrentSpeakerImg(agentImage);
+
+        // Short Glitch for entry
+        const entryGlitch = setInterval(() => {
+            setGlitchIntensity(Math.random() * 10);
+        }, 50);
+
+        await new Promise(r => setTimeout(r, 500));
+        clearInterval(entryGlitch);
         setGlitchIntensity(0);
 
-        // 3. Agent Dialogue 1
+        // 4. Agent Dialogue 1
         setDialogue({
             speaker: "???",
             text: "놀라셨습니까, 요원?",
@@ -278,20 +292,20 @@ export default function StepFiveMedieval({ onNext }) {
             onAction: () => {
                 setDialogue({
                     speaker: "교관",
-                    text: "방금 보셨듯이, 보기 좋은 'UI'에만 현혹되면 불편한 'UX'를 겪게 됩니다.\n좋은 설계자는 그 둘의 균형을 완벽하게 다루죠.", // Slightly updated text contextually
-                    actionLabel: "정신 차리기",
+                    text: "디지털 환경, 특히 우리가 매일 쓰는 스마트폰에서 UI와 UX를 빼고 이야기 할 순 없습니다.\n요원으로 한 단계 성장을 위해 실제 APP에서도 살펴보죠.",
+                    actionLabel: "실제 APP에서 느껴보기",
                     onAction: () => {
-                        // 4. Snap Action
+                        // 5. Snap Action
                         setDialogue(null);
-                        setIsSnapEffect(true); // Trigger snap visual/sound effect
+                        setIsSnapEffect(true);
 
                         setTimeout(() => {
-                            // 5. Final Line & Exit
+                            // 6. Final Line & Exit
                             setDialogue({
                                 speaker: "교관",
-                                text: "(손가락을 딱 튕기며)\n이제 그 균형의 원리를 직접 해부해 봅시다.",
+                                text: "(손가락을 딱 튕기며)\n이제 그 APP에서 UI와 UX를 직접 해부해 봅시다.",
                                 actionLabel: "분석실로 이동",
-                                onAction: onNext // Go to Step 6
+                                onAction: onNext
                             });
                         }, 1000);
                     }
@@ -407,7 +421,7 @@ export default function StepFiveMedieval({ onNext }) {
             {/* --- CHARACTER SPRITE --- */}
             <AnimatePresence>
                 {/* Only show character in non-lab phases or valid speakers */}
-                {phase !== 'acronym_lab' && (dialogue?.speaker === "점원" || dialogue?.speaker === "???" || dialogue?.speaker === "교관") && (
+                {phase !== 'acronym_lab' && currentSpeakerImg && (dialogue?.speaker === "점원" || dialogue?.speaker === "???" || dialogue?.speaker === "교관" || phase === 'agent_reveal') && (
                     <motion.div
                         initial={{ opacity: 0, x: -50, scale: 0.9 }}
                         animate={{
@@ -438,7 +452,7 @@ export default function StepFiveMedieval({ onNext }) {
                 {dialogue && phase !== 'acronym_lab' && phase !== 'transition_in' && !isSnapEffect && (
                     <motion.div
                         className={`absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl border-2 rounded-xl p-6 z-50 shadow-2xl safe-area-bottom backdrop-blur-sm
-                            ${dialogue.speaker === "교관" ? 'bg-slate-900/90 border-cyan-500' : 'bg-black/80 border-amber-800'}
+                            ${(dialogue.speaker === "교관" || dialogue.speaker === "???") ? 'bg-slate-900/90 border-cyan-500' : 'bg-black/80 border-amber-800'}
                         `}
                         initial={{ y: 50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -447,10 +461,10 @@ export default function StepFiveMedieval({ onNext }) {
                         <div className="flex gap-6">
                             {/* Avatar / Speaker Name */}
                             <div className={`w-24 flex flex-col items-center justify-center border-r pr-6
-                                ${dialogue.speaker === "교관" ? 'border-cyan-500/50' : 'border-amber-800/50'}
+                                ${(dialogue.speaker === "교관" || dialogue.speaker === "???") ? 'border-cyan-500/50' : 'border-amber-800/50'}
                             `}>
                                 <div className={`font-bold font-display text-xl mb-2
-                                    ${dialogue.speaker === "교관" ? 'text-cyan-400' : 'text-amber-500'}
+                                    ${(dialogue.speaker === "교관" || dialogue.speaker === "???") ? 'text-cyan-400' : 'text-amber-500'}
                                 `}>{dialogue.speaker}</div>
                             </div>
 
@@ -465,7 +479,7 @@ export default function StepFiveMedieval({ onNext }) {
                                         <button
                                             onClick={dialogue.onAction}
                                             className={`px-6 py-2 rounded border transition-colors flex items-center gap-2
-                                                ${dialogue.speaker === "교관"
+                                                ${(dialogue.speaker === "교관" || dialogue.speaker === "???")
                                                     ? 'bg-cyan-900 hover:bg-cyan-800 text-cyan-100 border-cyan-600'
                                                     : 'bg-amber-900 hover:bg-amber-800 text-amber-100 border-amber-600'}
                                             `}
