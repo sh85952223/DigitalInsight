@@ -2,17 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Typewriter from './Typewriter';
 
-// 에셋 (실제 경로가 맞는지 확인 필요)
+// 에셋
 import bgImage from '../assets/medieval_cafe.jpg';
 import menuImage from '../assets/menu_book.jpg';
 import rugImage from '../assets/ancient_rug.jpg';
 import chandelierImage from '../assets/chandelier.png';
+import shopkeeperImage from '../assets/shopkeeper.png'; // PNG
+import agentImage from '../assets/agent_instructor.png'; // New Agent Image
 
 export default function StepFiveMedieval({ onNext }) {
-    const [phase, setPhase] = useState('prologue'); // prologue -> transition_in -> entry -> explore...
+    const [phase, setPhase] = useState('prologue'); // prologue -> transition_in -> entry -> explore -> experience -> agent_reveal
     const [dialogue, setDialogue] = useState(null);
-    const [inspectedItems, setInspectedItems] = useState([]); // 'menu', 'chandelier', 'rug'
+    const [inspectedItems, setInspectedItems] = useState([]);
     const [showOverlay, setShowOverlay] = useState(false);
+
+    // Agent Reveal specific states
+    const [glitchIntensity, setGlitchIntensity] = useState(0);
+    const [currentSpeakerImg, setCurrentSpeakerImg] = useState(shopkeeperImage);
+    const [isSnapEffect, setIsSnapEffect] = useState(false);
 
     // --- PHASE MANAGEMENT ---
     useEffect(() => {
@@ -24,11 +31,19 @@ export default function StepFiveMedieval({ onNext }) {
                     text: "딸랑~ (종소리)\n\n어서 오세요, 여행자님! 바깥 날씨가 많이 춥죠? \n따뜻한 난로가 있는 안쪽 자리로 안내해 드릴게요.",
                     actionLabel: "안내에 따라 이동하기",
                     onAction: () => {
-                        // 페이드 아웃 효과 후 explore로 전환
-                        setDialogue(null); // 대화창 숨김
-                        setTimeout(() => {
-                            setPhase('explore');
-                        }, 500);
+                        // [NEW] 내 마음 속 생각 추가
+                        setDialogue({
+                            speaker: "나",
+                            text: "(중세 분위기 나는 카페 정말 와보고 싶었는데! 진짜 중세처럼 연기해주시니까 느낌 완전 사네~)",
+                            actionLabel: "안쪽으로 이동하기",
+                            onAction: () => {
+                                // 페이드 아웃 효과 후 explore로 전환
+                                setDialogue(null); // 대화창 숨김
+                                setTimeout(() => {
+                                    setPhase('explore');
+                                }, 500);
+                            }
+                        });
                     }
                 });
             }, 3500); // 3.5초간 진입 연출
@@ -36,7 +51,7 @@ export default function StepFiveMedieval({ onNext }) {
         }
     }, [phase]);
 
-    // 아이템 다 찾았을 때 효과 (자동진행 X, 버튼 표시용 상태 업데이트 등은 렌더링에서 처리)
+    // 아이템 다 찾았을 때 효과 (자동진행 X)
     const allItemsFound = inspectedItems.includes('menu') && inspectedItems.includes('chandelier') && inspectedItems.includes('rug');
 
     // --- HANDLERS ---
@@ -59,7 +74,7 @@ export default function StepFiveMedieval({ onNext }) {
             setShowOverlay(chandelierImage);
             setDialogue({
                 speaker: "나",
-                text: "(천장을 올려다본다)\n은은한 촛불 샹들리에가 카페 전체를 따뜻하게 감싸고 있어.\n너무 화려하지 않고 아늑한 느낌이야.",
+                text: "(천장을 올려다본다)\n진짜 촛불인가? 은은한 촛불 샹들리에가 카페 전체를 따뜻하게 감싸고 있어.\n너무 화려하지 않고 인테리어에 잘 녹아들었네.",
                 actionLabel: "시선 거두기",
                 onAction: () => { setShowOverlay(null); setDialogue(null); }
             });
@@ -67,15 +82,15 @@ export default function StepFiveMedieval({ onNext }) {
             setShowOverlay(rugImage);
             setDialogue({
                 speaker: "나",
-                text: "(바닥을 내려다본다)\n오래된 양탄자인데 문양이나 색감이 카페 분위기랑 찰떡이야.\n공간을 꽉 채워주는 느낌이네.",
-                actionLabel: "일어나기",
+                text: "(바닥을 내려다본다)\n오래된 양탄자같은 문양이나 색감이 중세 카페 분위기랑 찰떡이야.\n공간을 꽉 채워주는 느낌이군.",
+                actionLabel: "시선 거두기",
                 onAction: () => { setShowOverlay(null); setDialogue(null); }
             });
         }
     };
 
     const startExperience = () => {
-        setPhase('conclusion');
+        setPhase('experience');
 
         const sequence = async () => {
             setDialogue({
@@ -83,7 +98,7 @@ export default function StepFiveMedieval({ onNext }) {
                 text: "그럼 이제 주문을 해볼까요? 메뉴판을 다시 자세히 봐주세요.",
                 actionLabel: null
             });
-            await new Promise(r => setTimeout(r, 4000));
+            await new Promise(r => setTimeout(r, 2500));
 
             setShowOverlay(menuImage);
             setDialogue({
@@ -95,8 +110,8 @@ export default function StepFiveMedieval({ onNext }) {
                     setDialogue({
                         speaker: "나",
                         text: "하지만 발에 닿는 양탄자의 감촉은 정말 푹신하고 따뜻해.\n차가웠던 몸이 녹는 기분이야... 계속 머물고 싶어.",
-                        actionLabel: "깨달음 얻기",
-                        onAction: () => setPhase('acronym_lab')
+                        actionLabel: "계속 머무르기...",
+                        onAction: () => startAcronymLab() // Trigger Acronym Lab
                     });
                 }
             });
@@ -104,29 +119,212 @@ export default function StepFiveMedieval({ onNext }) {
         sequence();
     };
 
-    useEffect(() => {
-        if (phase === 'experience') {
-            startExperience();
-        }
-    }, [phase]);
+    // --- ACRONYM LAB SEQUENCE (Restored) ---
+    const startAcronymLab = () => {
+        setPhase('acronym_lab');
+        setDialogue(null);
+        setShowOverlay(null);
+    };
+
+    // Acronym Lab Render Logic
+    const AcronymLab = () => {
+        const [step, setStep] = useState(0); // 0: Start, 1: U, 2: I, 3: X, 4: Combine, 5: End
+
+        useEffect(() => {
+            if (step === 0) {
+                setTimeout(() => setStep(1), 1000);
+            }
+        }, [step]);
+
+        // Handlers for manual progression
+        const nextStep = () => {
+            if (step < 4) setStep(step + 1);
+            else {
+                // End of Lab -> Trigger Agent Reveal
+                startAgentReveal();
+            }
+        };
+
+        return (
+            <div className="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center text-white">
+                {/* Background Dim */}
+                <div className="absolute inset-0 bg-neutral-900 opacity-90"></div>
+
+                {/* Content Container */}
+                <div className="relative z-10 text-center max-w-4xl px-8">
+                    <AnimatePresence mode="wait">
+
+                        {/* STEP 1: U (User) */}
+                        {step === 1 && (
+                            <motion.div
+                                key="u"
+                                initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
+                                className="flex flex-col items-center"
+                            >
+                                <div className="text-9xl font-black text-cyan-500 mb-4 drop-shadow-[0_0_30px_rgba(6,182,212,0.6)] font-mono">U</div>
+                                <h2 className="text-4xl font-bold mb-6 font-display">User <span className="text-gray-400 text-2xl">(사용자)</span></h2>
+                                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl font-ui">
+                                    서비스나 제품을 이용하는 <span className="text-white font-bold">주체</span>.<br />
+                                    방금 카페에서 메뉴를 보고, 샹들리에를 보고, 양탄자를 느꼈던<br />
+                                    <span className="text-cyan-400 font-bold border-b border-cyan-500">바로 당신</span>입니다.
+                                </p>
+                                <button onClick={nextStep} className="mt-12 px-8 py-3 bg-cyan-900/50 hover:bg-cyan-800 border border-cyan-500 rounded text-cyan-300 transition-all font-bold">
+                                    다음 (Next) ▶
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* STEP 2: I (Interface) */}
+                        {step === 2 && (
+                            <motion.div
+                                key="i"
+                                initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
+                                className="flex flex-col items-center"
+                            >
+                                <div className="text-9xl font-black text-violet-500 mb-4 drop-shadow-[0_0_30px_rgba(139,92,246,0.6)] font-mono">I</div>
+                                <h2 className="text-4xl font-bold mb-6 font-display">Interface <span className="text-gray-400 text-2xl">(접점)</span></h2>
+                                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl font-ui">
+                                    사용자와 시스템이 만나는 <span className="text-white font-bold">경계</span>.<br />
+                                    <span className="text-violet-400 font-bold">예쁜 메뉴판 글씨</span>, <span className="text-violet-400 font-bold">화려한 샹들리에</span> 등<br />
+                                    눈에 보이는 모든 <span className="font-bold border-b border-violet-500">디자인 요소</span>들입니다.
+                                </p>
+                                <button onClick={nextStep} className="mt-12 px-8 py-3 bg-violet-900/50 hover:bg-violet-800 border border-violet-500 rounded text-violet-300 transition-all font-bold">
+                                    다음 (Next) ▶
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* STEP 3: X (Experience) */}
+                        {step === 3 && (
+                            <motion.div
+                                key="x"
+                                initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }}
+                                className="flex flex-col items-center"
+                            >
+                                <div className="text-9xl font-black text-green-500 mb-4 drop-shadow-[0_0_30px_rgba(34,197,94,0.6)] font-mono">X</div>
+                                <h2 className="text-4xl font-bold mb-6 font-display">Experience <span className="text-gray-400 text-2xl">(경험)</span></h2>
+                                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl font-ui">
+                                    사용자가 디자인을 통해 얻는 <span className="text-white font-bold">경험</span>.<br />
+                                    메뉴판이 <span className="font-bold text-red-400">읽기 어려웠던 불편함</span>,<br />
+                                    양탄자가 <span className="font-bold text-green-400">따뜻했던 편안함</span>.<br />
+                                    그 <span className="font-bold border-b border-green-500">모든 감정과 기억</span>입니다.
+                                </p>
+                                <button onClick={nextStep} className="mt-12 px-8 py-3 bg-green-900/50 hover:bg-green-800 border border-green-500 rounded text-green-300 transition-all font-bold">
+                                    다음 (Next) ▶
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* STEP 4: Summary (UI vs UX) */}
+                        {step === 4 && (
+                            <motion.div
+                                key="summary"
+                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }}
+                                className="flex flex-col items-center"
+                            >
+                                <div className="flex gap-12 mb-8 items-center">
+                                    <div className="text-center">
+                                        <div className="text-6xl font-black text-violet-500 mb-2">UI</div>
+                                        <div className="text-sm text-gray-400">보이는 것 (Design)</div>
+                                    </div>
+                                    <div className="text-2xl text-gray-600 font-bold">vs</div>
+                                    <div className="text-center">
+                                        <div className="text-6xl font-black text-green-500 mb-2">UX</div>
+                                        <div className="text-sm text-gray-400">느끼는 것 (Feeling)</div>
+                                    </div>
+                                </div>
+                                <h2 className="text-3xl font-bold mb-6 text-white font-display">
+                                    "그러나, 보기 좋은 디자인(UI)이<br />반드시 좋은 경험(UX)은 아닙니다."
+                                </h2>
+                                <button
+                                    onClick={() => startAgentReveal()} // DIRECTLY START AGENT REVEAL HERE
+                                    className="mt-8 px-10 py-4 bg-white text-black font-black text-xl hover:scale-105 transition-transform rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                                >
+                                    진실 마주하기 ⚡
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
+        );
+    };
+
+    // --- AGENT REVEAL SEQUENCE (Updated to be triggered from Acronym Lab) ---
+    const startAgentReveal = async () => {
+        // 1. Initial Glitch
+        setPhase('agent_reveal');
+        setDialogue(null);
+
+        // Glitch Animation Loop
+        let intensity = 0;
+        const glitchInterval = setInterval(() => {
+            intensity = Math.random() * 10;
+            setGlitchIntensity(intensity);
+        }, 50);
+
+        await new Promise(r => setTimeout(r, 1500)); // Wait for glitch to build up
+
+        // 2. Character Swap & Glitch Stop
+        setCurrentSpeakerImg(agentImage);
+        clearInterval(glitchInterval);
+        setGlitchIntensity(0);
+
+        // 3. Agent Dialogue 1
+        setDialogue({
+            speaker: "???",
+            text: "놀라셨습니까, 요원?",
+            actionLabel: "누...구세요?",
+            onAction: () => {
+                setDialogue({
+                    speaker: "교관",
+                    text: "방금 보셨듯이, 보기 좋은 'UI'에만 현혹되면 불편한 'UX'를 겪게 됩니다.\n좋은 설계자는 그 둘의 균형을 완벽하게 다루죠.", // Slightly updated text contextually
+                    actionLabel: "정신 차리기",
+                    onAction: () => {
+                        // 4. Snap Action
+                        setDialogue(null);
+                        setIsSnapEffect(true); // Trigger snap visual/sound effect
+
+                        setTimeout(() => {
+                            // 5. Final Line & Exit
+                            setDialogue({
+                                speaker: "교관",
+                                text: "(손가락을 딱 튕기며)\n이제 그 균형의 원리를 직접 해부해 봅시다.",
+                                actionLabel: "분석실로 이동",
+                                onAction: onNext // Go to Step 6
+                            });
+                        }, 1000);
+                    }
+                });
+            }
+        });
+    };
 
 
     // --- RENDER ---
     return (
         <div className="w-full h-screen bg-black relative overflow-hidden font-ui">
-            {/* Background Layer */}
+            {/* Background Layer (Fades out on Snap) */}
             <motion.div
                 className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${bgImage})` }}
-                initial={{ opacity: 0, scale: 1.1 }}
                 animate={{
-                    opacity: phase === 'acronym_lab' ? 0.2 : 1,
-                    scale: 1,
-                    // explore 단계에서는 선명하게, 그 외에는 약간 흐리게
-                    filter: (phase === 'explore' || phase === 'experience') ? 'blur(0px) brightness(1)' : 'blur(4px) brightness(0.6)'
+                    opacity: isSnapEffect ? 0 : (phase === 'agent_reveal' || phase === 'acronym_lab' ? 0.3 : 1),
+                    scale: isSnapEffect ? 1.5 : 1,
+                    filter: (phase === 'explore' || phase === 'experience') ? 'blur(0px)' : 'blur(4px)'
                 }}
-                transition={{ duration: 1.5 }}
+                transition={{ duration: isSnapEffect ? 0.5 : 1.5 }}
             />
+
+            {/* Snap Flash Effect */}
+            {isSnapEffect && (
+                <motion.div
+                    className="absolute inset-0 bg-white z-[100]"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                />
+            )}
 
             {/* Hint Text */}
             <AnimatePresence>
@@ -161,38 +359,31 @@ export default function StepFiveMedieval({ onNext }) {
                             `}
                         </style>
 
-                        {/* Chandelier Area (Top Left) */}
+                        {/* Chandelier Area */}
                         <motion.div
                             className="absolute top-[5%] left-[10%] w-80 h-64 cursor-pointer z-10 flex items-center justify-center group"
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => handleInspect('chandelier')}
                         >
-                            {/* Dramatic Glow & Icon */}
                             <div className="absolute text-4xl animate-bounce drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">✨</div>
                             <div className="w-8 h-8 bg-yellow-400/50 rounded-full blur-sm interaction-cue group-hover:bg-yellow-200/80 transition-all duration-300" />
-                            <div className="absolute inset-0 bg-yellow-500/10 group-hover:bg-yellow-500/20 rounded-full blur-3xl transition-colors duration-500" />
                         </motion.div>
 
-                        {/* Menu Area (Right Table) */}
+                        {/* Menu Area */}
                         <motion.div
                             className="absolute bottom-[25%] right-[20%] w-48 h-32 cursor-pointer z-10 flex items-center justify-center group"
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => handleInspect('menu')}
                         >
                             <div className="absolute text-4xl animate-bounce delay-100 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]">✨</div>
                             <div className="w-8 h-8 bg-cyan-400/50 rounded-full blur-sm interaction-cue group-hover:bg-cyan-200/80 transition-all duration-300" />
-                            <div className="absolute inset-0 bg-cyan-500/10 group-hover:bg-cyan-500/20 rounded-lg blur-2xl transition-colors duration-500" />
                         </motion.div>
 
                         {/* Rug Area */}
                         <motion.div
                             className="absolute bottom-10 left-1/2 -translate-x-1/2 w-96 h-32 cursor-pointer z-10 flex items-center justify-center group"
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => handleInspect('rug')}
                         >
                             <div className="absolute text-4xl animate-bounce delay-200 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">✨</div>
                             <div className="w-8 h-8 bg-orange-400/50 rounded-full blur-sm interaction-cue group-hover:bg-orange-200/80 transition-all duration-300" />
-                            <div className="absolute inset-0 bg-orange-500/10 group-hover:bg-orange-500/20 rounded-full blur-2xl transition-colors duration-500" />
                         </motion.div>
                     </>
                 )}
@@ -205,26 +396,62 @@ export default function StepFiveMedieval({ onNext }) {
                         className="absolute inset-0 z-40 bg-black/80 flex items-center justify-center p-8"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
-                        {/* 이미지 크기 조절: 샹들리에/메뉴판/러그에 따라 다르게 할 수도 있으나 일단 최대 크기 제한 */}
                         <img src={showOverlay} alt="Detail" className="max-h-[80vh] max-w-[90vw] rounded shadow-2xl border border-amber-900 object-contain" />
                     </motion.div>
                 )}
             </AnimatePresence>
 
+            {/* --- ACRONYM LAB RENDER --- */}
+            {phase === 'acronym_lab' && <AcronymLab />}
 
-            {/* Dialogue Interface */}
+            {/* --- CHARACTER SPRITE --- */}
             <AnimatePresence>
-                {dialogue && phase !== 'acronym_lab' && phase !== 'transition_in' && (
+                {/* Only show character in non-lab phases or valid speakers */}
+                {phase !== 'acronym_lab' && (dialogue?.speaker === "점원" || dialogue?.speaker === "???" || dialogue?.speaker === "교관") && (
                     <motion.div
-                        className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl bg-black/80 border-2 border-amber-800 rounded-xl p-6 z-50 shadow-2xl safe-area-bottom"
+                        initial={{ opacity: 0, x: -50, scale: 0.9 }}
+                        animate={{
+                            opacity: isSnapEffect ? 0 : 1,
+                            x: glitchIntensity > 0 ? (Math.random() * 10 - 5) : 0,
+                            scale: 1
+                        }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="absolute bottom-0 left-[2%] md:left-[5%] z-40 pointer-events-none origin-bottom-left"
+                        style={{
+                            filter: glitchIntensity > 0 ? `hue-rotate(${Math.random() * 360}deg) blur(${Math.random() * 2}px)` : 'none'
+                        }}
+                    >
+                        {/* Image */}
+                        <img
+                            src={currentSpeakerImg}
+                            alt="Speaker"
+                            className="max-h-[85vh] object-contain drop-shadow-2xl"
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* --- DIALOGUE INTERFACE --- */}
+            <AnimatePresence>
+                {/* Hide dialogue during Acronym Lab */}
+                {dialogue && phase !== 'acronym_lab' && phase !== 'transition_in' && !isSnapEffect && (
+                    <motion.div
+                        className={`absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl border-2 rounded-xl p-6 z-50 shadow-2xl safe-area-bottom backdrop-blur-sm
+                            ${dialogue.speaker === "교관" ? 'bg-slate-900/90 border-cyan-500' : 'bg-black/80 border-amber-800'}
+                        `}
                         initial={{ y: 50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 50, opacity: 0 }}
                     >
                         <div className="flex gap-6">
                             {/* Avatar / Speaker Name */}
-                            <div className="w-24 flex flex-col items-center justify-center border-r border-amber-800/50 pr-6">
-                                <div className="text-amber-500 font-bold font-display text-xl mb-2">{dialogue.speaker}</div>
+                            <div className={`w-24 flex flex-col items-center justify-center border-r pr-6
+                                ${dialogue.speaker === "교관" ? 'border-cyan-500/50' : 'border-amber-800/50'}
+                            `}>
+                                <div className={`font-bold font-display text-xl mb-2
+                                    ${dialogue.speaker === "교관" ? 'text-cyan-400' : 'text-amber-500'}
+                                `}>{dialogue.speaker}</div>
                             </div>
 
                             {/* Content */}
@@ -237,7 +464,11 @@ export default function StepFiveMedieval({ onNext }) {
                                     <div className="mt-4 flex justify-end">
                                         <button
                                             onClick={dialogue.onAction}
-                                            className="px-6 py-2 bg-amber-900 hover:bg-amber-800 text-amber-100 rounded border border-amber-600 transition-colors flex items-center gap-2"
+                                            className={`px-6 py-2 rounded border transition-colors flex items-center gap-2
+                                                ${dialogue.speaker === "교관"
+                                                    ? 'bg-cyan-900 hover:bg-cyan-800 text-cyan-100 border-cyan-600'
+                                                    : 'bg-amber-900 hover:bg-amber-800 text-amber-100 border-amber-600'}
+                                            `}
                                         >
                                             {dialogue.actionLabel} ▶
                                         </button>
@@ -259,17 +490,17 @@ export default function StepFiveMedieval({ onNext }) {
                             speaker: "가이드",
                             text: "훌륭한 관찰력입니다! \n이제 이 물건들을 직접 '경험'해볼 차례입니다.",
                             actionLabel: "경험 시작하기",
-                            onAction: () => setPhase('experience')
+                            onAction: () => startExperience()
                         })}
                         className="absolute bottom-[20%] left-1/2 -translate-x-1/2 px-8 py-3 bg-cyan-700/90 text-white font-bold rounded-full border border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:bg-cyan-600 transition-all z-30 flex items-center gap-2"
                     >
-                        <span>모든 관찰 완료! 다음 단계로</span>
+                        <span>둘러보기 끝! (다음 단계로)</span>
                         <span className="animate-bounce">👉</span>
                     </motion.button>
                 )}
             </AnimatePresence>
 
-            {/* Prologue: Connectivity Narrative */}
+            {/* Prologue */}
             {phase === 'prologue' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black px-12 text-center pointer-events-auto">
                     <motion.div
@@ -324,131 +555,6 @@ export default function StepFiveMedieval({ onNext }) {
                     </style>
                 </div>
             )}
-
-            {/* --- PHASE: ACRONYM LAB (Educational Ending) --- */}
-            {phase === 'acronym_lab' && (
-                <AcronymLabModule onNext={onNext} />
-            )}
-        </div>
-    );
-}
-
-// --- SUB-COMPONENT: Acronym Lab ---
-function AcronymLabModule({ onNext }) {
-    const [step, setStep] = useState(0); // 0: Intro, 1: U, 2: I, 3: X, 4: Final
-    const [showButton, setShowButton] = useState(false);
-
-    useEffect(() => {
-        // Prevent accidental clicks by delaying button appearance
-        const timer = setTimeout(() => setShowButton(true), 1500);
-        return () => clearTimeout(timer);
-    }, []);
-
-    return (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center">
-            {step === 0 && (
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                    <h2 className="text-4xl font-bold text-white mb-6 font-display">
-                        <span className="text-cyan-400">UI</span>와 <span className="text-green-400">UX</span>의 조화
-                    </h2>
-                    <p className="text-gray-300 text-xl mb-8 leading-relaxed">
-                        여행은 즐거우셨나요?<br />
-                        방금 경험한 것들을 <span className="font-bold text-amber-500">용어로 정리</span>해봅시다.
-                    </p>
-
-                    <div className="h-16 flex items-center justify-center">
-                        <AnimatePresence>
-                            {showButton && (
-                                <motion.button
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    onClick={() => setStep(1)}
-                                    className="px-8 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors shadow-lg hover:shadow-cyan-500/30"
-                                >
-                                    정리 시작하기
-                                </motion.button>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </motion.div>
-            )}
-
-            <div className={`flex gap-4 items-center justify-center transition-all duration-500 ${step > 0 ? 'opacity-100' : 'opacity-0 hidden'}`}>
-                {/* U */}
-                <motion.div
-                    layout
-                    className={`w-40 h-52 rounded-2xl border-2 flex flex-col items-center justify-center p-4 transition-colors ${step >= 1 ? 'bg-blue-900/40 border-blue-400' : 'bg-gray-900/40 border-gray-700 opacity-30'}`}
-                >
-                    <div className="text-5xl font-black mb-2 text-white">U</div>
-                    <div className="text-blue-300 font-bold text-sm">USER</div>
-                    <div className="mt-2 text-xs text-gray-300">
-                        카페를 방문한<br /><strong className="text-white text-base">여행자 (나)</strong>
-                    </div>
-                </motion.div>
-
-                {/* I */}
-                {step >= 2 && (
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                        className={`w-40 h-52 rounded-2xl border-2 flex flex-col items-center justify-center p-4 bg-cyan-900/40 border-cyan-400 transition-colors`}
-                    >
-                        <div className="text-5xl font-black mb-2 text-white">I</div>
-                        <div className="text-cyan-300 font-bold text-sm">INTERFACE</div>
-                        <div className="mt-2 text-xs text-gray-300">
-                            눈으로 즐거운<br /><strong className="text-white text-base">조명과 메뉴판</strong>
-                        </div>
-                    </motion.div>
-                )}
-
-                {/* X */}
-                {step >= 3 && (
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                        className={`w-40 h-52 rounded-2xl border-2 flex flex-col items-center justify-center p-4 bg-green-900/40 border-green-400 transition-colors`}
-                    >
-                        <div className="text-5xl font-black mb-2 text-white">X</div>
-                        <div className="text-green-300 font-bold text-sm">EXPERIENCE</div>
-                        <div className="mt-2 text-xs text-gray-300">
-                            마음이 편안한<br /><strong className="text-white text-base">환대와 양탄자</strong>
-                        </div>
-                    </motion.div>
-                )}
-            </div>
-
-            <div className="h-32 mt-12 flex items-center justify-center">
-                {step === 1 && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <p className="text-xl font-bold text-blue-200 mb-4">"모든 디지털 환경의 중심은 사용자입니다."</p>
-                        <button onClick={() => setStep(2)} className="text-white underline hover:text-blue-300 text-lg">다음: I (Interface) ▶</button>
-                    </motion.div>
-                )}
-                {step === 2 && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <p className="text-xl font-bold text-cyan-200 mb-4">"UI는 사용자의 눈과 손이 닿는 아름다운 도구입니다."</p>
-                        <button onClick={() => setStep(3)} className="text-white underline hover:text-cyan-300 text-lg">다음: X (Experience) ▶</button>
-                    </motion.div>
-                )}
-                {step === 3 && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <p className="text-xl font-bold text-green-200 mb-4">"UX는 사용자가 느끼는 만족감과 추억입니다."</p>
-                        <button onClick={() => setStep(4)} className="text-white underline hover:text-green-300 text-lg">결론 보기 ▶</button>
-                    </motion.div>
-                )}
-                {step === 4 && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <p className="text-2xl font-bold text-white mb-6">
-                            "좋은 디지털 환경은<br />
-                            <span className="text-cyan-400">보기에도 좋고(UI)</span>, <span className="text-green-400"> 쓰기에도 편해야(UX)</span> 합니다."
-                        </p>
-                        <button
-                            onClick={onNext}
-                            className="px-8 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.4)]"
-                        >
-                            UI와 UX 파헤쳐 보기
-                        </button>
-                    </motion.div>
-                )}
-            </div>
         </div>
     );
 }

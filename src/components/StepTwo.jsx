@@ -8,28 +8,28 @@ const directives = [
         id: '01',
         role: '설계자',
         title: '앱 접속',
-        desc: '배달 앱을 실행하고 주문 직전 단계까지 접속하라.',
+        desc: '설계자는 배달앱을 실행하고 주문 직전까지 화면 설정할 것.(이 때, 피험자가 화면을 보지 못하도록 할 것)',
         deco: 'LOGIN'
     },
     {
         id: '02',
         role: '피험자',
         title: '감각 차단',
-        desc: '눈을 감고 손을 내밀어라. 시각 정보를 차단하라.',
+        desc: '피험자는 눈을 감고 손을 내밀 것. 시각 정보를 차단할 것.',
         deco: 'BLIND'
     },
     {
         id: '03',
         role: '설계자',
         title: '디바이스 전달',
-        desc: '피험자의 손에 조용히 스마트폰을 올려두어라.',
+        desc: '설계자는 피험자의 손에 조용히 스마트폰을 올려둘 것.',
         deco: 'TRANSFER'
     },
     {
         id: '04',
         role: '피험자',
         title: '본능적 행동',
-        desc: '본능에 맡겨 \'주문하기\' 버튼의 위치를 터치하라.',
+        desc: '피험자는 눈을 감은 채로 본능에 맡겨 \'주문하기\' 버튼의 위치를 터치하라.',
         deco: 'EXECUTE'
     }
 ];
@@ -70,7 +70,7 @@ export default function StepTwo({ onNext }) {
                         <GlitchText text="작전 수행 방법" />
                     </h2>
                     <div className="text-base font-code text-[var(--primary-cyan)] mt-2">
-                        2단계: 작전 수행
+                        2단계: 아래 순서에 맞게 작전을 수행하시오.
                     </div>
                 </div>
                 <div className="text-5xl font-display font-bold text-[var(--primary-cyan)] opacity-50">

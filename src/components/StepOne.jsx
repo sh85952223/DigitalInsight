@@ -29,7 +29,7 @@ export default function StepOne({ onNext }) {
                     <h1 className="text-4xl md:text-6xl font-display font-black tracking-tighter mb-4 glow-text-cyan break-keep text-center leading-tight">
                         <GlitchText text="엄지 손가락은 이미 알고 있다" speed={25} />
                     </h1>
-                    <div className="text-xl md:text-2xl font-ui font-light tracking-wide text-cyan-400 mt-2">
+                    <div className="text-xl md:text-2xl font-ui font-bold tracking-wide text-cyan-400 mt-2">
                         [ 선택은 온전히 내가 한 것일까? ]
                     </div>
                 </motion.div>
@@ -37,7 +37,7 @@ export default function StepOne({ onNext }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
                 {/* Mission Brief */}
-                <HudContainer title="임무 브리핑" className="h-full min-h-[200px] flex flex-col justify-center">
+                <HudContainer title="임무 브리핑" largeTitle className="h-full min-h-[200px] flex flex-col justify-center">
                     <div className="text-lg md:text-xl leading-relaxed font-ui">
                         <div className="mb-4 text-cyan-300 font-bold opacity-80 font-code">
                             [ 1급 기밀 지령 ]
@@ -51,10 +51,10 @@ export default function StepOne({ onNext }) {
                 </HudContainer>
 
                 {/* Tactical Visual */}
-                <HudContainer title="팀 구성도" className="flex items-center justify-center min-h-[200px]">
+                <HudContainer title="팀 구성도" largeTitle className="flex items-center justify-center min-h-[200px]">
                     <motion.svg
                         viewBox="0 0 200 120"
-                        className="w-full max-w-[200px] drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]"
+                        className="w-full max-w-[300px] drop-shadow-[0_0_8px_rgba(0,243,255,0.5)]"
                     >
                         {/* Grid Background in SVG */}
                         <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -62,19 +62,19 @@ export default function StepOne({ onNext }) {
                         </pattern>
                         <rect width="200" height="120" fill="url(#smallGrid)" />
 
-                        {/* Agent Icons (Stylized) */}
-                        <g transform="translate(40, 60)">
-                            <circle r="15" fill="none" stroke="#00f3ff" strokeWidth="1.5" />
-                            <circle r="4" fill="#00f3ff" />
-                            <text y="30" textAnchor="middle" fill="#00f3ff" fontSize="10" className="font-code font-bold">설계자</text>
+                        {/* Agent Icons (Stylized & Larger) */}
+                        <g transform="translate(40, 50)">
+                            <circle r="18" fill="none" stroke="#00f3ff" strokeWidth="1.5" />
+                            <circle r="5" fill="#00f3ff" />
+                            <text y="35" textAnchor="middle" fill="#00f3ff" fontSize="12" className="font-code font-bold">설계자</text>
                         </g>
 
-                        <path d="M 65 60 L 135 60" stroke="#00f3ff" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
+                        <path d="M 65 50 L 135 50" stroke="#00f3ff" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
 
-                        <g transform="translate(160, 60)">
-                            <circle r="15" fill="none" stroke="#ff2a2a" strokeWidth="1.5" />
-                            <circle r="4" fill="#ff2a2a" />
-                            <text y="30" textAnchor="middle" fill="#ff2a2a" fontSize="10" className="font-code font-bold">피험자</text>
+                        <g transform="translate(160, 50)">
+                            <circle r="18" fill="none" stroke="#ff2a2a" strokeWidth="1.5" />
+                            <circle r="5" fill="#ff2a2a" />
+                            <text y="35" textAnchor="middle" fill="#ff2a2a" fontSize="12" className="font-code font-bold">피험자</text>
                         </g>
                     </motion.svg>
                 </HudContainer>

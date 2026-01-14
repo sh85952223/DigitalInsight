@@ -21,16 +21,16 @@ import m10 from '../assets/시장10.png';
 const MARKET_SEQUENCE = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10];
 
 const ACTION_STEPS = [
-    "과거엔...시장에 도착하고 둘러보기",
-    "사고 싶은 물건 직접 살펴보기",
-    "결정하면 지갑을 꺼내기",
-    "현금(또는 카드) 지불하기",
-    "거스름돈(또는 카드) 돌려받기",
-    "구매한 물건 받고 집으로 돌아가기",
-    "집에서 출발부터",
+    "과거엔...시장에 도착하면 둘러보고",
+    "사고 싶은 물건 직접 살펴보며",
+    "결정하면 지갑을 꺼냈다.",
+    "현금(또는 카드)을 지불하고",
+    "거스름돈(또는 카드)을 돌려받았다.",
+    "물건을 가지고 집으로 돌아가는 길...",
+    "집에서 출발하는 것부터",
     "물건을 구매하고",
     "돌아오기까지",
-    "시간과 노력이 필요했던 장보기"
+    "장보기에는 시간과 노력이 필요했다."
 ];
 
 export default function StepZero_1({ onComplete }) {
@@ -362,7 +362,7 @@ export default function StepZero_1({ onComplete }) {
                                                 <p className="text-gray-400 text-sm">
                                                     {presentPhase === 'idle' && "더 이상 발품 팔 필요가 없는 세상."}
                                                     {presentPhase === 'ordering' && "복잡한 과정은 생략되었습니다."}
-                                                    {presentPhase === 'delivered' && "더욱 편리해진 생활"}
+                                                    {presentPhase === 'delivered' && "과거에 비해 생활은 더욱 편리해졌다."}
                                                 </p>
                                             </div>
                                         </div>

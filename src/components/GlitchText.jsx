@@ -37,10 +37,10 @@ export default function GlitchText({ text, as: Component = 'span', className = '
             <span className="relative z-10">{displayText}</span>
 
             {/* RGB Split Effect (Static/Subtle) */}
-            <span className="absolute top-0 left-[-1px] -z-10 text-[var(--accent-red)] opacity-50 mix-blend-screen overflow-hidden clip-text h-full animate-pulse">
+            <span className="absolute top-0 left-[-1px] -z-10 text-[var(--accent-red)] opacity-10 mix-blend-screen overflow-hidden clip-text h-full animate-pulse">
                 {text}
             </span>
-            <span className="absolute top-0 left-[1px] -z-10 text-[var(--primary-cyan)] opacity-50 mix-blend-screen overflow-hidden clip-text h-full animate-pulse" style={{ animationDelay: '0.1s' }}>
+            <span className="absolute top-0 left-[1px] -z-10 text-[var(--primary-cyan)] opacity-30 mix-blend-screen overflow-hidden clip-text h-full animate-pulse" style={{ animationDelay: '0.1s' }}>
                 {text}
             </span>
         </Component>

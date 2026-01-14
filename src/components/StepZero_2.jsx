@@ -11,8 +11,14 @@ export default function StepZero_2({ onComplete }) {
         { id: 3, visible: false, x: '20%', y: '65%', text: '🔥 HOT DEAL!', bg: 'bg-red-500' },
         { id: 4, visible: false, x: '75%', y: '60%', text: '💰 SAVE 90%!', bg: 'bg-green-500' },
         { id: 5, visible: false, x: '45%', y: '25%', text: '⏰ HURRY UP!', bg: 'bg-orange-500' },
+        // Added 5 more popups for chaos
+        { id: 6, visible: false, x: '10%', y: '80%', text: '📉 STOCK LOW!', bg: 'bg-red-700' },
+        { id: 7, visible: false, x: '85%', y: '40%', text: '💎 JACKPOT!', bg: 'bg-purple-600' },
+        { id: 8, visible: false, x: '35%', y: '10%', text: '📬 NEWSLETTER', bg: 'bg-blue-500' },
+        { id: 9, visible: false, x: '60%', y: '85%', text: '🔓 ACCESS!', bg: 'bg-green-600' },
+        { id: 10, visible: false, x: '5%', y: '45%', text: '🚫 WAIT!', bg: 'bg-gray-800' },
     ]);
-    const REQUIRED_CLOSES = 3;
+    const REQUIRED_CLOSES = 5; // Increased required closes for more friction
 
     return (
         <motion.div
@@ -179,22 +185,43 @@ export default function StepZero_2({ onComplete }) {
                 </div>
             </motion.div>
 
-            {/* SCROLLING MARQUEE BANNER - Fixed full width */}
+            {/* === TAPES: CREATING 'X' SHAPE === */}
+
+            {/* TAPE 1: RED (Steeper tilt: -8deg) */}
             <motion.div
-                className="absolute top-[48%] left-0 w-[200vw] z-20"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                className="absolute top-[45%] left-[-10%] w-[120vw] z-20"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1, duration: 0.5 }}
-                style={{ marginLeft: '-50vw' }}
             >
-                <div className="bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 py-5 -rotate-2">
+                <div className="bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 py-6 -rotate-6 shadow-[0_0_30px_rgba(220,38,38,0.5)] border-y-4 border-white/20">
                     <motion.div
                         className="whitespace-nowrap flex"
                         animate={{ x: [0, -2000] }}
                         transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                     >
-                        <span className="text-5xl font-black text-white tracking-wider mx-4">
-                            🔥 DON'T MISS OUT! — LIMITED TIME OFFER — ACT NOW — HURRY UP — DON'T MISS OUT! — LIMITED TIME OFFER — ACT NOW — HURRY UP — DON'T MISS OUT! — LIMITED TIME OFFER — ACT NOW — HURRY UP — DON'T MISS OUT! — LIMITED TIME OFFER —
+                        <span className="text-5xl font-black text-white tracking-widest mx-4 italic">
+                            🔥 DON'T MISS OUT! — LIMITED TIME OFFER — ACT NOW — HURRY UP — DON'T MISS OUT! — LIMITED TIME OFFER — ACT NOW — HURRY UP — DON'T MISS OUT! — LIMITED TIME OFFER — ACT NOW — HURRY UP —
+                        </span>
+                    </motion.div>
+                </div>
+            </motion.div>
+
+            {/* TAPE 2: YELLOW (Opposite tilt: +8deg) */}
+            <motion.div
+                className="absolute top-[45%] left-[-10%] w-[120vw] z-20"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.2, duration: 0.5 }}
+            >
+                <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 py-6 rotate-6 shadow-[0_0_30px_rgba(234,179,8,0.5)] border-y-4 border-black/20">
+                    <motion.div
+                        className="whitespace-nowrap flex"
+                        animate={{ x: [-2000, 0] }} // Reverse direction
+                        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                    >
+                        <span className="text-5xl font-black text-black tracking-widest mx-4 italic">
+                            ⚠️ WARNING: HIGH DEMAND — SELLING FAST — ONLY 2 LEFT — WARNING: HIGH DEMAND — SELLING FAST — ONLY 2 LEFT — WARNING: HIGH DEMAND — SELLING FAST — ONLY 2 LEFT —
                         </span>
                     </motion.div>
                 </div>
@@ -214,7 +241,7 @@ export default function StepZero_2({ onComplete }) {
                             setGamePopups(prev => prev.map(p =>
                                 p.id === popup.id ? { ...p, visible: true } : p
                             ));
-                        }, 500 + (index * 800));
+                        }, 500 + (index * 400)); // Faster sequence for more popups
                     });
                 }}
             />
@@ -229,7 +256,7 @@ export default function StepZero_2({ onComplete }) {
                 >
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight tracking-tight">
                         편리하지만...<br />
-                        <span className="text-cyan-400">무엇을 놓치고 있는 걸까요?</span>
+                        <span className="text-cyan-400">무엇을 놓치고 있는 걸까?</span>
                     </h2>
 
                     {/* CIRCULAR GAUGE */}
@@ -323,7 +350,7 @@ export default function StepZero_2({ onComplete }) {
                                 ✕
                             </button>
                         </div>
-                        <p className="text-gray-400 text-sm mt-2">닫아서 메시지를 확인하세요</p>
+                        <p className="text-gray-400 text-sm mt-2">버튼을 눌러 팝업을 닫으세요</p>
                     </div>
                 </motion.div>
             )}
@@ -333,7 +360,7 @@ export default function StepZero_2({ onComplete }) {
                 popup.visible && (
                     <motion.div
                         key={popup.id}
-                        className={`absolute z-50 ${popup.bg} p-6 rounded-xl shadow-2xl cursor-pointer`}
+                        className={`absolute z-50 ${popup.bg} p-6 rounded-xl shadow-2xl cursor-pointer hover:brightness-110`}
                         style={{ left: popup.x, top: popup.y }}
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -342,7 +369,7 @@ export default function StepZero_2({ onComplete }) {
                         whileHover={{ scale: 1.05 }}
                     >
                         <div className="flex items-start gap-3">
-                            <span className="text-2xl font-black">{popup.text}</span>
+                            <span className="text-2xl font-black text-white drop-shadow-md">{popup.text}</span>
                             <button
                                 onClick={() => {
                                     setGamePopups(prev => prev.map(p =>
@@ -350,13 +377,13 @@ export default function StepZero_2({ onComplete }) {
                                     ));
                                     setClosedPopups(prev => prev + 1);
                                 }}
-                                className="w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center text-white font-bold text-lg transition-colors"
+                                className="w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white font-bold text-lg transition-colors border border-white/20"
                             >
                                 ✕
                             </button>
                         </div>
-                        <div className="mt-2 text-sm opacity-80">
-                            Click here to claim!
+                        <div className="mt-2 text-sm text-white/90 font-medium">
+                            Click to close!
                         </div>
                     </motion.div>
                 )
@@ -413,7 +440,7 @@ export default function StepZero_2({ onComplete }) {
                     >
                         <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight tracking-tight drop-shadow-2xl">
                             불편함이 사라진 자리에,<br />
-                            <span className="text-cyan-400">'신중함'</span>도 사라졌습니다.
+                            <span className="text-cyan-400">'신중함'</span>도 사라졌다.
                         </h2>
                         <p className="text-gray-400 text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed">
                             우리에게 필요한 건 바로, <span className="text-white border-b-2 border-cyan-500 pb-1 font-bold">생각할 시간</span>

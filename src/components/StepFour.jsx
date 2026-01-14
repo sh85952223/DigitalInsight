@@ -300,7 +300,7 @@ export default function StepFour({ result, onRestart, onNext }) {
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         <li style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', fontSize: '14px', color: '#d1d5db', fontFamily: 'monospace' }}>
                             <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#a855f7', flexShrink: 0 }}></span>
-                            <span><strong style={{ color: '#d8b4fe' }}>Dead Zone</strong>: 엄지 도달 불가 / 정보 표시 영역</span>
+                            <span><strong style={{ color: '#d8b4fe' }}>Dead Zone</strong>: 엄지 도달 힘듦 / 정보를 표시하는 영역</span>
                         </li>
                         <li style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', fontSize: '14px', color: '#d1d5db', fontFamily: 'monospace' }}>
                             <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#2dd4bf', flexShrink: 0 }}></span>
