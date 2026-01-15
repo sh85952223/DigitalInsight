@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Typewriter from './Typewriter';
 
@@ -9,6 +9,17 @@ import rugImage from '../assets/ancient_rug.jpg';
 import chandelierImage from '../assets/chandelier.png';
 import shopkeeperImage from '../assets/shopkeeper.png'; // PNG
 import agentImage from '../assets/agent_instructor.png'; // New Agent Image
+
+// Sound Assets
+import timeMachineSoundAsset from '../assets/sounds/mixkit-time-machine-working-2693.wav';
+import doorBellSoundAsset from '../assets/sounds/mixkit-store-door-bell-ring-934.wav';
+import bonfireSoundAsset from '../assets/sounds/bonfire.mp3';
+import peopleSoundAsset from '../assets/sounds/mixkit-people-indoors-ambience-2981.wav';
+import classicClickSoundAsset from '../assets/sounds/mixkit-classic-click-1117.wav';
+import interfaceClickSoundAsset from '../assets/sounds/mixkit-interface-device-click-2577.wav';
+import confirmationSoundAsset from '../assets/sounds/mixkit-sci-fi-confirmation-914.wav';
+import techGlitchSoundAsset from '../assets/sounds/mixkit-tech-weird-glitch-2685.wav';
+import magicalTransitionSoundAsset from '../assets/sounds/mixkit-magical-light-transition-2583.wav';
 
 export default function StepFiveMedieval({ onNext }) {
     const [phase, setPhase] = useState('prologue'); // prologue -> transition_in -> entry -> explore -> experience -> agent_reveal
@@ -21,22 +32,110 @@ export default function StepFiveMedieval({ onNext }) {
     const [currentSpeakerImg, setCurrentSpeakerImg] = useState(shopkeeperImage);
     const [isSnapEffect, setIsSnapEffect] = useState(false);
 
+    // Audio Refs
+    const timeMachineAudioRef = useRef(null);
+    const doorBellAudioRef = useRef(null);
+    const bonfireAudioRef = useRef(null);
+    const peopleAudioRef = useRef(null);
+    const classicClickAudioRef = useRef(null);
+    const interfaceClickAudioRef = useRef(null);
+    const confirmationAudioRef = useRef(null);
+    const techGlitchAudioRef = useRef(null);
+    const magicalTransitionAudioRef = useRef(null);
+
+    // Play classic click sound helper
+    const playClassicClick = () => {
+        if (classicClickAudioRef.current) {
+            classicClickAudioRef.current.currentTime = 0;
+            classicClickAudioRef.current.play().catch(() => { });
+        }
+    };
+
+    // Play interface click sound helper (for Acronym Lab and Agent phases)
+    const playInterfaceClick = () => {
+        if (interfaceClickAudioRef.current) {
+            interfaceClickAudioRef.current.currentTime = 0;
+            interfaceClickAudioRef.current.play().catch(() => { });
+        }
+    };
+
+    // Initialize Audio on mount
+    useEffect(() => {
+        timeMachineAudioRef.current = new Audio(timeMachineSoundAsset);
+        doorBellAudioRef.current = new Audio(doorBellSoundAsset);
+        bonfireAudioRef.current = new Audio(bonfireSoundAsset);
+        peopleAudioRef.current = new Audio(peopleSoundAsset);
+        classicClickAudioRef.current = new Audio(classicClickSoundAsset);
+        interfaceClickAudioRef.current = new Audio(interfaceClickSoundAsset);
+        confirmationAudioRef.current = new Audio(confirmationSoundAsset);
+        techGlitchAudioRef.current = new Audio(techGlitchSoundAsset);
+        magicalTransitionAudioRef.current = new Audio(magicalTransitionSoundAsset);
+
+        // Preload all
+        [timeMachineAudioRef, doorBellAudioRef, bonfireAudioRef, peopleAudioRef, classicClickAudioRef, interfaceClickAudioRef, confirmationAudioRef, techGlitchAudioRef, magicalTransitionAudioRef].forEach(ref => {
+            if (ref.current) {
+                ref.current.preload = 'auto';
+                ref.current.load();
+            }
+        });
+
+        timeMachineAudioRef.current.volume = 1;
+        doorBellAudioRef.current.volume = 0.6;
+        bonfireAudioRef.current.volume = 0.6;
+        bonfireAudioRef.current.loop = true;
+        peopleAudioRef.current.volume = 0.4;
+        peopleAudioRef.current.loop = true;
+        classicClickAudioRef.current.volume = 0.5;
+        interfaceClickAudioRef.current.volume = 0.6;
+        confirmationAudioRef.current.volume = 0.6;
+        techGlitchAudioRef.current.volume = 0.5;
+        magicalTransitionAudioRef.current.volume = 1;
+
+        return () => {
+            [timeMachineAudioRef, doorBellAudioRef, bonfireAudioRef, peopleAudioRef, classicClickAudioRef, interfaceClickAudioRef, confirmationAudioRef, techGlitchAudioRef, magicalTransitionAudioRef].forEach(ref => {
+                if (ref.current) {
+                    ref.current.pause();
+                    ref.current = null;
+                }
+            });
+        };
+    }, []);
+
     // --- PHASE MANAGEMENT ---
     useEffect(() => {
         if (phase === 'transition_in') {
             const timer = setTimeout(() => {
                 setPhase('entry');
+
+                // Play door bell sound
+                if (doorBellAudioRef.current) {
+                    doorBellAudioRef.current.currentTime = 0;
+                    doorBellAudioRef.current.play().catch(() => { });
+
+                    // After door bell ends, start ambient sounds
+                    doorBellAudioRef.current.onended = () => {
+                        if (bonfireAudioRef.current) {
+                            bonfireAudioRef.current.play().catch(() => { });
+                        }
+                        if (peopleAudioRef.current) {
+                            peopleAudioRef.current.play().catch(() => { });
+                        }
+                    };
+                }
+
                 setDialogue({
                     speaker: "점원",
                     text: "딸랑~ (종소리)\n\n어서 오세요, 여행자님! 바깥 날씨가 많이 춥죠? \n따뜻한 난로가 있는 안쪽 자리로 안내해 드릴게요.",
                     actionLabel: "안내에 따라 이동하기",
                     onAction: () => {
+                        playClassicClick();
                         // [NEW] 내 마음 속 생각 추가
                         setDialogue({
                             speaker: "나",
                             text: "(중세 분위기 나는 카페 정말 와보고 싶었는데! 진짜 중세처럼 연기해주시니까 느낌 완전 사네~)",
                             actionLabel: "안쪽으로 이동하기",
                             onAction: () => {
+                                playClassicClick();
                                 // 페이드 아웃 효과 후 explore로 전환
                                 setDialogue(null); // 대화창 숨김
                                 setTimeout(() => {
@@ -48,6 +147,12 @@ export default function StepFiveMedieval({ onNext }) {
                 });
             }, 3500); // 3.5초간 진입 연출
             return () => clearTimeout(timer);
+        }
+
+        // Stop ambient sounds when entering agent_reveal phase
+        if (phase === 'agent_reveal') {
+            if (bonfireAudioRef.current) bonfireAudioRef.current.pause();
+            if (peopleAudioRef.current) peopleAudioRef.current.pause();
         }
     }, [phase]);
 
@@ -68,7 +173,7 @@ export default function StepFiveMedieval({ onNext }) {
                 speaker: "나",
                 text: "(메뉴판을 집어 든다)\n와, 가죽 커버의 질감이 고급스럽고 캘리그라피 글씨가 정말 멋지네!\n마치 예술 작품 같아.",
                 actionLabel: "닫기",
-                onAction: () => { setShowOverlay(null); setDialogue(null); }
+                onAction: () => { playClassicClick(); setShowOverlay(null); setDialogue(null); }
             });
         } else if (item === 'chandelier') {
             setShowOverlay(chandelierImage);
@@ -76,7 +181,7 @@ export default function StepFiveMedieval({ onNext }) {
                 speaker: "나",
                 text: "(천장을 올려다본다)\n진짜 촛불인가? 은은한 촛불 샹들리에가 카페 전체를 따뜻하게 감싸고 있어.\n너무 화려하지 않고 인테리어에 잘 녹아들었네.",
                 actionLabel: "시선 거두기",
-                onAction: () => { setShowOverlay(null); setDialogue(null); }
+                onAction: () => { playClassicClick(); setShowOverlay(null); setDialogue(null); }
             });
         } else if (item === 'rug') {
             setShowOverlay(rugImage);
@@ -84,7 +189,7 @@ export default function StepFiveMedieval({ onNext }) {
                 speaker: "나",
                 text: "(바닥을 내려다본다)\n오래된 양탄자같은 문양이나 색감이 중세 카페 분위기랑 찰떡이야.\n공간을 꽉 채워주는 느낌이군.",
                 actionLabel: "시선 거두기",
-                onAction: () => { setShowOverlay(null); setDialogue(null); }
+                onAction: () => { playClassicClick(); setShowOverlay(null); setDialogue(null); }
             });
         }
     };
@@ -98,6 +203,7 @@ export default function StepFiveMedieval({ onNext }) {
             text: "그럼 이제 주문을 해볼까요? 메뉴판을 다시 자세히 봐주세요.",
             actionLabel: "메뉴판 보기",
             onAction: async () => {
+                playClassicClick();
                 setDialogue(null);
                 await new Promise(r => setTimeout(r, 300));
 
@@ -109,6 +215,7 @@ export default function StepFiveMedieval({ onNext }) {
                     text: "어...? 글씨가 너무 꼬불꼬불해서 뭐라고 쓴 건지 하나도 모르겠네.\n보기엔 예뻤는데 읽기는 너무 불편하다...",
                     actionLabel: "메뉴판 내려놓기",
                     onAction: async () => {
+                        playClassicClick();
                         // 1. Close Menu first
                         setShowOverlay(null);
                         setDialogue(null); // Clear dialogue momentarily to show the scene
@@ -121,7 +228,7 @@ export default function StepFiveMedieval({ onNext }) {
                             speaker: "나",
                             text: "하지만 발에 닿는 양탄자의 감촉은 정말 푹신하고 따뜻해.\n차가웠던 몸이 녹는 기분이야... 계속 머물고 싶어.",
                             actionLabel: "계속 머무르기...",
-                            onAction: () => startAcronymLab() // Trigger Acronym Lab
+                            onAction: () => { playClassicClick(); startAcronymLab(); } // Trigger Acronym Lab
                         });
                     }
                 });
@@ -131,6 +238,10 @@ export default function StepFiveMedieval({ onNext }) {
 
     // --- ACRONYM LAB SEQUENCE (Restored) ---
     const startAcronymLab = () => {
+        // Stop background ambient sounds
+        if (bonfireAudioRef.current) bonfireAudioRef.current.pause();
+        if (peopleAudioRef.current) peopleAudioRef.current.pause();
+
         setPhase('acronym_lab');
         setDialogue(null);
         setShowOverlay(null);
@@ -148,6 +259,7 @@ export default function StepFiveMedieval({ onNext }) {
 
         // Handlers for manual progression
         const nextStep = () => {
+            playInterfaceClick();
             if (step < 4) setStep(step + 1);
             else {
                 // End of Lab -> Trigger Agent Reveal
@@ -247,7 +359,23 @@ export default function StepFiveMedieval({ onNext }) {
                                     "보여지는 디자인 설계(UI)와<br />느끼게 하는 경험(UX)의 설계."
                                 </h2>
                                 <button
-                                    onClick={() => startAgentReveal()} // DIRECTLY START AGENT REVEAL HERE
+                                    onClick={() => {
+                                        // Play confirmation sound, then glitch sound when it ends
+                                        if (confirmationAudioRef.current) {
+                                            confirmationAudioRef.current.currentTime = 0;
+                                            confirmationAudioRef.current.play().catch(() => { });
+
+                                            confirmationAudioRef.current.onended = () => {
+                                                if (techGlitchAudioRef.current) {
+                                                    techGlitchAudioRef.current.currentTime = 0;
+                                                    techGlitchAudioRef.current.play().catch(() => { });
+                                                }
+                                                startAgentReveal();
+                                            };
+                                        } else {
+                                            startAgentReveal();
+                                        }
+                                    }}
                                     className="mt-8 px-10 py-4 bg-white text-black font-black text-xl hover:scale-105 transition-transform rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)]"
                                 >
                                     조금 더 파헤치기 ⚡
@@ -300,6 +428,7 @@ export default function StepFiveMedieval({ onNext }) {
             text: "놀라셨습니까, 요원?",
             actionLabel: "누...구세요?",
             onAction: async () => {
+                playInterfaceClick();
                 setDialogue(null); // 잠시 숨김 (Pause)
                 await new Promise(r => setTimeout(r, 600));
 
@@ -308,6 +437,7 @@ export default function StepFiveMedieval({ onNext }) {
                     text: "당신의 테스트를 지켜보는 선임 요원입니다. 디지털 환경, 특히 우리가 매일 쓰는 스마트폰에서 UI와 UX를 빼고 이야기 할 순 없습니다.\n요원으로 한 단계 성장을 위해 실제 APP에서도 살펴보죠.",
                     actionLabel: "다음",
                     onAction: async () => {
+                        playInterfaceClick();
                         setDialogue(null); // 잠시 숨김 (Pause)
                         await new Promise(r => setTimeout(r, 600));
 
@@ -320,10 +450,19 @@ export default function StepFiveMedieval({ onNext }) {
                                 setDialogue(null);
                                 setIsSnapEffect(true); // Flash
 
-                                // 6. Auto Transition
-                                setTimeout(() => {
-                                    onNext(); // Go to Step 6 automatically
-                                }, 800);
+                                // Play magical transition sound (skip first 2 seconds)
+                                if (magicalTransitionAudioRef.current) {
+                                    magicalTransitionAudioRef.current.currentTime = 2;
+                                    magicalTransitionAudioRef.current.play().catch(() => { });
+
+                                    // Wait for sound to finish, then transition
+                                    magicalTransitionAudioRef.current.onended = () => {
+                                        onNext(); // Go to Step 6 automatically
+                                    };
+                                } else {
+                                    // Fallback if audio fails
+                                    setTimeout(() => onNext(), 800);
+                                }
                             }
                         });
                     }
@@ -518,12 +657,15 @@ export default function StepFiveMedieval({ onNext }) {
                     <motion.button
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        onClick={() => setDialogue({
-                            speaker: "가이드",
-                            text: "훌륭한 관찰력입니다! \n이제 이 물건들을 직접 '경험'해볼 차례입니다.",
-                            actionLabel: "경험 시작하기",
-                            onAction: () => startExperience()
-                        })}
+                        onClick={() => {
+                            playClassicClick();
+                            setDialogue({
+                                speaker: "가이드",
+                                text: "훌륭한 관찰력입니다! \n이제 이 물건들을 직접 '경험'해볼 차례입니다.",
+                                actionLabel: "경험 시작하기",
+                                onAction: () => { playClassicClick(); startExperience(); }
+                            });
+                        }}
                         className="absolute bottom-[20%] left-1/2 -translate-x-1/2 px-8 py-3 bg-cyan-700/90 text-white font-bold rounded-full border border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:bg-cyan-600 transition-all z-30 flex items-center gap-2"
                     >
                         <span>둘러보기 끝! (다음 단계로)</span>
@@ -550,7 +692,14 @@ export default function StepFiveMedieval({ onNext }) {
                             <span className="text-amber-500">분위기 좋은 어느 한 카페</span>로 떠나봅시다.
                         </p>
                         <button
-                            onClick={() => setPhase('transition_in')}
+                            onClick={() => {
+                                // Play time machine sound
+                                if (timeMachineAudioRef.current) {
+                                    timeMachineAudioRef.current.currentTime = 0;
+                                    timeMachineAudioRef.current.play().catch(() => { });
+                                }
+                                setPhase('transition_in');
+                            }}
                             className="px-8 py-3 bg-transparent border border-cyan-500 text-cyan-500 hover:bg-cyan-500/10 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all rounded text-lg font-bold font-ui"
                         >
                             순간 이동 하기...

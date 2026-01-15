@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import imgAmericano from '../assets/americano.jpg';
 import imgColdBrew from '../assets/coldbrew.jpg';
 import imgCafeLatte from '../assets/cafelatte.jpg';
+
+// Sound Assets
+import glassKnockSoundAsset from '../assets/sounds/glass-knock-10-189876.mp3';
+import cashierSoundAsset from '../assets/sounds/cashier-quotka-chingquot-sound-effect-129698.mp3';
+import confirmationSoundAsset from '../assets/sounds/mixkit-sci-fi-confirmation-914.wav';
 
 // --- ICONS (Inline SVGs to replace Material Symbols) ---
 const IconFireplace = ({ className }) => (
@@ -30,7 +35,67 @@ export default function StepSix({ onNext }) {
     const [uxFlow, setUxFlow] = useState(null);
     const [tutorialStep, setTutorialStep] = useState(0); // 0: Logo, 1: Card, 2: Nav, 3: Done
 
-    // --- UI/UX DEFINITIONS (Right Panel) ---
+    // Audio Ref
+    const glassKnockAudioRef = useRef(null);
+    const cashierAudioRef = useRef(null);
+    const confirmationAudioRef = useRef(null);
+
+    // Initialize Audio
+    useEffect(() => {
+        glassKnockAudioRef.current = new Audio(glassKnockSoundAsset);
+        cashierAudioRef.current = new Audio(cashierSoundAsset);
+        confirmationAudioRef.current = new Audio(confirmationSoundAsset);
+
+        glassKnockAudioRef.current.preload = 'auto';
+        cashierAudioRef.current.preload = 'auto';
+        confirmationAudioRef.current.preload = 'auto';
+        glassKnockAudioRef.current.load();
+        cashierAudioRef.current.load();
+        confirmationAudioRef.current.load();
+
+        glassKnockAudioRef.current.volume = 0.5;
+        cashierAudioRef.current.volume = 0.7;
+        confirmationAudioRef.current.volume = 0.6;
+
+        return () => {
+            if (glassKnockAudioRef.current) {
+                glassKnockAudioRef.current.pause();
+                glassKnockAudioRef.current = null;
+            }
+            if (cashierAudioRef.current) {
+                cashierAudioRef.current.pause();
+                cashierAudioRef.current = null;
+            }
+            if (confirmationAudioRef.current) {
+                confirmationAudioRef.current.pause();
+                confirmationAudioRef.current = null;
+            }
+        };
+    }, []);
+
+    // Play glass knock sound helper
+    const playGlassKnock = () => {
+        if (glassKnockAudioRef.current) {
+            glassKnockAudioRef.current.currentTime = 0;
+            glassKnockAudioRef.current.play().catch(() => { });
+        }
+    };
+
+    // Play cashier sound helper
+    const playCashier = () => {
+        if (cashierAudioRef.current) {
+            cashierAudioRef.current.currentTime = 0;
+            cashierAudioRef.current.play().catch(() => { });
+        }
+    };
+
+    // Play confirmation sound helper
+    const playConfirmation = () => {
+        if (confirmationAudioRef.current) {
+            confirmationAudioRef.current.currentTime = 0;
+            confirmationAudioRef.current.play().catch(() => { });
+        }
+    };
     const uiDefinitions = {
         logo: {
             title: "브랜드 아이덴티티",
@@ -78,6 +143,7 @@ export default function StepSix({ onNext }) {
                     ${tutorialStep === 0 ? 'ring-2 ring-white ring-offset-2 ring-offset-[#f49d25] animate-pulse z-50' : ''}
                 `}
                 onClick={() => {
+                    playGlassKnock();
                     setSelectedUI('logo');
                     setUxFlow(null);
                     if (tutorialStep === 0) setTutorialStep(1);
@@ -159,6 +225,7 @@ export default function StepSix({ onNext }) {
                 ${tutorialStep === 2 ? 'ring-2 ring-white ring-offset-2 ring-offset-[#f49d25] animate-pulse z-50' : ''}
             `}
             onClick={() => {
+                playGlassKnock();
                 setSelectedUI('nav');
                 setUxFlow(null);
                 if (tutorialStep === 2) setTutorialStep(3); // Go directly to Step 3 (Order Button)
@@ -175,12 +242,12 @@ export default function StepSix({ onNext }) {
                 </motion.div>
             )}
 
-            <div className={`flex flex-col items-center gap-1.5 group ${appView === 'home' ? 'text-white' : 'text-[#9c9285]'}`} onClick={(e) => { e.stopPropagation(); setAppView('home'); setSelectedUI('nav'); }}>
+            <div className={`flex flex-col items-center gap-1.5 group ${appView === 'home' ? 'text-white' : 'text-[#9c9285]'}`} onClick={(e) => { e.stopPropagation(); playGlassKnock(); setAppView('home'); setSelectedUI('nav'); }}>
                 <IconHome className="w-7 h-7 group-hover:scale-110 transition-transform" />
                 <span className="text-[10px] tracking-wide font-medium">홈</span>
             </div>
             {/* Target for Step 2 */}
-            <div className={`flex flex-col items-center gap-1.5 group ${appView === 'menu' ? 'text-white' : 'text-[#9c9285]'}`} onClick={(e) => { e.stopPropagation(); setAppView('menu'); setSelectedUI('nav'); if (tutorialStep === 2) setTutorialStep(3); }}>
+            <div className={`flex flex-col items-center gap-1.5 group ${appView === 'menu' ? 'text-white' : 'text-[#9c9285]'}`} onClick={(e) => { e.stopPropagation(); playGlassKnock(); setAppView('menu'); setSelectedUI('nav'); if (tutorialStep === 2) setTutorialStep(3); }}>
                 <IconCoffee className="w-7 h-7 group-hover:text-white transition-colors" />
                 <span className="text-[10px] tracking-wide font-medium">메뉴</span>
             </div>
@@ -242,6 +309,7 @@ export default function StepSix({ onNext }) {
                                         ${tutorialStep === 1 ? 'ring-2 ring-white ring-offset-2 ring-offset-[#f49d25] animate-pulse z-50' : ''}
                                     `}
                                     onClick={() => {
+                                        playGlassKnock();
                                         setSelectedUI('menu_card');
                                         setUxFlow(null);
                                         if (tutorialStep === 1) setTutorialStep(2);
@@ -356,6 +424,7 @@ export default function StepSix({ onNext }) {
                                             <button
                                                 className={`bg-[#f49d25] text-[#1c1917] rounded-full px-4 py-1.5 text-xs font-bold hover:bg-white hover:scale-105 transition-all shadow-[0_0_10px_rgba(244,157,37,0.4)]`}
                                                 onClick={() => {
+                                                    playCashier();
                                                     setSelectedUI('button');
                                                     setUxFlow('order');
                                                     if (tutorialStep === 3) setTutorialStep(4);
@@ -532,7 +601,14 @@ export default function StepSix({ onNext }) {
                                 className="flex-shrink-0 overflow-visible"
                             >
                                 <button
-                                    onClick={onNext}
+                                    onClick={() => {
+                                        // Create new Audio object to avoid unmount interruption
+                                        const sound = new Audio(confirmationSoundAsset);
+                                        sound.volume = 0.6;
+                                        sound.play().catch(() => { });
+                                        // Delay transition to let sound play
+                                        setTimeout(() => onNext(), 300);
+                                    }}
                                     className="group flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full font-bold text-base hover:bg-cyan-400 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] whitespace-nowrap"
                                 >
                                     <span>최종 관문으로 이동</span>

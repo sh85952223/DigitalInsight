@@ -1,7 +1,10 @@
 // [REFACTORED] 미사용 React import 제거
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Typewriter from './Typewriter';
+
+// Import Sound Assets
+import zoomInSoundAsset from '../assets/sounds/mixkit-user-interface-zoom-in-2618.wav';
 
 // Zone detection based on diagonal position
 function getZone(x, y, width, height) {
@@ -40,6 +43,24 @@ export default function StepFour({ result, onRestart, onNext }) {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [isHovering, setIsHovering] = useState(false);
     const [zone, setZone] = useState(null);
+
+    // Audio Ref
+    const zoomInAudioRef = useRef(null);
+
+    // Initialize Audio on mount
+    useEffect(() => {
+        zoomInAudioRef.current = new Audio(zoomInSoundAsset);
+        zoomInAudioRef.current.preload = 'auto';
+        zoomInAudioRef.current.load();
+        zoomInAudioRef.current.volume = 0.5;
+
+        return () => {
+            if (zoomInAudioRef.current) {
+                zoomInAudioRef.current.pause();
+                zoomInAudioRef.current = null;
+            }
+        };
+    }, []);
 
     const handleMouseMove = (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -315,18 +336,26 @@ export default function StepFour({ result, onRestart, onNext }) {
                 </div>
 
                 <button
-                    onClick={onNext}
+                    onClick={() => {
+                        // Play zoom-in sound
+                        if (zoomInAudioRef.current) {
+                            zoomInAudioRef.current.currentTime = 0;
+                            zoomInAudioRef.current.play().catch(() => { });
+                        }
+                        setTimeout(() => onNext(), 100);
+                    }}
                     style={{
                         padding: '12px 32px',
-                        border: '1px solid rgba(0, 243, 255, 0.5)',
+                        border: '3px solid rgba(0, 243, 255, 0.5)',
                         backgroundColor: 'transparent',
                         color: 'rgba(0, 243, 255, 0.7)',
                         cursor: 'pointer',
                         textTransform: 'uppercase',
-                        fontSize: '14px',
+                        fontSize: '16px',
                         letterSpacing: '2px',
                         transition: 'all 0.2s',
-                        fontFamily: 'var(--font-display, sans-serif)'
+                        fontFamily: 'var(--font-display, sans-serif)',
+                        fontWeight: 'bold'
                     }}
                     onMouseEnter={(e) => {
                         e.target.style.borderColor = '#00f3ff';

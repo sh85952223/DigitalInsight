@@ -1,20 +1,80 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import HudContainer from './HudContainer';
 import GlitchText from './GlitchText';
 import Typewriter from './Typewriter';
 
+// Import Sound Assets
+import glitchSoundAsset from '../assets/sounds/mixkit-small-electric-glitch-2595.wav';
+import ambienceSoundAsset from '../assets/sounds/longmixkit-futuristic-sci-fi-computer-ambience-2507.wav';
+import confirmationSoundAsset from '../assets/sounds/mixkit-sci-fi-confirmation-914.wav';
+
 export default function StepThree({ onNext, onRecordResult }) {
     const [status, setStatus] = useState('IDLE'); // IDLE, PROCESSING, RESULT
     const [resultType, setResultType] = useState(null);
 
+    // Audio Refs
+    const glitchAudioRef = useRef(null);
+    const ambienceAudioRef = useRef(null);
+    const confirmationAudioRef = useRef(null);
+
+    // Initialize Audio on mount
+    useEffect(() => {
+        glitchAudioRef.current = new Audio(glitchSoundAsset);
+        ambienceAudioRef.current = new Audio(ambienceSoundAsset);
+        confirmationAudioRef.current = new Audio(confirmationSoundAsset);
+
+        glitchAudioRef.current.preload = 'auto';
+        ambienceAudioRef.current.preload = 'auto';
+        confirmationAudioRef.current.preload = 'auto';
+        glitchAudioRef.current.load();
+        ambienceAudioRef.current.load();
+        confirmationAudioRef.current.load();
+
+        glitchAudioRef.current.volume = 0.7;
+        ambienceAudioRef.current.volume = 0.5;
+        confirmationAudioRef.current.volume = 0.6;
+        ambienceAudioRef.current.loop = false;
+
+        return () => {
+            if (glitchAudioRef.current) {
+                glitchAudioRef.current.pause();
+                glitchAudioRef.current = null;
+            }
+            if (ambienceAudioRef.current) {
+                ambienceAudioRef.current.pause();
+                ambienceAudioRef.current = null;
+            }
+            if (confirmationAudioRef.current) {
+                confirmationAudioRef.current.pause();
+                confirmationAudioRef.current = null;
+            }
+        };
+    }, []);
+
     const handleChoice = (choice) => {
+        // Play glitch sound
+        if (glitchAudioRef.current) {
+            glitchAudioRef.current.currentTime = 0;
+            glitchAudioRef.current.play().catch(() => { });
+        }
+
         onRecordResult(choice);
         setResultType(choice);
         setStatus('PROCESSING');
 
+        // Play ambience sound for processing
+        if (ambienceAudioRef.current) {
+            ambienceAudioRef.current.currentTime = 0;
+            ambienceAudioRef.current.play().catch(() => { });
+        }
+
         // Simulate processing time
         setTimeout(() => {
+            // Stop ambience when done
+            if (ambienceAudioRef.current) {
+                ambienceAudioRef.current.pause();
+            }
             setStatus('RESULT');
         }, 2500);
     };
@@ -152,7 +212,14 @@ export default function StepThree({ onNext, onRecordResult }) {
                             </p>
 
                             <button
-                                onClick={onNext}
+                                onClick={() => {
+                                    // Play confirmation sound
+                                    if (confirmationAudioRef.current) {
+                                        confirmationAudioRef.current.currentTime = 0;
+                                        confirmationAudioRef.current.play().catch(() => { });
+                                    }
+                                    setTimeout(() => onNext(), 100);
+                                }}
                                 className={`px-8 py-3 bg-[var(--panel-bg)] text-white font-bold font-display tracking-wider hover:bg-white hover:text-black transition-colors border ${resultType === 'match' ? 'border-[var(--primary-cyan)]' : 'border-[var(--accent-red)]'}`}
                             >
                                 실험 분석 보고서 보기
