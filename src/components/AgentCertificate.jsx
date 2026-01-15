@@ -44,12 +44,12 @@ export default function AgentCertificate({ onExit }) {
             }
         }, fadeInterval);
 
-        // Play stamp sound after 0.5s (when stamp animation happens)
+        // Play stamp sound when stamp "hits" (0.5s delay + 0.15s animation duration)
         const stampTimer = setTimeout(() => {
             const stampSound = new Audio(stampSoundAsset);
             stampSound.volume = 0.6;
             stampSound.play().catch(() => { });
-        }, 500);
+        }, 650);
 
         return () => {
             clearInterval(fadeTimer);
