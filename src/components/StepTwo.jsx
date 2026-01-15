@@ -1,7 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import HudContainer from './HudContainer';
 import GlitchText from './GlitchText';
+
+// Import Sound Assets
+import clickSoundAsset from '../assets/sounds/mixkit-interface-device-click-2577.wav';
 
 const directives = [
     {
@@ -37,9 +40,31 @@ const directives = [
 export default function StepTwo({ onNext }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const isNavigating = useRef(false);
+    const clickAudioRef = useRef(null);
+
+    // Initialize Audio on mount
+    useEffect(() => {
+        clickAudioRef.current = new Audio(clickSoundAsset);
+        clickAudioRef.current.preload = 'auto';
+        clickAudioRef.current.load();
+        clickAudioRef.current.volume = 0.6;
+
+        return () => {
+            if (clickAudioRef.current) {
+                clickAudioRef.current.pause();
+                clickAudioRef.current = null;
+            }
+        };
+    }, []);
 
     const handleNext = () => {
         if (isNavigating.current) return;
+
+        // Play click sound
+        if (clickAudioRef.current) {
+            clickAudioRef.current.currentTime = 0;
+            clickAudioRef.current.play().catch(() => { });
+        }
 
         isNavigating.current = true;
         setTimeout(() => {

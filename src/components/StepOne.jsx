@@ -1,9 +1,63 @@
+import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import GlitchText from './GlitchText';
 import HudContainer from './HudContainer';
 import Typewriter from './Typewriter';
 
+// Import Sound Assets
+import ambienceSoundAsset from '../assets/sounds/longmixkit-futuristic-sci-fi-computer-ambience-2507.wav';
+import doorOpenSoundAsset from '../assets/sounds/mixkit-futuristic-door-open-183.mp3';
+
 export default function StepOne({ onNext }) {
+    // Audio Refs
+    const ambienceAudioRef = useRef(null);
+    const doorOpenAudioRef = useRef(null);
+
+    // Initialize Audio on mount
+    useEffect(() => {
+        ambienceAudioRef.current = new Audio(ambienceSoundAsset);
+        doorOpenAudioRef.current = new Audio(doorOpenSoundAsset);
+
+        // Preload
+        ambienceAudioRef.current.preload = 'auto';
+        doorOpenAudioRef.current.preload = 'auto';
+        ambienceAudioRef.current.load();
+        doorOpenAudioRef.current.load();
+
+        // Ambience settings - loop and low volume
+        ambienceAudioRef.current.loop = true;
+        ambienceAudioRef.current.volume = 0.7;
+        doorOpenAudioRef.current.volume = 0.6;
+
+        // Start playing ambience
+        ambienceAudioRef.current.play().catch(() => { });
+
+        return () => {
+            if (ambienceAudioRef.current) {
+                ambienceAudioRef.current.pause();
+                ambienceAudioRef.current = null;
+            }
+            if (doorOpenAudioRef.current) {
+                doorOpenAudioRef.current.pause();
+                doorOpenAudioRef.current = null;
+            }
+        };
+    }, []);
+
+    const handleNextClick = () => {
+        // Play door open sound
+        if (doorOpenAudioRef.current) {
+            doorOpenAudioRef.current.currentTime = 0;
+            doorOpenAudioRef.current.play().catch(() => { });
+        }
+        // Stop ambience when leaving
+        if (ambienceAudioRef.current) {
+            ambienceAudioRef.current.pause();
+        }
+        // Small delay to let sound start
+        setTimeout(() => onNext(), 100);
+    };
+
     return (
         <motion.div
             className="w-full max-w-4xl flex flex-col items-center"
@@ -83,7 +137,7 @@ export default function StepOne({ onNext }) {
             {/* Action Button */}
             <motion.button
                 className="mt-16 group relative px-10 py-5 bg-transparent border border-[var(--primary-cyan)] overflow-hidden"
-                onClick={onNext}
+                onClick={handleNextClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >

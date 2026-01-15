@@ -112,6 +112,17 @@ export default function StepZero_3({ onNext }) {
         confirmationAudioRef.current = new Audio(confirmationSoundAsset);
         glitchAudioRef.current = new Audio(glitchSoundAsset);
 
+        // Preload all audio
+        clickAudioRef.current.preload = 'auto';
+        warpAudioRef.current.preload = 'auto';
+        confirmationAudioRef.current.preload = 'auto';
+        glitchAudioRef.current.preload = 'auto';
+
+        clickAudioRef.current.load();
+        warpAudioRef.current.load();
+        confirmationAudioRef.current.load();
+        glitchAudioRef.current.load();
+
         clickAudioRef.current.volume = 0.6;
         warpAudioRef.current.volume = 0.5;
         confirmationAudioRef.current.volume = 0.7;
@@ -576,13 +587,12 @@ export default function StepZero_3({ onNext }) {
                     </motion.p>
                     <motion.button
                         onClick={() => {
-                            // Play glitch sound
-                            if (glitchAudioRef.current) {
-                                glitchAudioRef.current.currentTime = 0;
-                                glitchAudioRef.current.play().catch(() => { });
-                            }
+                            // Create new Audio instance to avoid cleanup issues
+                            const glitchSound = new Audio(glitchSoundAsset);
+                            glitchSound.volume = 0.5;
+                            glitchSound.play().catch(() => { });
                             // Small delay to let sound start
-                            setTimeout(() => onNext(), 100);
+                            setTimeout(() => onNext(), 200);
                         }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
