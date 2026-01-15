@@ -2,6 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Crosshair from './common/Crosshair';
 
+// Import Sound Assets (User Provided)
+import glitchSoundAsset from '../assets/sounds/mixkit-futuristic-glitch-robot-1039.wav';
+import clickSoundAsset from '../assets/sounds/mixkit-interface-device-click-2577.wav';
+import paperScrollSoundAsset from '../assets/sounds/mixkit-paper-scroll-in-an-office-2383.wav';
+import doorbellSoundAsset from '../assets/sounds/mixkit-doorbell-single-press-333.wav';
+
 // Import Modern Images
 import modernBed from '../assets/modern_bed.png';
 import modernDoor from '../assets/modern_door.png';
@@ -33,6 +39,24 @@ const ACTION_STEPS = [
     "장보기에는 시간과 노력이 필요했다."
 ];
 
+// refactor: Moved constants outside to prevent recreation
+const CHARS = "!@#$%^&*()_+-=[]{}|;:,.<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+const PHASE_TEXTS = {
+    idle: {
+        title: "침대에 누워, 터치 한 번.",
+        desc: "더 이상 발품 팔 필요가 없는 세상."
+    },
+    ordering: {
+        title: "결제 진행 중...",
+        desc: "복잡한 과정은 생략되었습니다."
+    },
+    delivered: {
+        title: "오늘 도착 완료.",
+        desc: "과거에 비해 생활은 더욱 편리해졌다."
+    }
+};
+
 export default function StepZero_1({ onComplete }) {
     // Internal Phase: 'cover' -> 'comparison'
     const [showCover, setShowCover] = useState(true);
@@ -45,7 +69,52 @@ export default function StepZero_1({ onComplete }) {
     const [presentUnlocked, setPresentUnlocked] = useState(false);
     const [presentPhase, setPresentPhase] = useState('idle'); // idle, ordering, delivered
 
+    // Audio Refs (User Assets)
+    const glitchAudioRef = useRef(null);
+    const paperScrollAudioRef = useRef(null);
+    const doorbellAudioRef = useRef(null);
+    const clickAudioRef = useRef(null);
+
+    // Audio Interaction State (Autoplay Policy Fix)
+    const [hasInteracted, setHasInteracted] = useState(false);
+
+    // Configure Audio settings on mount
+    useEffect(() => {
+        glitchAudioRef.current = new Audio(glitchSoundAsset);
+        clickAudioRef.current = new Audio(clickSoundAsset);
+        paperScrollAudioRef.current = new Audio(paperScrollSoundAsset);
+        doorbellAudioRef.current = new Audio(doorbellSoundAsset);
+
+        glitchAudioRef.current.loop = true; // Glitch loops on hover
+        glitchAudioRef.current.volume = 0.5;
+
+        clickAudioRef.current.volume = 0.6;
+        doorbellAudioRef.current.volume = 0.7;
+        paperScrollAudioRef.current.volume = 1;
+
+        // Cleanup
+        return () => {
+            if (glitchAudioRef.current) {
+                glitchAudioRef.current.pause();
+                glitchAudioRef.current = null;
+            }
+            if (clickAudioRef.current) {
+                clickAudioRef.current.pause();
+                clickAudioRef.current = null;
+            }
+            if (paperScrollAudioRef.current) {
+                paperScrollAudioRef.current.pause();
+                paperScrollAudioRef.current = null;
+            }
+            if (doorbellAudioRef.current) {
+                doorbellAudioRef.current.pause();
+                doorbellAudioRef.current = null;
+            }
+        };
+    }, []);
+
     // IMAGE PRELOADING (Optimization)
+    // refactor: Preload market images to avoid flicker during slider interaction
     useEffect(() => {
         MARKET_SEQUENCE.forEach((src) => {
             const img = new Image();
@@ -54,6 +123,7 @@ export default function StepZero_1({ onComplete }) {
     }, []);
 
     // HIDE GLOBAL BACKGROUND & ANIMATIONS (User Request)
+    // refactor: Temporarily disable global cyber effects while this scene is active to maintain immersion
     useEffect(() => {
         const cyberBg = document.getElementById('cyber-bg');
         const scanlines = document.querySelector('.scanlines');
@@ -70,28 +140,65 @@ export default function StepZero_1({ onComplete }) {
     // Handlers
     const handlePastChange = (val) => {
         setPastStep(val);
+
+        // Play paper scroll sound on slider change
+        if (paperScrollAudioRef.current) {
+            paperScrollAudioRef.current.currentTime = 0;
+            paperScrollAudioRef.current.play().catch(e => console.warn("Paper scroll SFX failed", e));
+        }
+
         if (val === MARKET_SEQUENCE.length - 1) {
             setPastCompleted(true);
             setPresentUnlocked(true);
         }
     };
 
+    // refactor: Use timeoutRef for safety cleanup
+    const timeoutRef = useRef(null);
+
     const handlePresentOrder = () => {
+        // Play click sound on order
+        if (clickAudioRef.current) {
+            clickAudioRef.current.currentTime = 0;
+            clickAudioRef.current.play().catch(e => console.warn("Click SFX failed", e));
+        }
+
         setPresentPhase('ordering');
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             setPresentPhase('delivered');
+            // Play doorbell sound on delivery
+            if (doorbellAudioRef.current) {
+                doorbellAudioRef.current.currentTime = 0;
+                doorbellAudioRef.current.play().catch(e => console.warn("Doorbell SFX failed", e));
+            }
         }, 1000);
     };
+
+    useEffect(() => {
+        return () => clearTimeout(timeoutRef.current);
+    }, []);
 
     // Glitch Button Logic
     const [btnText, setBtnText] = useState("접근을 요청합니다");
     const intervalRef = useRef(null);
-    const CHARS = "!@#$%^&*()_+-=[]{}|;:,.<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     const handleBtnEnter = () => {
         let iteration = 0;
         clearInterval(intervalRef.current);
         const target = "접근 허가";
+
+        // Play Glitch Sound (Looping)
+        if (glitchAudioRef.current) {
+            glitchAudioRef.current.currentTime = 0;
+            const playPromise = glitchAudioRef.current.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Browser Autoplay Policy often blocks audio on hover before first click
+                    console.error("Audio Play prevented. User interaction required first.", error);
+                });
+            }
+        }
 
         intervalRef.current = setInterval(() => {
             setBtnText((prev) =>
@@ -112,12 +219,51 @@ export default function StepZero_1({ onComplete }) {
     const handleBtnLeave = () => {
         clearInterval(intervalRef.current);
         setBtnText("접근을 요청합니다");
+
+        // Stop Glitch Sound
+        if (glitchAudioRef.current) {
+            glitchAudioRef.current.pause();
+            glitchAudioRef.current.currentTime = 0;
+        }
+    };
+
+    // Initial Interaction Handler
+    const handleInitialInteraction = () => {
+        setHasInteracted(true);
+        // Unlock AudioContext by playing and pausing immediately
+        if (glitchAudioRef.current) {
+            glitchAudioRef.current.play().then(() => {
+                glitchAudioRef.current.pause();
+                glitchAudioRef.current.currentTime = 0;
+            }).catch(e => console.log("Audio unlock attempt", e));
+        }
     };
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="w-full h-full relative overflow-hidden bg-transparent">
+            {/* ==================== CLICK TO START OVERLAY (FIXED) ==================== */}
+            {!hasInteracted && (
+                <div
+                    className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black cursor-pointer text-white"
+                    onClick={handleInitialInteraction}
+                >
+                    <div className="text-center relative">
+                        {/* Decorative Brackets */}
+                        <div className="w-16 h-16 border-t-2 border-l-2 border-cyan-500 rounded-tl-xl absolute -top-8 -left-8 pointer-events-none" />
+                        <div className="w-16 h-16 border-b-2 border-r-2 border-cyan-500 rounded-br-xl absolute -bottom-8 -right-8 pointer-events-none" />
+
+                        <h2 className="text-5xl font-black text-white tracking-[0.2em] mb-6 drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
+                            SYSTEM READY
+                        </h2>
+                        <p className="text-cyan-400 font-mono text-lg animate-pulse">
+                            [ CLICK SCREEN TO INITIALIZE ]
+                        </p>
+                    </div>
+                </div>
+            )}
+
             <AnimatePresence mode="wait">
-                {showCover ? (
+                {hasInteracted && showCover ? (
                     /* ==================== COVER SCREEN ==================== */
                     <motion.div
                         key="cover"
@@ -125,7 +271,7 @@ export default function StepZero_1({ onComplete }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
                         transition={{ duration: 0.8 }}
-                        className="relative z-20 flex flex-col items-center justify-center text-center p-8"
+                        className="relative z-20 flex flex-col items-center justify-center text-center p-8 w-full h-full"
                     >
                         <motion.h1
                             data-hover="true"
@@ -156,10 +302,17 @@ export default function StepZero_1({ onComplete }) {
                             whileTap={{ scale: 0.95 }}
                             transition={{ delay: 0.8 }}
                             onClick={() => {
-                                // SFX: Access Granted / Sci-Fi Interface Start
-                                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3');
-                                audio.volume = 0.5;
-                                audio.play().catch(e => console.error("Audio play failed:", e));
+                                // Stop glitch immediately
+                                if (glitchAudioRef.current) {
+                                    glitchAudioRef.current.pause();
+                                    glitchAudioRef.current.currentTime = 0;
+                                }
+
+                                // SFX: Click Sound (User Asset)
+                                if (clickAudioRef.current) {
+                                    clickAudioRef.current.currentTime = 0;
+                                    clickAudioRef.current.play().catch(e => console.warn("Click SFX failed", e));
+                                }
 
                                 setShowCover(false);
                             }}
@@ -175,7 +328,7 @@ export default function StepZero_1({ onComplete }) {
                         {/* Only Show Crosshair on Cover */}
                         <Crosshair color="#22d3ee" />
                     </motion.div>
-                ) : (
+                ) : hasInteracted && !showCover ? (
                     /* ==================== COMPARISON SCREEN ==================== */
                     <motion.div
                         key="comparison"
@@ -240,37 +393,43 @@ export default function StepZero_1({ onComplete }) {
                                             </p>
 
                                             {/* Physical Slider */}
-                                            <div className="relative w-full h-12 flex items-center justify-center mt-2">
-                                                {/* Track */}
-                                                <div className="absolute w-full h-3 bg-gray-400 rounded-full shadow-inner border border-gray-500 overflow-hidden">
-                                                    <div className="w-full h-full bg-gray-300" />
-                                                </div>
-                                                {/* Progress */}
-                                                <motion.div
-                                                    className="absolute left-0 h-3 bg-gray-600 rounded-l-full pointer-events-none"
-                                                    animate={{ width: `${(pastStep / (MARKET_SEQUENCE.length - 1)) * 100}%` }}
-                                                />
+                                            {/* refactor: Extracted calculation */}
+                                            {(() => {
+                                                const pastProgress = (pastStep / (MARKET_SEQUENCE.length - 1)) * 100;
+                                                return (
+                                                    <div className="relative w-full h-12 flex items-center justify-center mt-2">
+                                                        {/* Track */}
+                                                        <div className="absolute w-full h-3 bg-gray-400 rounded-full shadow-inner border border-gray-500 overflow-hidden">
+                                                            <div className="w-full h-full bg-gray-300" />
+                                                        </div>
+                                                        {/* Progress */}
+                                                        <motion.div
+                                                            className="absolute left-0 h-3 bg-gray-600 rounded-l-full pointer-events-none"
+                                                            animate={{ width: `${pastProgress}%` }}
+                                                        />
 
-                                                {/* Handle / Knob */}
-                                                <motion.div
-                                                    className="absolute top-1/2 w-8 h-8 -mt-4 bg-zinc-200 rounded-full shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_-2px_4px_rgba(0,0,0,0.2)] border border-gray-400 flex items-center justify-center pointer-events-none"
-                                                    animate={{ left: `calc(${(pastStep / (MARKET_SEQUENCE.length - 1)) * 100}% - 16px)` }}
-                                                >
-                                                    <div className="w-2 h-2 bg-gray-400 rounded-full shadow-inner" />
-                                                </motion.div>
+                                                        {/* Handle / Knob */}
+                                                        <motion.div
+                                                            className="absolute top-1/2 w-8 h-8 -mt-4 bg-zinc-200 rounded-full shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_-2px_4px_rgba(0,0,0,0.2)] border border-gray-400 flex items-center justify-center pointer-events-none"
+                                                            animate={{ left: `calc(${pastProgress}% - 16px)` }}
+                                                        >
+                                                            <div className="w-2 h-2 bg-gray-400 rounded-full shadow-inner" />
+                                                        </motion.div>
 
-                                                {/* Input - on top */}
-                                                <input
-                                                    type="range"
-                                                    min="0"
-                                                    max={MARKET_SEQUENCE.length - 1}
-                                                    step={1}
-                                                    value={pastStep}
-                                                    onChange={(e) => handlePastChange(Number(e.target.value))}
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-grab active:cursor-grabbing"
-                                                    style={{ zIndex: 50 }}
-                                                />
-                                            </div>
+                                                        {/* Input - on top */}
+                                                        <input
+                                                            type="range"
+                                                            min="0"
+                                                            max={MARKET_SEQUENCE.length - 1}
+                                                            step={1}
+                                                            value={pastStep}
+                                                            onChange={(e) => handlePastChange(Number(e.target.value))}
+                                                            className="absolute inset-0 w-full h-full opacity-0 cursor-grab active:cursor-grabbing"
+                                                            style={{ zIndex: 50 }}
+                                                        />
+                                                    </div>
+                                                );
+                                            })()}
 
                                             <div className="text-center text-[10px] font-mono text-gray-500 mt-2 tracking-widest uppercase">
                                                 {pastCompleted ? "Memory Archived" : "Drag to Experience"}
@@ -370,14 +529,11 @@ export default function StepZero_1({ onComplete }) {
                                             {/* Caption Overlay */}
                                             <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black to-transparent">
                                                 <h2 className="text-3xl font-black text-white mb-1">
-                                                    {presentPhase === 'idle' && "침대에 누워, 터치 한 번."}
-                                                    {presentPhase === 'ordering' && "결제 진행 중..."}
-                                                    {presentPhase === 'delivered' && "오늘 도착 완료."}
+                                                    {/* refactor: Use mapping object instead of ternary operators */}
+                                                    {PHASE_TEXTS[presentPhase].title}
                                                 </h2>
                                                 <p className="text-gray-400 text-sm">
-                                                    {presentPhase === 'idle' && "더 이상 발품 팔 필요가 없는 세상."}
-                                                    {presentPhase === 'ordering' && "복잡한 과정은 생략되었습니다."}
-                                                    {presentPhase === 'delivered' && "과거에 비해 생활은 더욱 편리해졌다."}
+                                                    {PHASE_TEXTS[presentPhase].desc}
                                                 </p>
                                             </div>
                                         </div>
@@ -390,28 +546,31 @@ export default function StepZero_1({ onComplete }) {
                                             </div>
 
                                             {/* Action Button */}
-                                            {presentUnlocked ? (
-                                                presentPhase === 'delivered' ? (
-                                                    <button
-                                                        onClick={onComplete}
-                                                        className="bg-zinc-800 text-white px-8 py-3 rounded-lg text-sm font-bold tracking-wide transition-all border border-gray-600 flex items-center gap-2 group/btn hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 hover:border-transparent hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
-                                                    >
-                                                        하지만 놓치고 있는건? <span className="text-gray-400 group-hover/btn:translate-x-1 transition-transform group-hover/btn:text-white">→</span>
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        onClick={handlePresentOrder}
-                                                        disabled={presentPhase === 'ordering'}
-                                                        className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-lg text-sm font-bold tracking-wide shadow-lg shadow-purple-900/20 active:scale-95 transition-all flex items-center gap-2"
-                                                    >
-                                                        <span className="text-lg">⚡</span> 즉시 결제하기
-                                                    </button>
-                                                )
-                                            ) : (
+                                            {/* refactor: Flattened conditional logic for better readability */}
+                                            {!presentUnlocked && (
                                                 <div className="flex items-center gap-2 text-gray-600">
                                                     <span>🔒</span>
                                                     <span className="text-xs uppercase tracking-wider">Locked</span>
                                                 </div>
+                                            )}
+
+                                            {presentUnlocked && presentPhase !== 'delivered' && (
+                                                <button
+                                                    onClick={handlePresentOrder}
+                                                    disabled={presentPhase === 'ordering'}
+                                                    className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-lg text-sm font-bold tracking-wide shadow-lg shadow-purple-900/20 active:scale-95 transition-all flex items-center gap-2"
+                                                >
+                                                    <span className="text-lg">⚡</span> 즉시 결제하기
+                                                </button>
+                                            )}
+
+                                            {presentUnlocked && presentPhase === 'delivered' && (
+                                                <button
+                                                    onClick={onComplete}
+                                                    className="bg-zinc-800 text-white px-8 py-3 rounded-lg text-sm font-bold tracking-wide transition-all border border-gray-600 flex items-center gap-2 group/btn hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 hover:border-transparent hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+                                                >
+                                                    하지만 놓치고 있는건? <span className="text-gray-400 group-hover/btn:translate-x-1 transition-transform group-hover/btn:text-white">→</span>
+                                                </button>
                                             )}
                                         </div>
                                     </div>
@@ -420,7 +579,7 @@ export default function StepZero_1({ onComplete }) {
 
                         </div>
                     </motion.div>
-                )}
+                ) : null}
             </AnimatePresence>
         </div>
     );

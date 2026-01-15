@@ -1,5 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Import Sound Assets
+import clickSoundAsset from '../assets/sounds/mixkit-interface-device-click-2577.wav';
+import warpSoundAsset from '../assets/sounds/mixkit-sci-fi-warp-slide-3113.wav';
+import confirmationSoundAsset from '../assets/sounds/mixkit-sci-fi-confirmation-914.wav';
+import glitchSoundAsset from '../assets/sounds/mixkit-futuristic-glitch-robot-1039.wav';
 
 // ============================================
 // CARD DATA
@@ -93,6 +99,44 @@ export default function StepZero_3({ onNext }) {
     const TOTAL_ITEMS = 8;
     const allFound = foundItems.length >= TOTAL_ITEMS;
 
+    // Audio Refs
+    const clickAudioRef = useRef(null);
+    const warpAudioRef = useRef(null);
+    const confirmationAudioRef = useRef(null);
+    const glitchAudioRef = useRef(null);
+
+    // Initialize Audio on mount
+    useEffect(() => {
+        clickAudioRef.current = new Audio(clickSoundAsset);
+        warpAudioRef.current = new Audio(warpSoundAsset);
+        confirmationAudioRef.current = new Audio(confirmationSoundAsset);
+        glitchAudioRef.current = new Audio(glitchSoundAsset);
+
+        clickAudioRef.current.volume = 0.6;
+        warpAudioRef.current.volume = 0.5;
+        confirmationAudioRef.current.volume = 0.7;
+        glitchAudioRef.current.volume = 0.5;
+
+        return () => {
+            if (clickAudioRef.current) {
+                clickAudioRef.current.pause();
+                clickAudioRef.current = null;
+            }
+            if (warpAudioRef.current) {
+                warpAudioRef.current.pause();
+                warpAudioRef.current = null;
+            }
+            if (confirmationAudioRef.current) {
+                confirmationAudioRef.current.pause();
+                confirmationAudioRef.current = null;
+            }
+            if (glitchAudioRef.current) {
+                glitchAudioRef.current.pause();
+                glitchAudioRef.current = null;
+            }
+        };
+    }, []);
+
     // Force HIDE global scanlines and vignette (App.jsx)
     useEffect(() => {
         const scanlines = document.querySelector('.scanlines');
@@ -114,6 +158,11 @@ export default function StepZero_3({ onNext }) {
     const handleDarkPatternClick = (content, e) => {
         if (!foundItems.includes(content.id)) {
             setFoundItems([...foundItems, content.id]);
+            // Play warp sound when finding a dark pattern
+            if (warpAudioRef.current) {
+                warpAudioRef.current.currentTime = 0;
+                warpAudioRef.current.play().catch(() => { });
+            }
         }
     };
 
@@ -374,7 +423,14 @@ export default function StepZero_3({ onNext }) {
                         아름다운 화면 뒤에 무엇이 숨어있는지 X-RAY로 확인하라.
                     </p>
                     <motion.button
-                        onClick={() => setPhase('xray')}
+                        onClick={() => {
+                            // Play click sound
+                            if (clickAudioRef.current) {
+                                clickAudioRef.current.currentTime = 0;
+                                clickAudioRef.current.play().catch(() => { });
+                            }
+                            setPhase('xray');
+                        }}
                         whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(239,68,68,0.5)' }}
                         whileTap={{ scale: 0.95 }}
                         className="px-10 py-4 bg-red-600 text-white font-black text-xl rounded-sm shadow-lg uppercase tracking-widest"
@@ -467,7 +523,16 @@ export default function StepZero_3({ onNext }) {
                         transition={{ delay: 1 }}
                     >
                         <button
-                            onClick={() => allFound && setPhase('revealed')}
+                            onClick={() => {
+                                if (allFound) {
+                                    // Play confirmation sound
+                                    if (confirmationAudioRef.current) {
+                                        confirmationAudioRef.current.currentTime = 0;
+                                        confirmationAudioRef.current.play().catch(() => { });
+                                    }
+                                    setPhase('revealed');
+                                }
+                            }}
                             disabled={!allFound}
                             className={`px-10 py-5 rounded-full font-black text-xl border backdrop-blur-md transition-all flex items-center gap-3 tracking-wide ${allFound
                                 ? 'bg-cyan-500 text-black border-cyan-400 shadow-[0_0_30px_rgba(0,243,255,0.5)] hover:bg-cyan-400 cursor-pointer'
@@ -510,7 +575,15 @@ export default function StepZero_3({ onNext }) {
                         당신에게 디지털 수사 요원이 되기 위한 테스트 자격을 부여합니다.
                     </motion.p>
                     <motion.button
-                        onClick={onNext}
+                        onClick={() => {
+                            // Play glitch sound
+                            if (glitchAudioRef.current) {
+                                glitchAudioRef.current.currentTime = 0;
+                                glitchAudioRef.current.play().catch(() => { });
+                            }
+                            // Small delay to let sound start
+                            setTimeout(() => onNext(), 100);
+                        }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 1.5 }}

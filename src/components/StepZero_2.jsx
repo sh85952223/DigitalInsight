@@ -1,5 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+
+// Import Sound Assets
+import popAlertSoundAsset from '../assets/sounds/mixkit-message-pop-alert-2354.mp3';
+import closeSoundAsset from '../assets/sounds/mixkit-mouse-click-close-1113.wav';
+import confirmationSoundAsset from '../assets/sounds/mixkit-sci-fi-confirmation-914.wav';
+import clickSoundAsset from '../assets/sounds/mixkit-interface-device-click-2577.wav';
 
 export default function StepZero_2({ onComplete }) {
     // Friction Loss Phase - Pop-up Game State
@@ -19,6 +25,55 @@ export default function StepZero_2({ onComplete }) {
         { id: 10, visible: false, x: '5%', y: '45%', text: '🚫 WAIT!', bg: 'bg-gray-800' },
     ]);
     const REQUIRED_CLOSES = 5; // Increased required closes for more friction
+
+    // Audio Refs
+    const popAlertAudioRef = useRef(null);
+    const closeAudioRef = useRef(null);
+    const confirmationAudioRef = useRef(null);
+    const clickAudioRef = useRef(null);
+
+    // Initialize Audio on mount
+    useEffect(() => {
+        popAlertAudioRef.current = new Audio(popAlertSoundAsset);
+        closeAudioRef.current = new Audio(closeSoundAsset);
+        confirmationAudioRef.current = new Audio(confirmationSoundAsset);
+        clickAudioRef.current = new Audio(clickSoundAsset);
+
+        // Preload all audio
+        popAlertAudioRef.current.preload = 'auto';
+        closeAudioRef.current.preload = 'auto';
+        confirmationAudioRef.current.preload = 'auto';
+        clickAudioRef.current.preload = 'auto';
+
+        popAlertAudioRef.current.load();
+        closeAudioRef.current.load();
+        confirmationAudioRef.current.load();
+        clickAudioRef.current.load();
+
+        popAlertAudioRef.current.volume = 0.5;
+        closeAudioRef.current.volume = 0.6;
+        confirmationAudioRef.current.volume = 0.7;
+        clickAudioRef.current.volume = 0.6;
+
+        return () => {
+            if (popAlertAudioRef.current) {
+                popAlertAudioRef.current.pause();
+                popAlertAudioRef.current = null;
+            }
+            if (closeAudioRef.current) {
+                closeAudioRef.current.pause();
+                closeAudioRef.current = null;
+            }
+            if (confirmationAudioRef.current) {
+                confirmationAudioRef.current.pause();
+                confirmationAudioRef.current = null;
+            }
+            if (clickAudioRef.current) {
+                clickAudioRef.current.pause();
+                clickAudioRef.current = null;
+            }
+        };
+    }, []);
 
     return (
         <motion.div
@@ -250,10 +305,11 @@ export default function StepZero_2({ onComplete }) {
                                 p.id === popup.id ? { ...p, visible: true } : p
                             ));
 
-                            // Play Random Popup Sound
-                            const sfx = new Audio(popupSounds[Math.floor(Math.random() * popupSounds.length)]);
-                            sfx.volume = 0.3; // slightly lower volume
-                            sfx.play().catch(() => { });
+                            // Play pop alert sound
+                            if (popAlertAudioRef.current) {
+                                popAlertAudioRef.current.currentTime = 0;
+                                popAlertAudioRef.current.play().catch(() => { });
+                            }
 
                         }, 500 + (index * 400)); // Faster sequence for more popups
                     });
@@ -362,8 +418,11 @@ export default function StepZero_2({ onComplete }) {
                                 <button
                                     onClick={() => {
                                         setClosedPopups(prev => prev + 1);
-                                        // Close Hint Sound
-                                        new Audio('https://assets.mixkit.co/sfx/preview/mixkit-simple-game-countdown-921.mp3').play().catch(() => { });
+                                        // Close Sound
+                                        if (closeAudioRef.current) {
+                                            closeAudioRef.current.currentTime = 0;
+                                            closeAudioRef.current.play().catch(() => { });
+                                        }
                                     }}
                                     className="w-6 h-6 bg-gray-600 hover:bg-gray-500 rounded-full flex items-center justify-center text-white text-sm transition-colors"
                                 >
@@ -399,10 +458,18 @@ export default function StepZero_2({ onComplete }) {
                                         ));
                                         setClosedPopups(prev => prev + 1);
 
-                                        // Close Popup Sound (Click)
-                                        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3');
-                                        audio.volume = 0.5;
-                                        audio.play().catch(() => { });
+                                        // Play confirmation sound on last popup, else close sound
+                                        if (closedPopups + 1 >= REQUIRED_CLOSES) {
+                                            if (confirmationAudioRef.current) {
+                                                confirmationAudioRef.current.currentTime = 0;
+                                                confirmationAudioRef.current.play().catch(() => { });
+                                            }
+                                        } else {
+                                            if (closeAudioRef.current) {
+                                                closeAudioRef.current.currentTime = 0;
+                                                closeAudioRef.current.play().catch(() => { });
+                                            }
+                                        }
                                     }}
                                     className="w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white font-bold text-lg transition-colors border border-white/20"
                                 >
@@ -428,10 +495,11 @@ export default function StepZero_2({ onComplete }) {
                             animate={{ opacity: [1, 1, 0], scale: [0, 2, 3] }}
                             transition={{ duration: 1, ease: "easeOut" }}
                             onLayoutAnimationStart={() => {
-                                // Impact Sound
-                                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cinematic-deep-impact-swish-1996.mp3');
-                                audio.volume = 0.8;
-                                audio.play().catch(() => { });
+                                // Mission complete confirmation sound
+                                if (confirmationAudioRef.current) {
+                                    confirmationAudioRef.current.currentTime = 0;
+                                    confirmationAudioRef.current.play().catch(() => { });
+                                }
                             }}
                         >
                             <div
@@ -482,7 +550,15 @@ export default function StepZero_2({ onComplete }) {
                             </p>
 
                             <motion.button
-                                onClick={onComplete}
+                                onClick={() => {
+                                    // Play click sound
+                                    if (clickAudioRef.current) {
+                                        clickAudioRef.current.currentTime = 0;
+                                        clickAudioRef.current.play().catch(() => { });
+                                    }
+                                    // Small delay to ensure sound plays before transition
+                                    setTimeout(() => onComplete(), 100);
+                                }}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 1.5, duration: 0.5 }}
