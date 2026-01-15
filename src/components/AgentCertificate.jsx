@@ -7,6 +7,7 @@ import Lanyard from './Lanyard';
 // Sound Assets
 import bgmSoundAsset from '../assets/sounds/innovative-tech-background-for-presentations-153299.mp3';
 import stampSoundAsset from '../assets/sounds/traditional-stamp-44189.mp3';
+import clappingSoundAsset from '../assets/sounds/mixkit-ending-show-audience-clapping-478.wav';
 
 export default function AgentCertificate({ onExit }) {
     // Audio Ref
@@ -45,11 +46,12 @@ export default function AgentCertificate({ onExit }) {
         }, fadeInterval);
 
         // Play stamp sound when stamp "hits" (0.5s delay + 0.15s animation duration)
+        // Adjusted to 600ms for tighter sync
         const stampTimer = setTimeout(() => {
             const stampSound = new Audio(stampSoundAsset);
             stampSound.volume = 0.6;
             stampSound.play().catch(() => { });
-        }, 650);
+        }, 600);
 
         return () => {
             clearInterval(fadeTimer);
@@ -181,7 +183,13 @@ export default function AgentCertificate({ onExit }) {
                         </div>
                     </div>
 
-                    <button onClick={onExit} className="mt-6 w-full py-4 bg-white text-black font-bold tracking-widest hover:bg-cyan-400 transition-colors flex items-center justify-center gap-2 group">
+                    <button onClick={() => {
+                        const clappingSound = new Audio(clappingSoundAsset);
+                        clappingSound.volume = 0.6;
+                        clappingSound.play().catch(() => { });
+                        // Delay exit to let sound start playing
+                        setTimeout(onExit, 500);
+                    }} className="mt-6 w-full py-4 bg-white text-black font-bold tracking-widest hover:bg-cyan-400 transition-colors flex items-center justify-center gap-2 group">
                         <span>본부로 복귀</span>
                         <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </button>

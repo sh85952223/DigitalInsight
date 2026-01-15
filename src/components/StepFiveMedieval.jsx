@@ -20,6 +20,7 @@ import interfaceClickSoundAsset from '../assets/sounds/mixkit-interface-device-c
 import confirmationSoundAsset from '../assets/sounds/mixkit-sci-fi-confirmation-914.wav';
 import techGlitchSoundAsset from '../assets/sounds/mixkit-tech-weird-glitch-2685.wav';
 import magicalTransitionSoundAsset from '../assets/sounds/mixkit-magical-light-transition-2583.wav';
+import typewriterHitSoundAsset from '../assets/sounds/mixkit-mechanical-typewriter-hit-1365.wav';
 
 export default function StepFiveMedieval({ onNext }) {
     const [phase, setPhase] = useState('prologue'); // prologue -> transition_in -> entry -> explore -> experience -> agent_reveal
@@ -42,6 +43,7 @@ export default function StepFiveMedieval({ onNext }) {
     const confirmationAudioRef = useRef(null);
     const techGlitchAudioRef = useRef(null);
     const magicalTransitionAudioRef = useRef(null);
+    const typewriterHitAudioRef = useRef(null);
 
     // Play classic click sound helper
     const playClassicClick = () => {
@@ -59,6 +61,14 @@ export default function StepFiveMedieval({ onNext }) {
         }
     };
 
+    // Play typewriter hit sound helper
+    const playTypewriterHit = () => {
+        if (typewriterHitAudioRef.current) {
+            typewriterHitAudioRef.current.currentTime = 0;
+            typewriterHitAudioRef.current.play().catch(() => { });
+        }
+    };
+
     // Initialize Audio on mount
     useEffect(() => {
         timeMachineAudioRef.current = new Audio(timeMachineSoundAsset);
@@ -70,9 +80,10 @@ export default function StepFiveMedieval({ onNext }) {
         confirmationAudioRef.current = new Audio(confirmationSoundAsset);
         techGlitchAudioRef.current = new Audio(techGlitchSoundAsset);
         magicalTransitionAudioRef.current = new Audio(magicalTransitionSoundAsset);
+        typewriterHitAudioRef.current = new Audio(typewriterHitSoundAsset);
 
         // Preload all
-        [timeMachineAudioRef, doorBellAudioRef, bonfireAudioRef, peopleAudioRef, classicClickAudioRef, interfaceClickAudioRef, confirmationAudioRef, techGlitchAudioRef, magicalTransitionAudioRef].forEach(ref => {
+        [timeMachineAudioRef, doorBellAudioRef, bonfireAudioRef, peopleAudioRef, classicClickAudioRef, interfaceClickAudioRef, confirmationAudioRef, techGlitchAudioRef, magicalTransitionAudioRef, typewriterHitAudioRef].forEach(ref => {
             if (ref.current) {
                 ref.current.preload = 'auto';
                 ref.current.load();
@@ -90,9 +101,10 @@ export default function StepFiveMedieval({ onNext }) {
         confirmationAudioRef.current.volume = 0.6;
         techGlitchAudioRef.current.volume = 0.5;
         magicalTransitionAudioRef.current.volume = 1;
+        typewriterHitAudioRef.current.volume = 0.6;
 
         return () => {
-            [timeMachineAudioRef, doorBellAudioRef, bonfireAudioRef, peopleAudioRef, classicClickAudioRef, interfaceClickAudioRef, confirmationAudioRef, techGlitchAudioRef, magicalTransitionAudioRef].forEach(ref => {
+            [timeMachineAudioRef, doorBellAudioRef, bonfireAudioRef, peopleAudioRef, classicClickAudioRef, interfaceClickAudioRef, confirmationAudioRef, techGlitchAudioRef, magicalTransitionAudioRef, typewriterHitAudioRef].forEach(ref => {
                 if (ref.current) {
                     ref.current.pause();
                     ref.current = null;
@@ -168,6 +180,7 @@ export default function StepFiveMedieval({ onNext }) {
         }
 
         if (item === 'menu') {
+            playTypewriterHit();
             setShowOverlay(menuImage);
             setDialogue({
                 speaker: "나",
@@ -176,6 +189,7 @@ export default function StepFiveMedieval({ onNext }) {
                 onAction: () => { playClassicClick(); setShowOverlay(null); setDialogue(null); }
             });
         } else if (item === 'chandelier') {
+            playTypewriterHit();
             setShowOverlay(chandelierImage);
             setDialogue({
                 speaker: "나",
@@ -184,6 +198,7 @@ export default function StepFiveMedieval({ onNext }) {
                 onAction: () => { playClassicClick(); setShowOverlay(null); setDialogue(null); }
             });
         } else if (item === 'rug') {
+            playTypewriterHit();
             setShowOverlay(rugImage);
             setDialogue({
                 speaker: "나",
@@ -429,40 +444,65 @@ export default function StepFiveMedieval({ onNext }) {
             actionLabel: "누...구세요?",
             onAction: async () => {
                 playInterfaceClick();
-                setDialogue(null); // 잠시 숨김 (Pause)
+                setDialogue(null);
                 await new Promise(r => setTimeout(r, 600));
 
+                // Dialogue 2-1
                 setDialogue({
                     speaker: "교관",
-                    text: "당신의 테스트를 지켜보는 선임 요원입니다. 디지털 환경, 특히 우리가 매일 쓰는 스마트폰에서 UI와 UX를 빼고 이야기 할 순 없습니다.\n요원으로 한 단계 성장을 위해 실제 APP에서도 살펴보죠.",
-                    actionLabel: "다음",
+                    text: "당신의 테스트를 지켜보는 선임 요원입니다.",
+                    actionLabel: "...",
                     onAction: async () => {
                         playInterfaceClick();
-                        setDialogue(null); // 잠시 숨김 (Pause)
+                        setDialogue(null);
                         await new Promise(r => setTimeout(r, 600));
 
-                        // 5. Final Line (Before Snap)
+                        // Dialogue 2-2
                         setDialogue({
                             speaker: "교관",
-                            text: "(손가락을 딱 튕기며)\n이제 실제 같은 APP에서 UI와 UX를 직접 해부해 봅시다.",
-                            actionLabel: "Snap! 🫰", // Trigger Snap
-                            onAction: () => {
+                            text: "디지털 환경, 특히 우리가 매일 쓰는 스마트폰에서 UI와 UX를 빼고 이야기 할 순 없습니다.",
+                            actionLabel: "다음",
+                            onAction: async () => {
+                                playInterfaceClick();
                                 setDialogue(null);
-                                setIsSnapEffect(true); // Flash
+                                await new Promise(r => setTimeout(r, 600));
 
-                                // Play magical transition sound (skip first 2 seconds)
-                                if (magicalTransitionAudioRef.current) {
-                                    magicalTransitionAudioRef.current.currentTime = 2;
-                                    magicalTransitionAudioRef.current.play().catch(() => { });
+                                // Dialogue 2-3
+                                setDialogue({
+                                    speaker: "교관",
+                                    text: "요원으로 한 단계 성장을 위해 실제 APP에서도 살펴보죠.",
+                                    actionLabel: "다음",
+                                    onAction: async () => {
+                                        playInterfaceClick();
+                                        setDialogue(null);
+                                        await new Promise(r => setTimeout(r, 600));
 
-                                    // Wait for sound to finish, then transition
-                                    magicalTransitionAudioRef.current.onended = () => {
-                                        onNext(); // Go to Step 6 automatically
-                                    };
-                                } else {
-                                    // Fallback if audio fails
-                                    setTimeout(() => onNext(), 800);
-                                }
+                                        // Final Line
+                                        setDialogue({
+                                            speaker: "교관",
+                                            text: "(손가락을 딱 튕기며)\n이제 실제 같은 APP에서 UI와 UX를 직접 해부해 봅시다.",
+                                            actionLabel: "Snap! 🫰", // Trigger Snap
+                                            onAction: () => {
+                                                setDialogue(null);
+                                                setIsSnapEffect(true); // Flash
+
+                                                // Play magical transition sound (skip first 2 seconds)
+                                                if (magicalTransitionAudioRef.current) {
+                                                    magicalTransitionAudioRef.current.currentTime = 2;
+                                                    magicalTransitionAudioRef.current.play().catch(() => { });
+
+                                                    // Wait for sound to finish, then transition
+                                                    magicalTransitionAudioRef.current.onended = () => {
+                                                        onNext(); // Go to Step 6 automatically
+                                                    };
+                                                } else {
+                                                    // Fallback if audio fails
+                                                    setTimeout(() => onNext(), 800);
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
                             }
                         });
                     }
