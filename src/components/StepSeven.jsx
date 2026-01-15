@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlitchText from './GlitchText';
 
@@ -7,13 +7,43 @@ import QuizStage1 from './QuizStage1';
 import QuizStage2 from './QuizStage2';
 import AgentCertificate from './AgentCertificate';
 
+// Sound Assets
+import underwaterHumSoundAsset from '../assets/sounds/mixkit-underwater-transmitter-hum-2135.wav';
+
 export default function StepSeven({ onNext, subStep = 0 }) {
     const [step, setStep] = useState(subStep);
+
+    // Audio Ref
+    const ambienceAudioRef = useRef(null);
 
     // Sync with external subStep prop if provided (for dev menu navigation)
     React.useEffect(() => {
         setStep(subStep);
     }, [subStep]);
+
+    // Initialize and play background ambience on mount
+    useEffect(() => {
+        ambienceAudioRef.current = new Audio(underwaterHumSoundAsset);
+        ambienceAudioRef.current.preload = 'auto';
+        ambienceAudioRef.current.load();
+        ambienceAudioRef.current.volume = 0.3;
+        ambienceAudioRef.current.loop = true;
+
+        // Play after a short delay to let confirmation sound finish
+        const playTimer = setTimeout(() => {
+            if (ambienceAudioRef.current) {
+                ambienceAudioRef.current.play().catch(() => { });
+            }
+        }, 500);
+
+        return () => {
+            clearTimeout(playTimer);
+            if (ambienceAudioRef.current) {
+                ambienceAudioRef.current.pause();
+                ambienceAudioRef.current = null;
+            }
+        };
+    }, []);
 
     return (
         <div className="fixed inset-0 z-[9999] bg-black font-sans select-none">
@@ -38,7 +68,7 @@ export default function StepSeven({ onNext, subStep = 0 }) {
 
                 {step === 1 && (
                     <motion.div key="st1" className="w-full h-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <QuizStage1 onComplete={() => setStep(2)} />
+                        <QuizStage1 onComplete={() => setStep(2)} ambienceAudioRef={ambienceAudioRef} />
                     </motion.div>
                 )}
 

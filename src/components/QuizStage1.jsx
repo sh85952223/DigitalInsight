@@ -116,12 +116,39 @@ const SoundEngine = {
     }
 };
 
-const QuizStage1 = ({ onComplete }) => {
+const QuizStage1 = ({ onComplete, ambienceAudioRef }) => {
     const [digitized, setDigitized] = useState([]);
     const [infoModalItem, setInfoModalItem] = useState(null);
     const [shakeItem, setShakeItem] = useState(null);
     const [hoveredSlot, setHoveredSlot] = useState(null);
     const constraintsRef = useRef(null);
+
+    // Fade out background ambience over 4-5 seconds on mount
+    useEffect(() => {
+        if (ambienceAudioRef?.current) {
+            const audio = ambienceAudioRef.current;
+            const fadeDuration = 4500; // 4.5 seconds
+            const fadeSteps = 50;
+            const fadeInterval = fadeDuration / fadeSteps;
+            const volumeStep = audio.volume / fadeSteps;
+
+            let currentStep = 0;
+            const fadeTimer = setInterval(() => {
+                currentStep++;
+                const newVolume = Math.max(0, audio.volume - volumeStep);
+                audio.volume = newVolume;
+
+                if (currentStep >= fadeSteps) {
+                    clearInterval(fadeTimer);
+                    audio.pause();
+                }
+            }, fadeInterval);
+
+            return () => {
+                clearInterval(fadeTimer);
+            };
+        }
+    }, [ambienceAudioRef]);
 
     const handleDrag = (event, info, draggedItem) => {
         const point = {

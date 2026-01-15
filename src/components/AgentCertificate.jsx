@@ -1,8 +1,65 @@
 // [REFACTORED] 미사용 React, Suspense, GlitchText import 제거
+import { useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Loader } from '@react-three/drei';
 import Lanyard from './Lanyard';
 
+// Sound Assets
+import bgmSoundAsset from '../assets/sounds/innovative-tech-background-for-presentations-153299.mp3';
+import stampSoundAsset from '../assets/sounds/traditional-stamp-44189.mp3';
+
 export default function AgentCertificate({ onExit }) {
+    // Audio Ref
+    const bgmAudioRef = useRef(null);
+
+    // Initialize and play background music on mount with fade in
+    useEffect(() => {
+        bgmAudioRef.current = new Audio(bgmSoundAsset);
+        bgmAudioRef.current.preload = 'auto';
+        bgmAudioRef.current.load();
+        bgmAudioRef.current.volume = 0; // Start at 0 for fade in
+        bgmAudioRef.current.loop = true;
+
+        // Skip first 2 seconds (quiet part)
+        bgmAudioRef.current.currentTime = 2;
+
+        // Start playing
+        bgmAudioRef.current.play().catch(() => { });
+
+        // Fade in over 2 seconds
+        const fadeDuration = 2000;
+        const fadeSteps = 40;
+        const fadeInterval = fadeDuration / fadeSteps;
+        const targetVolume = 0.35;
+        const volumeStep = targetVolume / fadeSteps;
+        let currentStep = 0;
+
+        const fadeTimer = setInterval(() => {
+            currentStep++;
+            if (bgmAudioRef.current) {
+                bgmAudioRef.current.volume = Math.min(targetVolume, volumeStep * currentStep);
+            }
+            if (currentStep >= fadeSteps) {
+                clearInterval(fadeTimer);
+            }
+        }, fadeInterval);
+
+        // Play stamp sound after 0.5s (when stamp animation happens)
+        const stampTimer = setTimeout(() => {
+            const stampSound = new Audio(stampSoundAsset);
+            stampSound.volume = 0.6;
+            stampSound.play().catch(() => { });
+        }, 500);
+
+        return () => {
+            clearInterval(fadeTimer);
+            clearTimeout(stampTimer);
+            if (bgmAudioRef.current) {
+                bgmAudioRef.current.pause();
+                bgmAudioRef.current = null;
+            }
+        };
+    }, []);
     return (
         <div className="w-full h-full flex bg-zinc-950 relative overflow-hidden font-sans">
             {/* LEFT: 3D INTERACTION AREA */}
@@ -81,9 +138,20 @@ export default function AgentCertificate({ onExit }) {
                         </div>
                     </div>
 
-                    {/* Stamp - Realistic Official Seal Style */}
-                    <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-12 w-56 h-56 opacity-90 pointer-events-none select-none z-0 mix-blend-plus-lighter">
-                        <div className="w-full h-full border-4 border-double border-cyan-500 rounded-full flex items-center justify-center -rotate-12 bg-cyan-900/10 shadow-[0_0_30px_rgba(6,182,212,0.2)] animate-[stamp_0.4s_cubic-bezier(0.5,0,0.5,1.5)_0.2s_both]">
+                    {/* Stamp - Realistic Official Seal Style with Stamping Animation */}
+                    <motion.div
+                        initial={{ scale: 2.5, opacity: 0, rotate: 15 }}
+                        animate={{ scale: 1, opacity: 0.9, rotate: -12 }}
+                        transition={{
+                            delay: 0.5,
+                            duration: 0.15,
+                            type: "spring",
+                            stiffness: 500,
+                            damping: 15
+                        }}
+                        className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-12 w-56 h-56 pointer-events-none select-none z-0 mix-blend-plus-lighter"
+                    >
+                        <div className="w-full h-full border-4 border-double border-cyan-500 rounded-full flex items-center justify-center bg-cyan-900/10 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
                             {/* Inner Circle */}
                             <div className="w-[90%] h-[90%] border border-cyan-400 rounded-full flex items-center justify-center relative">
                                 {/* Top/Bottom Text hints */}
@@ -103,7 +171,7 @@ export default function AgentCertificate({ onExit }) {
                                 <div className="absolute text-9xl text-cyan-500/5 rotate-12">★</div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Actions */}
                     <div className="mt-12 flex gap-4 relative z-10">

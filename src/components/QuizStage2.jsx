@@ -184,14 +184,16 @@ const QuizStage2 = ({ onComplete }) => {
                             initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }}
                             className="absolute inset-0 bg-red-600 z-40 pointer-events-none mix-blend-overlay"
                         />
-                        {/* Error Toast */}
+                        {/* Error Toast - Centered */}
                         <motion.div
-                            initial={{ opacity: 0, y: -50, x: '-50%' }}
-                            animate={{ opacity: 1, y: 0, x: '-50%' }}
-                            exit={{ opacity: 0, y: -20, x: '-50%' }}
-                            className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-2 rounded-full font-bold shadow-[0_0_20px_rgba(220,38,38,0.6)] flex items-center gap-2 border border-red-400"
+                            initial={{ opacity: 0, y: -50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="fixed top-24 left-0 right-0 z-50 flex justify-center pointer-events-none"
                         >
-                            <span>⚠️ Incorrect Classification! Try Again.</span>
+                            <div className="bg-red-600 text-white px-6 py-2 rounded-full font-bold shadow-[0_0_20px_rgba(220,38,38,0.6)] flex items-center gap-2 border border-red-400">
+                                <span>⚠️ Incorrect Classification! Try Again.</span>
+                            </div>
                         </motion.div>
                     </>
                 )}
