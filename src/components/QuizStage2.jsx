@@ -199,44 +199,86 @@ const QuizStage2 = ({ onComplete }) => {
                 )}
             </AnimatePresence>
 
-            {/* --- INSTRUCTION POPUP --- */}
+            {/* --- INSTRUCTION POPUP (Redesigned) --- */}
             <AnimatePresence>
                 {showIntro && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }}
-                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-6"
                     >
-                        <div className="w-full max-w-md border border-green-500 bg-black/90 p-8 flex flex-col items-center text-center shadow-[0_0_50px_rgba(0,255,0,0.2)]">
-                            <div className="text-green-500 text-sm font-mono mb-4 animate-pulse">&gt;&gt;&gt; INCOMING TRANSMISSION</div>
-                            <h2 className="text-3xl font-black text-white mb-6" style={{ fontFamily: '"Noto Sans KR", sans-serif' }}>
-                                UI와 UX 이해도 분석 시작
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 1.05, opacity: 0 }}
+                            className="w-full max-w-3xl border-2 border-green-500 bg-black p-12 flex flex-col items-center text-center shadow-[0_0_100px_rgba(0,255,0,0.15)] relative overflow-hidden"
+                        >
+                            {/* Decorative Background Elements */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-green-500 shadow-[0_0_20px_#22c55e]"></div>
+                            <div className="absolute bottom-0 right-0 w-full h-1 bg-cyan-500 shadow-[0_0_20px_#06b6d4]"></div>
+                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
+
+                            <div className="text-green-500 text-lg font-mono mb-6 animate-pulse tracking-[0.2em] uppercase">
+                                &gt;&gt;&gt; Incoming Transmission
+                            </div>
+
+                            <h2 className="text-5xl md:text-6xl font-black text-white mb-8 tracking-tight leading-none" style={{ fontFamily: '"Noto Sans KR", sans-serif' }}>
+                                UI와 UX <span className="text-green-500">이해도</span> 분석
                             </h2>
-                            <p className="text-gray-300 mb-8 leading-relaxed font-ui">
-                                제시되는 키워드가<br />
-                                <span className="text-green-400 font-bold">UI (디자인/시스템)</span>라면 <span className="text-white font-bold">왼쪽</span>으로,<br />
-                                <span className="text-cyan-400 font-bold">UX (경험/감정)</span>라면 <span className="text-white font-bold">오른쪽</span>으로<br />
-                                드래그하여 분류하십시오.
+
+                            <p className="text-gray-300 mb-12 text-xl leading-relaxed font-ui max-w-2xl break-keep">
+                                제시되는 키워드를 확인하고<br />
+                                <span className="text-green-400 font-bold px-2 py-1 bg-green-950/50 rounded mx-1 border border-green-800">UI (디자인)</span>는 왼쪽,<br />
+                                <span className="text-cyan-400 font-bold px-2 py-1 bg-cyan-950/50 rounded mx-1 border border-cyan-800">UX (경험)</span>는 오른쪽으로
+                                <br />신속하게 분류하십시오.
                             </p>
 
-                            {/* Visual Aid */}
-                            <div className="flex gap-8 mb-8 opacity-80">
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className="w-12 h-12 border-2 border-green-500 rounded-lg flex items-center justify-center text-2xl">←</div>
-                                    <span className="text-green-500 text-xs font-bold">UI</span>
+                            {/* Visual Aid with Large Drag Animation */}
+                            <div className="relative w-full max-w-lg h-32 mb-12 flex items-center justify-between px-10">
+                                {/* Left Target (UI) */}
+                                <div className="flex flex-col items-center gap-3">
+                                    <div className="w-20 h-20 border-2 border-green-500 rounded-xl flex items-center justify-center text-green-500 bg-green-950/20 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+                                        <span className="text-4xl">←</span>
+                                    </div>
+                                    <span className="text-green-500 text-sm font-bold tracking-widest">UI / SYSTEM</span>
                                 </div>
-                                <div className="flex flex-col items-center gap-2">
-                                    <div className="w-12 h-12 border-2 border-cyan-500 rounded-lg flex items-center justify-center text-2xl">→</div>
-                                    <span className="text-cyan-500 text-xs font-bold">UX</span>
+
+                                {/* Animated Card Demo */}
+                                <motion.div
+                                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-28 bg-zinc-800 border-2 border-zinc-500 rounded-lg flex items-center justify-center z-10 shadow-2xl"
+                                    animate={{
+                                        x: [0, -80, 0, 80, 0],
+                                        rotate: [0, -10, 0, 10, 0],
+                                        opacity: [1, 0.8, 1, 0.8, 1],
+                                        scale: [1, 0.95, 1, 0.95, 1]
+                                    }}
+                                    transition={{
+                                        duration: 3,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                        times: [0, 0.25, 0.5, 0.75, 1]
+                                    }}
+                                >
+                                    <span className="text-4xl filter drop-shadow-lg">👆</span>
+                                </motion.div>
+
+                                {/* Right Target (UX) */}
+                                <div className="flex flex-col items-center gap-3">
+                                    <div className="w-20 h-20 border-2 border-cyan-500 rounded-xl flex items-center justify-center text-cyan-500 bg-cyan-950/20 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+                                        <span className="text-4xl">→</span>
+                                    </div>
+                                    <span className="text-cyan-500 text-sm font-bold tracking-widest">UX / FEELING</span>
                                 </div>
                             </div>
 
                             <button
                                 onClick={() => setShowIntro(false)}
-                                className="w-full py-4 bg-green-900/50 hover:bg-green-700 text-green-300 border border-green-500 font-bold text-lg transition-all tracking-widest hover:shadow-[0_0_20px_rgba(0,255,0,0.4)]"
+                                className="w-full max-w-md py-6 bg-green-600 hover:bg-green-500 text-white font-black text-2xl transition-all tracking-[0.2em] shadow-[0_0_30px_rgba(34,197,94,0.4)] hover:shadow-[0_0_60px_rgba(34,197,94,0.6)] clipped-corner hover:-translate-y-1"
                             >
-                                TEST START
+                                MISSION START
                             </button>
-                        </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

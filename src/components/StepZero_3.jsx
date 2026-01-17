@@ -95,6 +95,7 @@ export default function StepZero_3({ onNext }) {
     const [phase, setPhase] = useState('intro');
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [foundItems, setFoundItems] = useState([]);
+    const [showInstruction, setShowInstruction] = useState(false); // Instruction Popup State
 
     const TOTAL_ITEMS = 8;
     const allFound = foundItems.length >= TOTAL_ITEMS;
@@ -107,26 +108,24 @@ export default function StepZero_3({ onNext }) {
 
     // Initialize Audio on mount
     useEffect(() => {
-        clickAudioRef.current = new Audio(clickSoundAsset);
-        warpAudioRef.current = new Audio(warpSoundAsset);
-        confirmationAudioRef.current = new Audio(confirmationSoundAsset);
-        glitchAudioRef.current = new Audio(glitchSoundAsset);
+        const loadAudio = () => {
+            clickAudioRef.current = new Audio(clickSoundAsset);
+            warpAudioRef.current = new Audio(warpSoundAsset);
+            confirmationAudioRef.current = new Audio(confirmationSoundAsset);
+            glitchAudioRef.current = new Audio(glitchSoundAsset);
 
-        // Preload all audio
-        clickAudioRef.current.preload = 'auto';
-        warpAudioRef.current.preload = 'auto';
-        confirmationAudioRef.current.preload = 'auto';
-        glitchAudioRef.current.preload = 'auto';
+            // Preload all audio
+            clickAudioRef.current.preload = 'auto';
+            warpAudioRef.current.preload = 'auto';
+            confirmationAudioRef.current.preload = 'auto';
+            glitchAudioRef.current.preload = 'auto';
 
-        clickAudioRef.current.load();
-        warpAudioRef.current.load();
-        confirmationAudioRef.current.load();
-        glitchAudioRef.current.load();
-
-        clickAudioRef.current.volume = 0.6;
-        warpAudioRef.current.volume = 0.5;
-        confirmationAudioRef.current.volume = 0.7;
-        glitchAudioRef.current.volume = 0.5;
+            clickAudioRef.current.volume = 0.6;
+            warpAudioRef.current.volume = 0.5;
+            confirmationAudioRef.current.volume = 0.7;
+            glitchAudioRef.current.volume = 0.5;
+        }
+        loadAudio();
 
         return () => {
             if (clickAudioRef.current) {
@@ -347,6 +346,13 @@ export default function StepZero_3({ onNext }) {
                     {XRAY_CONTENT.viewers.label}
                 </button>
             </div>
+            <div className="absolute top-[240px] left-6 right-6 flex justify-between items-start">
+                <div className="w-[60%] h-6 bg-red-900/10 border border-red-900/30 rounded"></div>
+                <div className="text-right">
+                    <div className="text-red-500 font-black text-2xl">{BEAUTIFUL_CONTENT.price}</div>
+                    <div className="text-gray-400 text-sm line-through decoration-red-500/50">{BEAUTIFUL_CONTENT.originalPrice}</div>
+                </div>
+            </div>
             <button
                 onClick={(e) => handleDarkPatternClick(XRAY_CONTENT.price, e)}
                 className={`absolute top-[240px] right-6 text-red-500 font-bold text-sm hover:bg-red-600 hover:text-white px-2 py-1 rounded transition-all cursor-pointer pointer-events-auto ${foundItems.includes('price') ? 'ring-2 ring-cyan-400 bg-red-600/20' : ''}`}
@@ -397,6 +403,61 @@ export default function StepZero_3({ onNext }) {
         >
             {/* GLOBAL OVERLAYS HIDDEN BY USEEFFECT */}
 
+            {/* INSTRUCTION MODAL - SHOWN AT START OF XRAY PHASE */}
+            <AnimatePresence>
+                {showInstruction && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative bg-zinc-900 border border-cyan-500/50 p-8 max-w-lg w-full rounded-lg shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center overflow-hidden"
+                        >
+                            {/* Scanline Effect */}
+                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
+                            <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500 shadow-[0_0_10px_#06b6d4]"></div>
+
+                            <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-wider">
+                                <span className="text-cyan-400">MISSION</span> BRIEFING
+                            </h3>
+
+                            <div className="text-left bg-black/50 p-6 rounded border border-zinc-800 mb-8 font-mono text-m leading-relaxed text-gray-300">
+                                <p className="mb-4">
+                                    <span className="text-cyan-500 font-bold">&gt;&gt; 요원이 되는 길</span>
+                                </p>
+                                <p className="mb-4">
+                                    겉보기엔 화려하지만 이 페이지에는<br />
+                                    기업의 <span className="text-red-500 font-bold">'숨겨진 의도'</span>가 있음.
+                                </p>
+                                <p>
+                                    <span className="text-white font-bold bg-cyan-950 px-1 border border-cyan-800">X-RAY 렌즈</span>를 사용하여
+                                    숨겨진 의도를 찾고,<br />
+                                    해당 요소를 <span className="text-yellow-400 font-bold underline underline-offset-4">클릭하여 데이터를 확보</span>할 것.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    if (clickAudioRef.current) {
+                                        clickAudioRef.current.currentTime = 0;
+                                        clickAudioRef.current.play().catch(() => { });
+                                    }
+                                    setShowInstruction(false);
+                                }}
+                                className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold tracking-widest text-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] clipped-corner"
+                            >
+                                작전 개시
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* HUD Status Text */}
             {phase === 'xray' && (
                 <div className="fixed bottom-8 left-8 text-cyan-500 font-mono text-xs z-40 opacity-70 leading-relaxed pointer-events-none hidden md:block">
@@ -441,6 +502,7 @@ export default function StepZero_3({ onNext }) {
                                 clickAudioRef.current.play().catch(() => { });
                             }
                             setPhase('xray');
+                            setShowInstruction(true);
                         }}
                         whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(239,68,68,0.5)' }}
                         whileTap={{ scale: 0.95 }}
@@ -451,51 +513,33 @@ export default function StepZero_3({ onNext }) {
                 </motion.div>
             )}
 
-            {/* X-RAY PHASE */}
-            {phase === 'xray' && (
+            {/* MAIN CONTENT AREA */}
+            {(phase === 'xray' || phase === 'revealed') && (
                 <>
-                    {/* Mission Progress - VERTICAL STACK SIDEBAR (BIGGER) */}
-                    <motion.div
-                        className="absolute top-32 left-8 z-[60] hidden md:block"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
+                    {/* Beautiful Card Layer (Bottom) */}
+                    <div
+                        className="fixed z-10 brightness-[0.2] transition-all duration-700"
+                        style={{
+                            width: CARD_CONFIG.width,
+                            height: CARD_CONFIG.height,
+                            left: (typeof window !== 'undefined' ? window.innerWidth : 1024) / 2 - CARD_CONFIG.width / 2,
+                            top: (typeof window !== 'undefined' ? window.innerHeight : 768) / 2 - 40 - CARD_CONFIG.height / 2,
+                        }}
                     >
-                        <div className="text-cyan-400 font-bold text-xs tracking-widest mb-4">PROGRESS</div>
-                        <div className="flex flex-col gap-3">
-                            {Array.from({ length: TOTAL_ITEMS }).map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    className={`w-36 h-5 rounded-md border ${i < foundItems.length
-                                        ? 'bg-cyan-400 border-cyan-400 shadow-[0_0_10px_cyan]'
-                                        : 'bg-transparent border-gray-700'}`}
-                                    initial={false}
-                                    animate={{
-                                        scaleX: i < foundItems.length ? [1, 1.1, 1] : 1,
-                                        backgroundColor: i < foundItems.length ? '#22d3ee' : 'transparent'
-                                    }}
-                                    transition={{ duration: 0.3 }}
-                                />
-                            ))}
-                        </div>
-                        <div className="mt-4 text-white font-black text-3xl font-mono">
-                            {foundItems.length}<span className="text-lg text-gray-500 font-medium">/{TOTAL_ITEMS}</span>
-                        </div>
-                    </motion.div>
+                        {renderBeautifulCard()}
+                    </div >
 
-                    {/* Card Container */}
+                    {/* X-Ray Card Layer (Masked) */}
                     {(() => {
-                        const cardCenterX = typeof window !== 'undefined' ? window.innerWidth / 2 : 512;
-                        const cardCenterY = typeof window !== 'undefined' ? (window.innerHeight / 2) - 40 : 300;
-                        const cardLeft = cardCenterX - CARD_CONFIG.width / 2;
-                        const cardTop = cardCenterY - CARD_CONFIG.height / 2;
+                        const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
+                        const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 768;
+                        const cardLeft = windowWidth / 2 - CARD_CONFIG.width / 2;
+                        const cardTop = windowHeight / 2 - 40 - CARD_CONFIG.height / 2;
                         const maskX = mousePos.x - cardLeft;
                         const maskY = mousePos.y - cardTop;
 
                         return (
                             <>
-                                <div className="fixed z-10" style={{ width: CARD_CONFIG.width, height: CARD_CONFIG.height, left: cardLeft, top: cardTop }}>
-                                    {renderBeautifulCard()}
-                                </div>
                                 <div
                                     className="fixed z-20"
                                     style={{
