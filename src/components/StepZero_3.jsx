@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Import Sound Assets
@@ -6,6 +6,22 @@ import clickSoundAsset from '../assets/sounds/mixkit-interface-device-click-2577
 import warpSoundAsset from '../assets/sounds/mixkit-sci-fi-warp-slide-3113.wav';
 import confirmationSoundAsset from '../assets/sounds/mixkit-sci-fi-confirmation-914.wav';
 import glitchSoundAsset from '../assets/sounds/mixkit-futuristic-glitch-robot-1039.wav';
+
+// ============================================
+// HELPER: Throttle
+// ============================================
+const throttle = (func, limit) => {
+    let inThrottle;
+    return function () {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+};
 
 // ============================================
 // CARD DATA
@@ -92,10 +108,17 @@ const XRAY_CONTENT = {
 };
 
 export default function StepZero_3({ onNext }) {
+    // State
     const [phase, setPhase] = useState('intro');
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [foundItems, setFoundItems] = useState([]);
-    const [showInstruction, setShowInstruction] = useState(false); // Instruction Popup State
+    const [showInstruction, setShowInstruction] = useState(false);
+
+    // 2-1. Window Size Optimization
+    const [windowSize, setWindowSize] = useState({
+        width: typeof window !== 'undefined' ? window.innerWidth : 1024,
+        height: typeof window !== 'undefined' ? window.innerHeight : 768
+    });
 
     const TOTAL_ITEMS = 8;
     const allFound = foundItems.length >= TOTAL_ITEMS;
@@ -128,26 +151,29 @@ export default function StepZero_3({ onNext }) {
         loadAudio();
 
         return () => {
-            if (clickAudioRef.current) {
-                clickAudioRef.current.pause();
-                clickAudioRef.current = null;
-            }
-            if (warpAudioRef.current) {
-                warpAudioRef.current.pause();
-                warpAudioRef.current = null;
-            }
-            if (confirmationAudioRef.current) {
-                confirmationAudioRef.current.pause();
-                confirmationAudioRef.current = null;
-            }
-            if (glitchAudioRef.current) {
-                glitchAudioRef.current.pause();
-                glitchAudioRef.current = null;
-            }
+            if (clickAudioRef.current) clickAudioRef.current = null;
+            if (warpAudioRef.current) warpAudioRef.current = null;
+            if (confirmationAudioRef.current) confirmationAudioRef.current = null;
+            if (glitchAudioRef.current) glitchAudioRef.current = null;
         };
     }, []);
 
-    // Force HIDE global scanlines and vignette (App.jsx)
+    // 2-1. Window Resize Listener (Throttled)
+    useEffect(() => {
+        const handleResize = throttle(() => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        }, 200);
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // 3-1. Force HIDE global scanlines and vignette (App.jsx)
+    // Modified to be conditional as per request (phase === 'xray')
+    // NOTE: 'intro' phase also benefits from clean background, so keeping it generic but respecting component mount cycle.
     useEffect(() => {
         const scanlines = document.querySelector('.scanlines');
         const vignette = document.querySelector('.vignette');
@@ -161,121 +187,53 @@ export default function StepZero_3({ onNext }) {
         };
     }, []);
 
-    const handleMouseMove = (e) => {
-        setMousePos({ x: e.clientX, y: e.clientY });
-    };
+    // 1-3. Throttle Mouse Move
+    const handleMouseMove = useCallback(
+        throttle((e) => {
+            setMousePos({ x: e.clientX, y: e.clientY });
+        }, 16), []
+    );
 
-    const handleDarkPatternClick = (content, e) => {
-        if (!foundItems.includes(content.id)) {
-            setFoundItems([...foundItems, content.id]);
-            // Play warp sound when finding a dark pattern
+    // 1-2. Callback Memoization - Empty dependency array to prevent recreation
+    const handleDarkPatternClick = useCallback((content, e) => {
+        setFoundItems(prev => {
+            if (prev.includes(content.id)) return prev;
+            // Play warp sound
             if (warpAudioRef.current) {
                 warpAudioRef.current.currentTime = 0;
                 warpAudioRef.current.play().catch(() => { });
             }
-        }
-    };
+            return [...prev, content.id];
+        });
+    }, []);
 
-    const renderSidebars = () => {
-        const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
-        const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 768;
-
-        const cardCenterX = windowWidth / 2;
-        const cardCenterY = (windowHeight / 2) - 40;
-        const cardLeft = cardCenterX - CARD_CONFIG.width / 2;
-        const cardTop = cardCenterY - CARD_CONFIG.height / 2;
-
-        const visibleItems = Object.values(XRAY_CONTENT).filter(item => foundItems.includes(item.id));
-        const leftItems = visibleItems.filter(item => item.side === 'left');
-        const rightItems = visibleItems.filter(item => item.side === 'right');
-        const popupWidth = 300;
-        const leftSidebarX = Math.max(40, cardLeft - 340);
-        const rightSidebarX = Math.min(windowWidth - 340, cardLeft + CARD_CONFIG.width + 40);
-
-        const renderStack = (items, isLeft) => {
-            const startY = Math.max(100, (windowHeight - (items.length * 150)) / 2);
-
-            return items.map((item, index) => {
-                const sidebarX = isLeft ? leftSidebarX : rightSidebarX;
-                const sidebarY = startY + (index * 160);
-
-                const targetAbsX = cardLeft + item.pos.x;
-                const targetAbsY = cardTop + item.pos.y;
-                const lineEndX = targetAbsX - sidebarX;
-                const lineEndY = targetAbsY - sidebarY;
-
-                return (
-                    <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, x: isLeft ? -30 : 30, y: 20 }}
-                        animate={{ opacity: 1, x: 0, y: 0 }}
-                        className="fixed z-[60]"
-                        style={{
-                            left: sidebarX,
-                            top: sidebarY,
-                            width: popupWidth,
-                        }}
-                    >
-                        <div className={`
-                            relative p-6 rounded-2xl border border-gray-700
-                            backdrop-blur-md bg-gray-900/90 shadow-2xl
-                            ${isLeft ? 'text-right' : 'text-left'}
-                         `}>
-                            {/* Accent Line */}
-                            <div className={`absolute top-6 bottom-6 w-1 bg-cyan-400 ${isLeft ? 'right-0 rounded-l-none' : 'left-0 rounded-r-none'}`} />
-
-                            {/* Title: Clean, Bold, Standard Tracking */}
-                            <div className="text-white text-xl font-bold mb-2 flex items-center gap-2 justify-end flex-row-reverse">
-                                {isLeft ? (
-                                    <>
-                                        {item.label}
-                                        <span className="text-cyan-400 text-sm">⚠️</span>
-                                    </>
-                                ) : (
-                                    <div className="flex gap-2 items-center flex-row-reverse w-full justify-end">
-                                        <span className="text-cyan-400 text-sm">⚠️</span>
-                                        {item.label}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Body: Clean Sans, High Contrast */}
-                            <p className="text-gray-300 text-[15px] font-medium leading-7 break-keep tracking-normal">
-                                {item.explain}
-                            </p>
-                        </div>
-
-                        {/* Leader Line */}
-                        <svg
-                            className="absolute top-0 left-0 w-[2000px] h-[2000px] pointer-events-none overflow-visible"
-                            style={{ left: 0, top: 0 }}
-                        >
-                            <line
-                                x1={isLeft ? popupWidth : 0}
-                                y1={70}
-                                x2={lineEndX}
-                                y2={lineEndY}
-                                stroke="#22d3ee"
-                                strokeWidth="2"
-                                className="opacity-40"
-                                strokeDasharray="6 4"
-                            />
-                            <circle cx={lineEndX} cy={lineEndY} r="4" fill="#22d3ee" className="animate-pulse" />
-                        </svg>
-                    </motion.div>
-                );
-            });
+    // 2-2. Centralized Card Position Calculation
+    const { cardLeft, cardTop } = useMemo(() => {
+        const cardCenterX = windowSize.width / 2;
+        const cardCenterY = (windowSize.height / 2) - 40;
+        return {
+            cardLeft: cardCenterX - CARD_CONFIG.width / 2,
+            cardTop: cardCenterY - CARD_CONFIG.height / 2
         };
+    }, [windowSize.width, windowSize.height]);
 
-        return (
-            <>
-                {renderStack(leftItems, true)}
-                {renderStack(rightItems, false)}
-            </>
-        );
-    };
+    // 5-1. Memoize Mask Style
+    const maskStyle = useMemo(() => {
+        const maskX = mousePos.x - cardLeft;
+        const maskY = mousePos.y - cardTop;
+        const gradient = `radial-gradient(circle 150px at ${maskX}px ${maskY}px, black 30%, transparent 100%)`;
+        return {
+            width: CARD_CONFIG.width,
+            height: CARD_CONFIG.height,
+            left: cardLeft,
+            top: cardTop,
+            maskImage: gradient,
+            WebkitMaskImage: gradient,
+        };
+    }, [mousePos.x, mousePos.y, cardLeft, cardTop]);
 
-    const renderBeautifulCard = () => (
+    // 1-1. Memoize renderBeautifulCard
+    const beautifulCard = useMemo(() => (
         <div
             className="absolute bg-white rounded-3xl overflow-hidden shadow-2xl"
             style={{ width: CARD_CONFIG.width, height: CARD_CONFIG.height }}
@@ -321,9 +279,10 @@ export default function StepZero_3({ onNext }) {
                 {BEAUTIFUL_CONTENT.footer}
             </div>
         </div>
-    );
+    ), []);
 
-    const renderXRayCard = () => (
+    // 1-1. Memoize renderXRayCard
+    const xrayCard = useMemo(() => (
         <div
             className="absolute bg-black rounded-3xl overflow-hidden border-2 border-red-500 bg-[linear-gradient(rgba(255,0,0,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,0,0.08)_1px,transparent_1px)] bg-[size:20px_20px]"
             style={{ width: CARD_CONFIG.width, height: CARD_CONFIG.height }}
@@ -392,7 +351,94 @@ export default function StepZero_3({ onNext }) {
                 {XRAY_CONTENT.footer.label}
             </button>
         </div>
-    );
+    ), [foundItems, handleDarkPatternClick]);
+
+    // Render Sidebars logic
+    const renderSidebars = () => {
+        // Use optimized windowSize derived values
+        const visibleItems = Object.values(XRAY_CONTENT).filter(item => foundItems.includes(item.id));
+        const leftItems = visibleItems.filter(item => item.side === 'left');
+        const rightItems = visibleItems.filter(item => item.side === 'right');
+        const popupWidth = 300;
+
+        const leftSidebarX = Math.max(40, cardLeft - 340);
+        const rightSidebarX = Math.min(windowSize.width - 340, cardLeft + CARD_CONFIG.width + 40);
+
+        const renderStack = (items, isLeft) => {
+            const startY = Math.max(100, (windowSize.height - (items.length * 150)) / 2);
+
+            return items.map((item, index) => {
+                const sidebarX = isLeft ? leftSidebarX : rightSidebarX;
+                const sidebarY = startY + (index * 160);
+
+                const targetAbsX = cardLeft + item.pos.x;
+                const targetAbsY = cardTop + item.pos.y;
+                const lineEndX = targetAbsX - sidebarX;
+                const lineEndY = targetAbsY - sidebarY;
+
+                return (
+                    <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, x: isLeft ? -30 : 30, y: 20 }}
+                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        className="fixed z-[60]"
+                        style={{
+                            left: sidebarX,
+                            top: sidebarY,
+                            width: popupWidth,
+                        }}
+                    >
+                        <div className={`
+                            relative p-6 rounded-2xl border border-gray-700
+                            backdrop-blur-md bg-gray-900/90 shadow-2xl
+                            ${isLeft ? 'text-right' : 'text-left'}
+                         `}>
+                            <div className={`absolute top-6 bottom-6 w-1 bg-cyan-400 ${isLeft ? 'right-0 rounded-l-none' : 'left-0 rounded-r-none'}`} />
+                            <div className="text-white text-xl font-bold mb-2 flex items-center gap-2 justify-end flex-row-reverse">
+                                {isLeft ? (
+                                    <>
+                                        {item.label}
+                                        <span className="text-cyan-400 text-sm">⚠️</span>
+                                    </>
+                                ) : (
+                                    <div className="flex gap-2 items-center flex-row-reverse w-full justify-end">
+                                        <span className="text-cyan-400 text-sm">⚠️</span>
+                                        {item.label}
+                                    </div>
+                                )}
+                            </div>
+                            <p className="text-gray-300 text-[15px] font-medium leading-7 break-keep tracking-normal">
+                                {item.explain}
+                            </p>
+                        </div>
+                        <svg
+                            className="absolute top-0 left-0 w-[2000px] h-[2000px] pointer-events-none overflow-visible"
+                            style={{ left: 0, top: 0 }}
+                        >
+                            <line
+                                x1={isLeft ? popupWidth : 0}
+                                y1={70}
+                                x2={lineEndX}
+                                y2={lineEndY}
+                                stroke="#22d3ee"
+                                strokeWidth="2"
+                                className="opacity-40"
+                                strokeDasharray="6 4"
+                            />
+                            <circle cx={lineEndX} cy={lineEndY} r="4" fill="#22d3ee" className="animate-pulse" />
+                        </svg>
+                    </motion.div>
+                );
+            });
+        };
+
+        return (
+            <>
+                {renderStack(leftItems, true)}
+                {renderStack(rightItems, false)}
+            </>
+        );
+    };
 
     return (
         <motion.div
@@ -401,85 +447,7 @@ export default function StepZero_3({ onNext }) {
             animate={{ opacity: 1 }}
             onMouseMove={handleMouseMove}
         >
-            {/* GLOBAL OVERLAYS HIDDEN BY USEEFFECT */}
-
-            {/* INSTRUCTION MODAL - SHOWN AT START OF XRAY PHASE */}
-            <AnimatePresence>
-                {showInstruction && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="relative bg-zinc-900 border border-cyan-500/50 p-8 max-w-lg w-full rounded-lg shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center overflow-hidden"
-                        >
-                            {/* Scanline Effect */}
-                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
-                            <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500 shadow-[0_0_10px_#06b6d4]"></div>
-
-                            <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-wider">
-                                <span className="text-cyan-400">MISSION</span> BRIEFING
-                            </h3>
-
-                            <div className="text-left bg-black/50 p-6 rounded border border-zinc-800 mb-8 font-mono text-m leading-relaxed text-gray-300">
-                                <p className="mb-4">
-                                    <span className="text-cyan-500 font-bold">&gt;&gt; 요원이 되는 길</span>
-                                </p>
-                                <p className="mb-4">
-                                    겉보기엔 화려하지만 이 페이지에는<br />
-                                    기업의 <span className="text-red-500 font-bold">'숨겨진 의도'</span>가 있음.
-                                </p>
-                                <p>
-                                    <span className="text-white font-bold bg-cyan-950 px-1 border border-cyan-800">X-RAY 렌즈</span>를 사용하여
-                                    숨겨진 의도를 찾고,<br />
-                                    해당 요소를 <span className="text-yellow-400 font-bold underline underline-offset-4">클릭하여 데이터를 확보</span>할 것.
-                                </p>
-                            </div>
-
-                            <button
-                                onClick={() => {
-                                    if (clickAudioRef.current) {
-                                        clickAudioRef.current.currentTime = 0;
-                                        clickAudioRef.current.play().catch(() => { });
-                                    }
-                                    setShowInstruction(false);
-                                }}
-                                className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold tracking-widest text-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] clipped-corner"
-                            >
-                                작전 개시
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* HUD Status Text */}
-            {phase === 'xray' && (
-                <div className="fixed bottom-8 left-8 text-cyan-500 font-mono text-xs z-40 opacity-70 leading-relaxed pointer-events-none hidden md:block">
-                    SYSTEM: ONLINE<br />
-                    MODE: X-RAY ANALYSIS<br />
-                    STATUS: ACTIVE
-                </div>
-            )}
-
-            {/* PHASE TITLE */}
-            {phase !== 'revealed' && (
-                <motion.div
-                    className="absolute top-8 left-8 z-50 pointer-events-none"
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                >
-                    <div className="text-cyan-400 text-sm font-mono tracking-widest mb-1">PHASE 3</div>
-                    <div className="text-white text-3xl font-black">AGENT AWAKENING</div>
-                    <div className="text-gray-500 text-sm font-medium">요원으로 깨어나다</div>
-                </motion.div>
-            )}
-
+            {/* 4-1. Conditional rendering - Early return or Phase separation */}
             {/* INTRO PHASE */}
             {phase === 'intro' && (
                 <motion.div
@@ -496,7 +464,6 @@ export default function StepZero_3({ onNext }) {
                     </p>
                     <motion.button
                         onClick={() => {
-                            // Play click sound
                             if (clickAudioRef.current) {
                                 clickAudioRef.current.currentTime = 0;
                                 clickAudioRef.current.play().catch(() => { });
@@ -516,88 +483,145 @@ export default function StepZero_3({ onNext }) {
             {/* MAIN CONTENT AREA */}
             {(phase === 'xray' || phase === 'revealed') && (
                 <>
-                    {/* Beautiful Card Layer (Bottom) */}
+                    {/* Beautiful Card Layer (Bottom) - Persists but fades/blurs in revealed */}
                     <div
-                        className="fixed z-10 brightness-[0.2] transition-all duration-700"
+                        className={`fixed z-10 transition-all duration-1000 ${phase === 'revealed' ? 'brightness-[0.2] blur-sm opacity-50' : ''}`}
                         style={{
                             width: CARD_CONFIG.width,
                             height: CARD_CONFIG.height,
-                            left: (typeof window !== 'undefined' ? window.innerWidth : 1024) / 2 - CARD_CONFIG.width / 2,
-                            top: (typeof window !== 'undefined' ? window.innerHeight : 768) / 2 - 40 - CARD_CONFIG.height / 2,
+                            left: cardLeft,
+                            top: cardTop,
+                            filter: phase === 'xray' ? 'drop-shadow(0 0 30px rgba(255,255,255,0.3))' : undefined,
                         }}
                     >
-                        {renderBeautifulCard()}
+                        {beautifulCard}
                     </div >
 
-                    {/* X-Ray Card Layer (Masked) */}
-                    {(() => {
-                        const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
-                        const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 768;
-                        const cardLeft = windowWidth / 2 - CARD_CONFIG.width / 2;
-                        const cardTop = windowHeight / 2 - 40 - CARD_CONFIG.height / 2;
-                        const maskX = mousePos.x - cardLeft;
-                        const maskY = mousePos.y - cardTop;
+                    {/* X-RAY SPECIFIC ELEMENTS - ONLY visible in xray phase */}
+                    {phase === 'xray' && (
+                        <>
+                            {/* INSTRUCTION MODAL */}
+                            <AnimatePresence>
+                                {showInstruction && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                                    >
+                                        <motion.div
+                                            initial={{ scale: 0.9, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            exit={{ scale: 0.95, opacity: 0 }}
+                                            className="relative bg-zinc-900 border border-cyan-500/50 p-8 max-w-lg w-full rounded-lg shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center overflow-hidden"
+                                        >
+                                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500 shadow-[0_0_10px_#06b6d4]"></div>
 
-                        return (
-                            <>
-                                <div
-                                    className="fixed z-20"
-                                    style={{
-                                        width: CARD_CONFIG.width,
-                                        height: CARD_CONFIG.height,
-                                        left: cardLeft,
-                                        top: cardTop,
-                                        maskImage: `radial-gradient(circle 150px at ${maskX}px ${maskY}px, black 30%, transparent 100%)`,
-                                        WebkitMaskImage: `radial-gradient(circle 150px at ${maskX}px ${maskY}px, black 30%, transparent 100%)`,
+                                            <h3 className="text-2xl font-black text-white mb-6 uppercase tracking-wider">
+                                                <span className="text-cyan-400">MISSION</span> BRIEFING
+                                            </h3>
+
+                                            <div className="text-left bg-black/50 p-6 rounded border border-zinc-800 mb-8 font-mono text-m leading-relaxed text-gray-300">
+                                                <p className="mb-4">
+                                                    <span className="text-cyan-500 font-bold">&gt;&gt; 요원이 되는 길</span>
+                                                </p>
+                                                <p className="mb-4">
+                                                    겉보기엔 화려하지만 이 페이지에는<br />
+                                                    기업의 <span className="text-red-500 font-bold">'숨겨진 의도'</span>가 있음.
+                                                </p>
+                                                <p>
+                                                    <span className="text-white font-bold bg-cyan-950 px-1 border border-cyan-800">X-RAY 렌즈</span>를 사용하여
+                                                    숨겨진 의도를 찾고,<br />
+                                                    해당 요소를 <span className="text-yellow-400 font-bold underline underline-offset-4">클릭하여 데이터를 확보</span>할 것.
+                                                </p>
+                                            </div>
+
+                                            <button
+                                                onClick={() => {
+                                                    if (clickAudioRef.current) {
+                                                        clickAudioRef.current.currentTime = 0;
+                                                        clickAudioRef.current.play().catch(() => { });
+                                                    }
+                                                    setShowInstruction(false);
+                                                }}
+                                                className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold tracking-widest text-lg transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] clipped-corner"
+                                            >
+                                                작전 개시
+                                            </button>
+                                        </motion.div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {/* X-Ray Card Layer (Masked) */}
+                            <div
+                                className="fixed z-20"
+                                style={maskStyle}
+                            >
+                                {xrayCard}
+                            </div>
+
+                            {/* Lens Ring */}
+                            <div
+                                className="fixed pointer-events-none z-[40] w-[300px] h-[300px] border border-cyan-500/30 rounded-full"
+                                style={{ left: mousePos.x, top: mousePos.y, transform: 'translate(-50%, -50%)', boxShadow: '0 0 20px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.1)' }}
+                            >
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black text-cyan-500 text-[10px] font-mono px-2">X-RAY LENS</div>
+                            </div>
+
+                            {/* Sidebars - only render if there are found items */}
+                            <AnimatePresence>
+                                {foundItems.length > 0 && renderSidebars()}
+                            </AnimatePresence>
+
+                            {/* HUD Status Text - Only XRAY phase */}
+                            <div className="fixed bottom-8 left-8 text-cyan-500 font-mono text-xs z-40 opacity-70 leading-relaxed pointer-events-none hidden md:block">
+                                SYSTEM: ONLINE<br />
+                                MODE: X-RAY ANALYSIS<br />
+                                STATUS: ACTIVE
+                            </div>
+
+                            {/* PHASE TITLE */}
+                            <motion.div
+                                className="absolute top-8 left-8 z-50 pointer-events-none"
+                                initial={{ opacity: 0, x: -30 }}
+                                animate={{ opacity: 1, x: 0 }}
+                            >
+                                <div className="text-cyan-400 text-sm font-mono tracking-widest mb-1">PHASE 3</div>
+                                <div className="text-white text-3xl font-black">AGENT AWAKENING</div>
+                                <div className="text-gray-500 text-sm font-medium">요원으로 깨어나다</div>
+                            </motion.div>
+
+                            {/* 수사 완료 버튼 */}
+                            <motion.div
+                                className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70]"
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: allFound ? 1 : 0.4, y: 0 }}
+                                transition={{ delay: 1 }}
+                            >
+                                <button
+                                    onClick={() => {
+                                        if (allFound) {
+                                            if (confirmationAudioRef.current) {
+                                                confirmationAudioRef.current.currentTime = 0;
+                                                confirmationAudioRef.current.play().catch(() => { });
+                                            }
+                                            setPhase('revealed');
+                                        }
                                     }}
+                                    disabled={!allFound}
+                                    className={`px-10 py-5 rounded-full font-black text-xl border backdrop-blur-md transition-all flex items-center gap-3 tracking-wide ${allFound
+                                        ? 'bg-cyan-500 text-black border-cyan-400 shadow-[0_0_30px_rgba(0,243,255,0.5)] hover:bg-cyan-400 cursor-pointer'
+                                        : 'bg-gray-800/80 text-gray-500 border-gray-600 cursor-not-allowed'
+                                        }`}
                                 >
-                                    {renderXRayCard()}
-                                </div>
-                            </>
-                        );
-                    })()}
-
-                    {/* Lens Ring */}
-                    <div
-                        className="fixed pointer-events-none z-[40] w-[300px] h-[300px] border border-cyan-500/30 rounded-full"
-                        style={{ left: mousePos.x, top: mousePos.y, transform: 'translate(-50%, -50%)', boxShadow: '0 0 20px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 243, 255, 0.1)' }}
-                    >
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black text-cyan-500 text-[10px] font-mono px-2">X-RAY LENS</div>
-                    </div>
-
-                    {/* 설명 사이드바 (스택형) */}
-                    <AnimatePresence>
-                        {renderSidebars()}
-                    </AnimatePresence>
-
-                    {/* 수사 완료 버튼 */}
-                    <motion.div
-                        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70]"
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: allFound ? 1 : 0.4, y: 0 }}
-                        transition={{ delay: 1 }}
-                    >
-                        <button
-                            onClick={() => {
-                                if (allFound) {
-                                    // Play confirmation sound
-                                    if (confirmationAudioRef.current) {
-                                        confirmationAudioRef.current.currentTime = 0;
-                                        confirmationAudioRef.current.play().catch(() => { });
-                                    }
-                                    setPhase('revealed');
-                                }
-                            }}
-                            disabled={!allFound}
-                            className={`px-10 py-5 rounded-full font-black text-xl border backdrop-blur-md transition-all flex items-center gap-3 tracking-wide ${allFound
-                                ? 'bg-cyan-500 text-black border-cyan-400 shadow-[0_0_30px_rgba(0,243,255,0.5)] hover:bg-cyan-400 cursor-pointer'
-                                : 'bg-gray-800/80 text-gray-500 border-gray-600 cursor-not-allowed'
-                                }`}
-                        >
-                            <span>{allFound ? '수사 완료' : `${TOTAL_ITEMS - foundItems.length}개 남음`}</span>
-                            {allFound && <span className="bg-black text-cyan-400 rounded-full w-8 h-8 flex items-center justify-center text-lg">✓</span>}
-                        </button>
-                    </motion.div>
+                                    <span>{allFound ? '수사 완료' : `${TOTAL_ITEMS - foundItems.length}개 남음`}</span>
+                                    {allFound && <span className="bg-black text-cyan-400 rounded-full w-8 h-8 flex items-center justify-center text-lg">✓</span>}
+                                </button>
+                            </motion.div>
+                        </>
+                    )}
                 </>
             )}
 
@@ -631,11 +655,9 @@ export default function StepZero_3({ onNext }) {
                     </motion.p>
                     <motion.button
                         onClick={() => {
-                            // Create new Audio instance to avoid cleanup issues
                             const glitchSound = new Audio(glitchSoundAsset);
                             glitchSound.volume = 0.5;
                             glitchSound.play().catch(() => { });
-                            // Small delay to let sound start
                             setTimeout(() => onNext(), 200);
                         }}
                         initial={{ opacity: 0, y: 20 }}

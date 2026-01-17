@@ -223,19 +223,33 @@ const QuizStage2 = ({ onComplete }) => {
                                 &gt;&gt;&gt; Incoming Transmission
                             </div>
 
-                            <h2 className="text-5xl md:text-6xl font-black text-white mb-8 tracking-tight leading-none" style={{ fontFamily: '"Noto Sans KR", sans-serif' }}>
-                                UI와 UX <span className="text-green-500">이해도</span> 분석
-                            </h2>
+                            {/* Title with breathing room */}
+                            <div className="mb-5">
+                                <h2 className="text-5xl md:text-6xl font-black text-white tracking-tight leading-tight" style={{ fontFamily: '"Noto Sans KR", sans-serif' }}>
+                                    UI와 UX <span className="text-green-500">이해도</span> 분석
+                                </h2>
+                            </div>
 
-                            <p className="text-gray-300 mb-12 text-xl leading-relaxed font-ui max-w-2xl break-keep">
-                                제시되는 키워드를 확인하고<br />
-                                <span className="text-green-400 font-bold px-2 py-1 bg-green-950/50 rounded mx-1 border border-green-800">UI (디자인)</span>는 왼쪽,<br />
-                                <span className="text-cyan-400 font-bold px-2 py-1 bg-cyan-950/50 rounded mx-1 border border-cyan-800">UX (경험)</span>는 오른쪽으로
-                                <br />신속하게 분류하십시오.
-                            </p>
+                            {/* Description - Block-based layout for better vertical rhythm */}
+                            <div className="mb-7 space-y-5 text-xl text-gray-300 leading-relaxed font-ui max-w-2xl break-keep text-center" style={{ fontFamily: '"Noto Sans KR", sans-serif' }}>
+                                <p>제시되는 키워드를 확인하고</p>
+                                <p>
+                                    <span className="text-green-400 font-bold px-2 py-1 bg-green-950/50 rounded border border-green-800">
+                                        UI (디자인)
+                                    </span>
+                                    는 왼쪽,
+                                </p>
+                                <p>
+                                    <span className="text-cyan-400 font-bold px-2 py-1 bg-cyan-950/50 rounded border border-cyan-800">
+                                        UX (경험)
+                                    </span>
+                                    는 오른쪽으로
+                                </p>
+                                <p>신속하게 분류하십시오.</p>
+                            </div>
 
-                            {/* Visual Aid with Large Drag Animation */}
-                            <div className="relative w-full max-w-lg h-32 mb-12 flex items-center justify-between px-10">
+                            {/* Visual Aid with Large Drag Animation - Increased height */}
+                            <div className="relative w-full max-w-lg h-40 mb-7 flex items-center justify-between px-5">
                                 {/* Left Target (UI) */}
                                 <div className="flex flex-col items-center gap-3">
                                     <div className="w-20 h-20 border-2 border-green-500 rounded-xl flex items-center justify-center text-green-500 bg-green-950/20 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
