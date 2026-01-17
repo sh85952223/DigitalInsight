@@ -548,7 +548,7 @@ export default function StepSix({ onNext }) {
                                 <div className="space-y-3">
                                     {uxDefinitions.order.steps.map((step, idx) => (
                                         <div key={idx} className="flex items-center gap-3 text-[#e8e1d5] text-base">
-                                            <span className="w-8 h-8 rounded-full bg-green-900 border border-green-500/50 text-green-400 flex items-center justify-center text-sm font-bold shadow-lg shrink-0">{idx + 1}</span>
+                                            <span className="w-8 h-8 rounded-full bg-green-900 border border-green-500/50 text-green-400 flex items-center justify-center text-s font-bold shadow-lg shrink-0">{idx + 1}</span>
                                             <span className="font-medium">{step}</span>
                                         </div>
                                     ))}

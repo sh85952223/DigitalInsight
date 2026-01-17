@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlitchText from './GlitchText';
 
@@ -116,6 +116,30 @@ const SoundEngine = {
     }
 };
 
+// --- PERFORMANCE: Throttle helper ---
+const throttle = (func, limit) => {
+    let inThrottle;
+    return function () {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+};
+
+// --- PERFORMANCE: Static positions array (moved outside component) ---
+const ARTIFACT_POSITIONS = [
+    { top: '30%', left: '15%', rotate: -15 },
+    { top: '48%', left: '8%', rotate: 10 },
+    { bottom: '10%', left: '17%', rotate: 25 },
+    { top: '20%', right: '25%', rotate: 15 },
+    { top: '48%', right: '15%', rotate: -10 },
+    { bottom: '12%', right: '20%', rotate: -25 }
+];
+
 const QuizStage1 = ({ onComplete, ambienceAudioRef }) => {
     const [digitized, setDigitized] = useState([]);
     const [infoModalItem, setInfoModalItem] = useState(null);
@@ -150,50 +174,49 @@ const QuizStage1 = ({ onComplete, ambienceAudioRef }) => {
         }
     }, [ambienceAudioRef]);
 
-    const handleDrag = (event, info, draggedItem) => {
-        const point = {
-            x: event.clientX || info.point.x,
-            y: event.clientY || info.point.y
-        };
-        const padding = 30; // Slightly larger for hover feedback
-        let activeSlot = null;
+    // PERFORMANCE: Throttled drag handler with useCallback
+    const handleDrag = useCallback(
+        throttle((event, info, draggedItem) => {
+            const point = {
+                x: event.clientX || info.point.x,
+                y: event.clientY || info.point.y
+            };
+            const padding = 30;
+            let activeSlot = null;
 
-        // Check collision with ALL slots, not just the matching one
-        for (const targetItem of ARTIFACTS) {
-            const targetId = `slot-${targetItem.id}`;
-            const targetElement = document.getElementById(targetId);
+            for (const targetItem of ARTIFACTS) {
+                const targetId = `slot-${targetItem.id}`;
+                const targetElement = document.getElementById(targetId);
 
-            if (targetElement) {
-                const rect = targetElement.getBoundingClientRect();
-                if (
-                    point.x >= rect.left - padding &&
-                    point.x <= rect.right + padding &&
-                    point.y >= rect.top - padding &&
-                    point.y <= rect.bottom + padding
-                ) {
-                    activeSlot = targetItem.id;
-                    break;
+                if (targetElement) {
+                    const rect = targetElement.getBoundingClientRect();
+                    if (
+                        point.x >= rect.left - padding &&
+                        point.x <= rect.right + padding &&
+                        point.y >= rect.top - padding &&
+                        point.y <= rect.bottom + padding
+                    ) {
+                        activeSlot = targetItem.id;
+                        break;
+                    }
                 }
             }
-        }
-        setHoveredSlot(activeSlot);
-    };
+            setHoveredSlot(activeSlot);
+        }, 16), // 60fps throttle
+        []);
 
-    const handleDragEnd = (event, info, item) => {
+    // PERFORMANCE: useCallback for handleDragEnd
+    const handleDragEnd = useCallback((event, info, item) => {
         setHoveredSlot(null);
         const targetId = `slot-${item.id}`;
         const targetElement = document.getElementById(targetId);
 
         if (targetElement) {
             const rect = targetElement.getBoundingClientRect();
-
-            // Check if the center of the dragged item is within the target slot
             const point = {
                 x: event.clientX || info.point.x,
                 y: event.clientY || info.point.y
             };
-
-            // Allow some tolerance (padding) for easier drops
             const padding = 20;
 
             if (
@@ -202,13 +225,14 @@ const QuizStage1 = ({ onComplete, ambienceAudioRef }) => {
                 point.y >= rect.top - padding &&
                 point.y <= rect.bottom + padding
             ) {
-                if (!digitized.includes(item.id)) {
-                    setDigitized(prev => [...prev, item.id]);
+                setDigitized(prev => {
+                    if (prev.includes(item.id)) return prev;
                     SoundEngine.playSuccess();
                     if (navigator.vibrate) navigator.vibrate(50);
                     setInfoModalItem(item);
-                    return;
-                }
+                    return [...prev, item.id];
+                });
+                return;
             }
         }
 
@@ -217,11 +241,12 @@ const QuizStage1 = ({ onComplete, ambienceAudioRef }) => {
         if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
         setShakeItem(item.id);
         setTimeout(() => setShakeItem(null), 500);
-    };
+    }, []);
 
-    const handleCloseModal = () => {
+    // PERFORMANCE: useCallback for handleCloseModal
+    const handleCloseModal = useCallback(() => {
         setInfoModalItem(null);
-    };
+    }, []);
 
     useEffect(() => {
         if (digitized.length === ARTIFACTS.length && !infoModalItem) {
@@ -441,15 +466,8 @@ const QuizStage1 = ({ onComplete, ambienceAudioRef }) => {
                 {ARTIFACTS.map((item, i) => {
                     if (digitized.includes(item.id)) return null;
 
-                    const positions = [
-                        { top: '30%', left: '15%', rotate: -15 },
-                        { top: '48%', left: '8%', rotate: 10 },
-                        { bottom: '10%', left: '17%', rotate: 25 },
-                        { top: '20%', right: '25%', rotate: 15 },
-                        { top: '48%', right: '15%', rotate: -10 },
-                        { bottom: '12%', right: '20%', rotate: -25 }
-                    ];
-                    const pos = positions[i] || { top: '50%', left: '50%' };
+                    // PERFORMANCE: Use static positions array
+                    const pos = ARTIFACT_POSITIONS[i] || { top: '50%', left: '50%' };
 
                     return (
                         <motion.div
